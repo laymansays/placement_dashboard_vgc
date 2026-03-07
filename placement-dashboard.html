@@ -601,7 +601,6 @@ body.admin-mode .modal{border-top:3px solid var(--admin);}
 </head>
 <body>
 
-<body>
 
 <div id="placement-login" style="
 position:fixed;
@@ -635,7 +634,15 @@ color:white;
 font-size:28px;
 font-weight:800;
 margin-bottom:18px;
-">V</div>
+<div style="text-align:left;margin-bottom:10px">
+  <a href="index.html" style="
+    font-size:13px;
+    color:#334155;
+    text-decoration:none;
+    font-weight:500;
+  ">← Back to Home</a>
+</div>
+  ">V</div>
 
 <h2 style="margin-bottom:6px">Placement Cell</h2>
 
@@ -2187,16 +2194,6 @@ async function showDiagnostics(){
 /* ════════════════════════════════════════════════════
    BOOT
 ════════════════════════════════════════════════════ */
-function checkPlacementPin(){
-  const pin = document.getElementById("placement-pin").value;
-
-  if(pin === "2525"){
-    document.getElementById("placement-login").style.display="none";
-  }else{
-    document.getElementById("pin-error").textContent="Incorrect Passkey";
-  }
-}
-  
 
 function checkPlacementPin(){
 
