@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Student Portal · Vidyavahini Placement</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-font-smoothing:antialiased;min-height:100vh;}
+
+/* ── LOGIN PAGE ── */
+.login-page{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(150deg,#0F172A 0%,#1E293B 50%,#1e3a8a 100%);
+  padding:24px;position:relative;overflow:hidden;
+}
+.login-page::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse at 70% 30%,rgba(99,179,237,.07) 0%,transparent 60%);
+}
+.login-card{
+  background:#fff;border-radius:24px;padding:48px 44px 40px;
+  width:100%;max-width:440px;position:relative;z-index:1;text-align:center;
+  box-shadow:0 32px 80px rgba(0,0,0,.22);
+}
+.login-back{
+  position:absolute;top:20px;left:24px;font-size:12.5px;color:#64748B;
+  text-decoration:none;font-weight:600;transition:color .15s;
+}
+.login-back:hover{color:#2563EB;}
+.login-logo{
+  width:64px;height:64px;border-radius:18px;margin:0 auto 20px;
+  background:linear-gradient(135deg,#2563EB,#7c3aed);
+  display:flex;align-items:center;justify-content:center;
+  font-size:28px;font-weight:900;color:#fff;
+  box-shadow:0 8px 24px rgba(37,99,235,.4);
+}
+.login-heading{font-size:26px;font-weight:800;color:#0F172A;letter-spacing:-.03em;margin-bottom:8px;}
+.login-sub{font-size:13.5px;color:#64748B;margin-bottom:32px;line-height:1.5;}
+.form-lbl{display:block;font-size:12px;font-weight:700;color:#374151;margin-bottom:7px;text-align:left;letter-spacing:.03em;}
+.form-inp{
+  width:100%;padding:11px 15px;border:1.5px solid #E2E8F0;border-radius:10px;
+  font-family:'Inter',sans-serif;font-size:14.5px;color:#0F172A;background:#F8FAFC;
+  outline:none;transition:all .15s;
+}
+.form-inp:focus{border-color:#2563EB;background:#fff;box-shadow:0 0 0 3px rgba(37,99,235,.12);}
+.form-err{font-size:12.5px;color:#EF4444;font-weight:600;min-height:20px;margin:6px 0 0;text-align:left;}
+.btn-login{
+  width:100%;margin-top:14px;padding:13px 20px;border:none;border-radius:10px;
+  background:linear-gradient(135deg,#2563EB,#7c3aed);color:#fff;
+  font-size:15px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;
+  box-shadow:0 4px 16px rgba(37,99,235,.3);transition:all .2s;
+}
+.btn-login:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 24px rgba(37,99,235,.4);}
+.btn-login:disabled{opacity:.65;cursor:not-allowed;}
+
+/* ── LOADING OVERLAY ── */
+.sp-loading{
+  position:fixed;inset:0;background:rgba(15,23,42,.72);backdrop-filter:blur(4px);
+  display:none;align-items:center;justify-content:center;flex-direction:column;
+  gap:16px;z-index:9999;color:#fff;text-align:center;
+}
+.sp-loading.show{display:flex;}
+.sp-spinner{
+  width:44px;height:44px;border:3px solid rgba(255,255,255,.2);
+  border-top-color:#fff;border-radius:50%;
+  animation:spin .75s linear infinite;
+}
+.sp-loading-msg{font-size:15px;font-weight:600;color:#fff;}
+.sp-loading-detail{font-size:12.5px;color:rgba(255,255,255,.55);}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ── PORTAL NAV ── */
+.sp-nav{
+  position:sticky;top:0;z-index:100;
+  background:rgba(255,255,255,.96);backdrop-filter:blur(12px);
+  border-bottom:1px solid #E2E8F0;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 40px;height:62px;
+  box-shadow:0 1px 12px rgba(0,0,0,.04);
+}
+.sp-nav-brand{display:flex;align-items:center;gap:12px;text-decoration:none;}
+.sp-nav-logo{
+  width:36px;height:36px;border-radius:9px;flex-shrink:0;
+  background:linear-gradient(135deg,#2563EB,#7c3aed);
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;font-weight:900;color:#fff;
+}
+.sp-nav-title{font-size:13.5px;font-weight:700;color:#0F172A;}
+.sp-nav-right{display:flex;align-items:center;gap:14px;}
+.sp-nav-name{font-size:13.5px;font-weight:600;color:#1E293B;}
+.btn-logout{
+  padding:7px 16px;border:1.5px solid #E2E8F0;border-radius:8px;
+  background:none;font-size:13px;font-weight:600;color:#64748B;
+  cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;
+}
+.btn-logout:hover{border-color:#CBD5E1;color:#0F172A;}
+
+/* ── PORTAL BODY ── */
+.sp-body{display:flex;max-width:1280px;margin:0 auto;min-height:calc(100vh - 62px);}
+.sp-sidebar{width:300px;flex-shrink:0;padding:32px 24px 40px;position:sticky;top:62px;max-height:calc(100vh - 62px);overflow-y:auto;}
+.sp-main{flex:1;min-width:0;padding:32px 40px 64px;border-left:1px solid #E2E8F0;}
+
+/* ── PROFILE CARD ── */
+.profile-card{
+  background:#fff;border:1px solid #E2E8F0;border-radius:20px;
+  padding:28px 22px;box-shadow:0 2px 16px rgba(0,0,0,.04);text-align:center;
+}
+.profile-photo-wrap{
+  width:90px;height:90px;border-radius:50%;margin:0 auto 16px;
+  overflow:hidden;border:3px solid #E2E8F0;position:relative;
+}
+.profile-photo{width:100%;height:100%;object-fit:cover;display:block;}
+.profile-ini{
+  width:100%;height:100%;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#2563EB,#7c3aed);
+  font-size:28px;font-weight:800;color:#fff;
+}
+.profile-name{font-size:17px;font-weight:800;color:#0F172A;letter-spacing:-.02em;margin-bottom:4px;}
+.profile-sub{font-size:13px;color:#64748B;margin-bottom:2px;}
+.profile-sub2{font-size:12px;color:#94A3B8;margin-bottom:16px;}
+.elig-badge{
+  display:inline-block;font-size:11.5px;font-weight:700;
+  padding:5px 14px;border-radius:99px;margin-bottom:20px;
+}
+.elig-yes{background:#D1FAE5;color:#065F46;}
+.elig-no{background:#FEE2E2;color:#991B1B;}
+.profile-fields{text-align:left;margin-bottom:20px;}
+.pf-row{display:flex;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px solid #F1F5F9;}
+.pf-row:last-child{border-bottom:none;}
+.pf-k{font-size:11.5px;color:#94A3B8;font-weight:600;white-space:nowrap;flex-shrink:0;}
+.pf-v{font-size:12.5px;color:#1E293B;font-weight:500;text-align:right;word-break:break-all;}
+.btn-resume{
+  display:block;width:100%;padding:11px;border-radius:10px;
+  background:#EFF6FF;color:#2563EB;border:1px solid #BFDBFE;
+  text-decoration:none;font-size:13.5px;font-weight:700;text-align:center;transition:all .15s;
+}
+.btn-resume:hover{background:#DBEAFE;}
+
+/* ── SECTIONS ── */
+.sp-section{
+  background:#fff;border:1px solid #E2E8F0;border-radius:20px;
+  padding:28px;margin-bottom:20px;box-shadow:0 2px 16px rgba(0,0,0,.04);
+}
+.sp-sec-head{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #F1F5F9;
+}
+.sp-sec-title{font-size:17px;font-weight:800;color:#0F172A;letter-spacing:-.02em;}
+.count-chip{font-size:12px;font-weight:700;padding:3px 12px;border-radius:99px;background:#EFF6FF;color:#2563EB;border:1px solid #BFDBFE;}
+.empty-state{text-align:center;padding:32px 16px;color:#94A3B8;}
+.empty-icon{font-size:32px;margin-bottom:12px;}
+.empty-state p{font-size:14px;line-height:1.6;}
+
+/* ── INELIGIBLE BANNER ── */
+.inelig-banner{
+  background:#FFF7ED;border:1px solid #FED7AA;border-left:4px solid #F97316;
+  border-radius:12px;padding:20px 22px;margin-bottom:20px;
+  display:flex;gap:14px;align-items:flex-start;
+}
+.inelig-icon{font-size:22px;flex-shrink:0;margin-top:2px;}
+.inelig-title{font-size:14px;font-weight:700;color:#7C2D12;margin-bottom:6px;}
+.inelig-list{list-style:none;padding:0;margin:0 0 8px;}
+.inelig-list li{font-size:13px;color:#9A3412;margin-bottom:3px;padding-left:14px;position:relative;}
+.inelig-list li::before{content:'·';position:absolute;left:2px;font-weight:700;}
+
+/* ── STATUS GROUPS ── */
+.status-group{border:1px solid #F1F5F9;border-radius:12px;overflow:hidden;margin-bottom:12px;}
+.status-group:last-child{margin-bottom:0;}
+.status-group-hdr{font-size:12px;font-weight:700;padding:8px 16px;display:flex;align-items:center;gap:8px;letter-spacing:.04em;}
+.shdr-sel{background:#D1FAE5;color:#065F46;border-bottom:1px solid #A7F3D0;}
+.shdr-int{background:#FEF3C7;color:#92400E;border-bottom:1px solid #FDE68A;}
+.shdr-reg{background:#DBEAFE;color:#1E40AF;border-bottom:1px solid #BFDBFE;}
+.status-group-hdr .cnt{margin-left:auto;background:rgba(0,0,0,.1);padding:1px 8px;border-radius:99px;font-size:11px;}
+.status-row{display:flex;align-items:center;gap:14px;padding:14px 16px;border-bottom:1px solid #F8FAFC;transition:background .12s;}
+.status-row:last-child{border-bottom:none;}
+.status-row:hover{background:#F8FAFC;}
+.status-info{flex:1;min-width:0;}
+.status-co-name{font-size:14px;font-weight:700;color:#0F172A;margin-bottom:2px;}
+.status-detail{font-size:12px;color:#64748B;}
+.status-pill{font-size:11px;font-weight:700;padding:3px 12px;border-radius:99px;white-space:nowrap;flex-shrink:0;}
+.spill-sel{background:#D1FAE5;color:#065F46;}
+.spill-int{background:#FEF3C7;color:#92400E;}
+.spill-reg{background:#DBEAFE;color:#1E40AF;}
+
+/* ── AVATAR ── */
+.co-av{
+  flex-shrink:0;border-radius:10px;overflow:hidden;
+  background:#fff;border:1.5px solid #E2E8F0;
+  display:flex;align-items:center;justify-content:center;
+}
+.co-av img{width:100%;height:100%;object-fit:contain;}
+.co-av-ini{
+  width:100%;height:100%;display:flex;align-items:center;justify-content:center;
+  font-weight:800;color:#fff;
+}
+
+/* ── COMPANY CARDS ── */
+.co-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;}
+.co-card{
+  background:#fff;border:1.5px solid #E2E8F0;border-radius:16px;
+  padding:20px;cursor:pointer;transition:all .22s;
+  box-shadow:0 1px 8px rgba(0,0,0,.04);
+  display:flex;flex-direction:column;gap:14px;position:relative;overflow:hidden;
+}
+.co-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,#2563EB,#7c3aed);
+  transform:scaleX(0);transform-origin:left;transition:transform .22s;
+}
+.co-card:hover{border-color:#2563EB;box-shadow:0 8px 32px rgba(37,99,235,.14);transform:translateY(-3px);}
+.co-card:hover::before{transform:scaleX(1);}
+.co-card-head{display:flex;align-items:center;gap:14px;}
+.co-card-name{font-size:15px;font-weight:800;color:#0F172A;line-height:1.2;flex:1;}
+.co-chips{display:flex;flex-wrap:wrap;gap:6px;}
+.chip{
+  display:flex;align-items:center;gap:5px;
+  font-size:12px;color:#374151;background:#F8FAFC;border:1px solid #E2E8F0;
+  border-radius:8px;padding:4px 10px;
+}
+.chip-empty{font-size:12px;color:#94A3B8;font-style:italic;}
+.elig-sum{
+  font-size:11.5px;color:#64748B;padding:8px 12px;
+  background:#F8FAFC;border-radius:8px;border:1px solid #F1F5F9;line-height:1.4;
+}
+.btn-apply-card{
+  width:100%;padding:10px;border-radius:10px;border:none;
+  background:linear-gradient(135deg,#2563EB,#7c3aed);
+  color:#fff;font-size:13.5px;font-weight:700;font-family:'Inter',sans-serif;
+  cursor:pointer;box-shadow:0 2px 10px rgba(37,99,235,.25);transition:all .2s;
+}
+.btn-apply-card:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(37,99,235,.35);}
+
+/* ── COMPANY MODAL ── */
+.co-modal{
+  position:fixed;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(4px);
+  display:none;align-items:center;justify-content:center;padding:24px;z-index:1000;
+}
+.co-modal.show{display:flex;}
+.co-modal-box{
+  background:#fff;border-radius:20px;width:100%;max-width:580px;
+  max-height:88vh;overflow-y:auto;
+  box-shadow:0 32px 80px rgba(0,0,0,.22);
+  animation:slideUp .22s ease;
+}
+@keyframes slideUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+.co-modal-head{
+  display:flex;align-items:flex-start;gap:18px;padding:24px 24px 20px;
+  border-bottom:1px solid #F1F5F9;position:sticky;top:0;background:#fff;z-index:1;
+}
+.co-modal-name{font-size:20px;font-weight:800;color:#0F172A;letter-spacing:-.02em;margin-bottom:8px;}
+.co-modal-badges{display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.badge-pill{font-size:11px;font-weight:600;padding:3px 12px;border-radius:99px;background:#F1F5F9;color:#475569;}
+.badge-date{background:#EFF6FF;color:#1E40AF;}
+.badge-link{font-size:11.5px;color:#2563EB;text-decoration:none;font-weight:600;}
+.badge-link:hover{text-decoration:underline;}
+.co-modal-close{
+  margin-left:auto;flex-shrink:0;background:none;border:1.5px solid #E2E8F0;border-radius:8px;
+  width:32px;height:32px;cursor:pointer;font-size:15px;color:#64748B;
+  display:flex;align-items:center;justify-content:center;transition:all .15s;
+}
+.co-modal-close:hover{background:#F1F5F9;color:#0F172A;}
+.co-modal-body{padding:24px;}
+.mf-grid{border:1px solid #F1F5F9;border-radius:12px;overflow:hidden;margin-bottom:20px;}
+.mf-row{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;border-bottom:1px solid #F8FAFC;}
+.mf-row:last-child{border-bottom:none;}
+.mf-k{font-size:11.5px;font-weight:700;color:#94A3B8;min-width:120px;flex-shrink:0;padding-top:1px;letter-spacing:.03em;}
+.mf-v{font-size:13.5px;color:#1E293B;font-weight:500;flex:1;line-height:1.4;}
+.jd-box{background:#F8FAFC;border-radius:12px;padding:16px 18px;border:1px solid #E2E8F0;}
+.jd-box-title{font-size:12px;font-weight:700;color:#64748B;margin-bottom:10px;letter-spacing:.04em;}
+.jd-box-text{font-size:13.5px;color:#1E293B;line-height:1.7;}
+.co-modal-footer{
+  display:flex;align-items:center;justify-content:flex-end;gap:10px;
+  padding:16px 24px;border-top:1px solid #F1F5F9;
+  position:sticky;bottom:0;background:#fff;
+}
+.btn-modal-close{
+  padding:10px 20px;border:1.5px solid #E2E8F0;border-radius:10px;
+  background:none;font-size:14px;font-weight:600;color:#64748B;
+  cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;
+}
+.btn-modal-close:hover{border-color:#CBD5E1;color:#0F172A;}
+.btn-modal-apply{
+  padding:10px 24px;border:none;border-radius:10px;
+  background:linear-gradient(135deg,#2563EB,#7c3aed);
+  color:#fff;font-size:14px;font-weight:700;font-family:'Inter',sans-serif;
+  cursor:pointer;box-shadow:0 3px 12px rgba(37,99,235,.3);transition:all .2s;
+}
+.btn-modal-apply:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(37,99,235,.4);}
+.no-form-txt{font-size:13px;color:#94A3B8;}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  .sp-nav{padding:0 20px;}
+  .sp-nav-name{display:none;}
+  .sp-body{flex-direction:column;}
+  .sp-sidebar{width:100%;position:static;max-height:none;padding:20px 16px 0;border-bottom:1px solid #E2E8F0;}
+  .profile-card{display:grid;grid-template-columns:90px 1fr;gap:16px;text-align:left;}
+  .profile-photo-wrap{width:90px;height:90px;margin:0;}
+  .profile-fields{display:none;}
+  .sp-main{padding:20px 16px 40px;border-left:none;}
+  .co-grid{grid-template-columns:1fr;}
+  .mf-k{min-width:100px;}
+}
+@media(max-width:480px){
+  .login-card{padding:40px 24px 32px;}
+  .sp-section{padding:20px 16px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ── LOADING OVERLAY ── -->
+<div id="loading-overlay" class="sp-loading">
+  <div class="sp-spinner"></div>
+  <div id="loading-msg" class="sp-loading-msg">Loading…</div>
+  <div id="loading-detail" class="sp-loading-detail"></div>
+</div>
+
+<!-- ── LOGIN PAGE ── -->
+<div id="login-page" class="login-page">
+  <div class="login-card">
+    <a href="index.html" class="login-back">← Home</a>
+    <div class="login-logo">V</div>
+    <h1 class="login-heading">Student Portal</h1>
+    <p class="login-sub">Vidyavahini First Grade Degree College<br>Placement Cell 2025–26</p>
+    <label class="form-lbl" for="email-inp">REGISTERED EMAIL ADDRESS</label>
+    <input id="email-inp" class="form-inp" type="email" placeholder="yourname@college.edu" autocomplete="email" autocapitalize="off"/>
+    <div id="email-err" class="form-err"></div>
+    <button id="login-btn" class="btn-login" type="button">Login to Portal →</button>
+  </div>
+</div>
+
+<!-- ── PORTAL (hidden until login) ── -->
+<div id="portal-page" style="display:none;">
+
+  <!-- Nav -->
+  <nav class="sp-nav">
+    <a href="index.html" class="sp-nav-brand">
+      <div class="sp-nav-logo">V</div>
+      <span class="sp-nav-title">Placement Portal</span>
+    </a>
+    <div class="sp-nav-right">
+      <span class="sp-nav-name" id="nav-name"></span>
+      <button class="btn-logout" id="logout-btn">Logout</button>
+    </div>
+  </nav>
+
+  <!-- Body -->
+  <div class="sp-body">
+    <aside class="sp-sidebar">
+      <div id="profile-wrap"></div>
+    </aside>
+    <main class="sp-main">
+      <div id="inelig-wrap"></div>
+      <div id="status-wrap"></div>
+      <div id="avail-wrap"></div>
+    </main>
+  </div>
+</div>
+
+<!-- ── COMPANY MODAL ── -->
+<div id="co-modal" class="co-modal">
+  <div class="co-modal-box">
+    <div id="co-modal-inner"></div>
+    <div class="co-modal-footer">
+      <button class="btn-modal-close" id="modal-close-btn">Close</button>
+      <span id="modal-apply-slot"></span>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════
+   SHARED UTILITIES
+══════════════════════════════════════════════════════ */
+const CONFIG_SHEET_ID   = '1Mb9jrzZMSta5NYs28i3STS2tYNqhMtabj3wktvHiYmw';
+const CONFIG_TAB_NAME   = 'CONFIG_TAB';
+const ADMIN_TAB_NAME    = 'ADMIN_MODE';
+const STUDENT_TAB_NAME  = 'STUDENT_MASTER';
+
+function xe(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function ini(n){ return (n||'?').split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]||'').join('').toUpperCase()||'?'; }
+function fmtD(d){ if(!d)return'—'; try{return new Date(d).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});}catch{return d;} }
+function extractSid(raw){
+  if(!raw)return'';
+  raw=String(raw).trim();
+  try{raw=decodeURIComponent(raw);}catch(e){}
+  const r=raw.match(/[?&]q=([^&]+)/); if(r)return extractSid(decodeURIComponent(r[1]));
+  const m=raw.match(/\/d\/([a-zA-Z0-9_-]{20,})/); if(m)return m[1];
+  if(/^[a-zA-Z0-9_-]{20,}$/.test(raw))return raw;
+  return'';
+}
+function drivePhoto(url){
+  if(!url)return'';
+  const m=url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/); if(m)return`https://drive.google.com/uc?export=view&id=${m[1]}`;
+  const m2=url.match(/[?&]id=([a-zA-Z0-9_-]+)/); if(m2)return`https://drive.google.com/uc?export=view&id=${m2[1]}`;
+  return url;
+}
+const GRADS=[['#1e40af','#7c3aed'],['#0369a1','#0e7490'],['#065f46','#0891b2'],['#7c2d12','#b45309'],['#6b21a8','#db2777'],['#991b1b','#ea580c'],['#0f4c3a','#065f46'],['#3730a3','#1e40af']];
+function grad(i){const p=GRADS[i%GRADS.length];return`linear-gradient(135deg,${p[0]},${p[1]})`;}
+const LOGO_HINTS={'tcs':'tcs.com','infosys':'infosys.com','wipro':'wipro.com','accenture':'accenture.com','cognizant':'cognizant.com','first source':'firstsource.com','firstsource':'firstsource.com','fyers':'fyers.in','rupeek':'rupeek.com','codeyoung':'codeyoung.com','interns elite':'internselite.com','genz':'genzeducatewing.com','cloud unicorn':'cloudunicorn.in','idea infinity':'ideainfinity.in'};
+function logoDomain(name,web){
+  if(web){try{const u=web.startsWith('http')?web:'https://'+web;return new URL(u).hostname.replace(/^www\./,'');}catch(e){}}
+  const n=(name||'').toLowerCase();
+  for(const[k,v]of Object.entries(LOGO_HINTS)){if(n.includes(k))return v;}
+  return n.replace(/[^a-z0-9]/g,'')+'.com';
+}
+function logoHtml(name,web,idx,sz){
+  const size=sz||48; const d=logoDomain(name,web);
+  const cb=`https://logo.clearbit.com/${d}?size=${size*2}`;
+  const gf=`https://www.google.com/s2/favicons?domain=${d}&sz=128`;
+  const g=grad(idx||0); const pad=size>56?8:6; const fsz=Math.round(size*.30);
+  return `<div class="co-av" style="width:${size}px;height:${size}px;border-radius:${Math.round(size*.21)}px;">
+    <img src="${cb}" style="width:100%;height:100%;object-fit:contain;padding:${pad}px;display:block;" onerror="this.style.display='none';this.nextElementSibling.style.display='block';"/>
+    <img src="${gf}" style="width:100%;height:100%;object-fit:contain;padding:${pad+2}px;display:none;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"/>
+    <div class="co-av-ini" style="background:${g};font-size:${fsz}px;">${ini(name)}</div>
+  </div>`;
+}
+
+async function apiFetch(sheetId, tab, format='json'){
+  const url=`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:${format}&sheet=${encodeURIComponent(tab)}`;
+  const ctrl=new AbortController(); const tid=setTimeout(()=>ctrl.abort(),12000);
+  try{
+    const res=await fetch(url,{signal:ctrl.signal}); clearTimeout(tid);
+    if(!res.ok)throw new Error(`HTTP ${res.status}`);
+    const text=await res.text();
+    if(text.trimStart().startsWith('<'))throw new Error(`Sheet not public or tab "${tab}" missing`);
+    if(format==='json'){
+      const j=JSON.parse(text.replace(/^[^(]*\(/,'').replace(/\);\s*$/,''));
+      if(j.status==='error')throw new Error(`Tab "${tab}" not found`);
+      return j;
+    }
+    return text;
+  }catch(e){clearTimeout(tid);throw e;}
+}
+
+function jsonToRows(j){
+  return(j.table?.rows||[]).map(row=>(row.c||[]).map(cell=>cell?(cell.v!=null?String(cell.v).trim():(cell.f||'')):''));
+}
+
+function parseCSV(csv){
+  const rows=[];let cur='',inQ=false,row=[];
+  for(let i=0;i<csv.length;i++){
+    const ch=csv[i];
+    if(ch==='"'){if(inQ&&csv[i+1]==='"'){cur+='"';i++;}else inQ=!inQ;}
+    else if(ch===','&&!inQ){row.push(cur.trim());cur='';}
+    else if((ch==='\n'||ch==='\r')&&!inQ){if(ch==='\r'&&csv[i+1]==='\n')i++;row.push(cur.trim());rows.push(row);row=[];cur='';}
+    else cur+=ch;
+  }
+  if(cur||row.length){row.push(cur.trim());rows.push(row);}
+  return rows.filter(r=>r.some(c=>c));
+}
+
+/* ══════════════════════════════════════════════════════
+   STATE
+══════════════════════════════════════════════════════ */
+let ST     = null;   // student object
+let COMPS  = [];     // company configs
+let STATUS = {};     // {compId: {reg,int,sel}}
+
+/* ══════════════════════════════════════════════════════
+   LOADING UI
+══════════════════════════════════════════════════════ */
+function showLoad(msg, detail){
+  document.getElementById('loading-msg').textContent = msg||'Loading…';
+  document.getElementById('loading-detail').textContent = detail||'';
+  document.getElementById('loading-overlay').classList.add('show');
+}
+function hideLoad(){ document.getElementById('loading-overlay').classList.remove('show'); }
+
+/* ══════════════════════════════════════════════════════
+   BOOT
+══════════════════════════════════════════════════════ */
+window.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('login-btn').addEventListener('click', handleLogin);
+  document.getElementById('email-inp').addEventListener('keydown', e=>{ if(e.key==='Enter') handleLogin(); });
+  document.getElementById('logout-btn').addEventListener('click', doLogout);
+  document.getElementById('modal-close-btn').addEventListener('click', closeModal);
+  document.getElementById('co-modal').addEventListener('click', e=>{ if(e.target===document.getElementById('co-modal')) closeModal(); });
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
+  document.getElementById('email-inp').focus();
+});
+
+/* ══════════════════════════════════════════════════════
+   LOGIN
+══════════════════════════════════════════════════════ */
+function handleLogin(){
+  const email = (document.getElementById('email-inp').value||'').trim();
+  const errEl = document.getElementById('email-err');
+  errEl.textContent = '';
+  if(!email){ errEl.textContent='Please enter your email address.'; return; }
+  if(!email.includes('@')){ errEl.textContent='Please enter a valid email.'; return; }
+  const btn = document.getElementById('login-btn');
+  btn.disabled = true; btn.textContent = 'Verifying…';
+  doLogin(email).finally(()=>{ btn.disabled=false; btn.textContent='Login to Portal →'; });
+}
+
+async function doLogin(email){
+  showLoad('Verifying student ID…', 'Fetching student master data');
+  try{
+    const j = await apiFetch(CONFIG_SHEET_ID, STUDENT_TAB_NAME, 'json');
+    const rows = jsonToRows(j);
+    // Skip header row if col[3] contains "email"
+    const data = (rows[0]?.[3]||'').toLowerCase().includes('email') ? rows.slice(1) : rows;
+    const row = data.find(r=>(r[3]||'').toLowerCase().trim()===email.toLowerCase().trim());
+    if(!row){ hideLoad(); document.getElementById('email-err').textContent='Student not found. Check your registered email address.'; return; }
+
+    ST = {
+      photoUrl:  drivePhoto(row[1]||''),
+      name:      row[2]||'',
+      email:     row[3]||'',
+      phone:     row[4]||'',
+      course:    row[5]||'',
+      semester:  row[6]||'',
+      section:   row[7]||'',
+      backlogs:  row[8]||'',
+      tenth:     parseFloat((row[9]||'').replace('%',''))||0,
+      twelfth:   parseFloat((row[10]||'').replace('%',''))||0,
+      resume:    row[11]||'',
+    };
+
+    showLoad('Loading company data…','Fetching placement configuration');
+    await loadCompanyData();
+    showLoad('Checking your applications…',`Checking ${COMPS.length} companies`);
+    await loadStatus();
+    hideLoad();
+    renderPortal();
+  }catch(e){
+    hideLoad();
+    console.error('[StudentPortal]', e);
+    document.getElementById('email-err').textContent = 'Error: '+e.message+'. Please check your internet and try again.';
+  }
+}
+
+/* ══════════════════════════════════════════════════════
+   LOAD COMPANY DATA
+══════════════════════════════════════════════════════ */
+async function loadCompanyData(){
+  const [configJ, adminCsv] = await Promise.all([
+    apiFetch(CONFIG_SHEET_ID, CONFIG_TAB_NAME, 'json'),
+    apiFetch(CONFIG_SHEET_ID, ADMIN_TAB_NAME,  'csv').catch(()=>''),
+  ]);
+
+  // Parse config
+  const cfgTable = configJ.table||{};
+  const cols = (cfgTable.cols||[]).map(c=>(c.label||'').toLowerCase().trim());
+  const ci=(...ks)=>{for(const k of ks){const i=cols.findIndex(c=>c.includes(k));if(i!==-1)return i;}return -1;};
+  const iComp=ci('company')!== -1?ci('company'):0;
+  const iSheet=ci('sheet')!== -1?ci('sheet'):1;
+  const iReg=ci('reg')!== -1?ci('reg'):2;
+  const iInt=ci('int','shortlist')!== -1?ci('int','shortlist'):3;
+  const iSel=ci('sel','select')!== -1?ci('sel','select'):4;
+  const iForm=ci('form','apply')!== -1?ci('form','apply'):5;
+
+  COMPS=[];
+  (cfgTable.rows||[]).forEach((row,idx)=>{
+    const cells=row.c||[];
+    const v=i=>(cells[i]&&cells[i].v!=null)?String(cells[i].v).trim():'';
+    const name=v(iComp); if(!name||name.toLowerCase()==='company')return;
+    const sid=extractSid(v(iSheet)); if(!sid)return;
+    const tabReg=v(iReg)||'Registered Students';
+    let tabInt=v(iInt)||null, tabSel=v(iSel)||null;
+    if(tabInt&&tabInt.toLowerCase()===tabReg.toLowerCase())tabInt=null;
+    if(tabSel&&tabSel.toLowerCase()===tabReg.toLowerCase())tabSel=null;
+    if(tabInt&&tabSel&&tabInt.toLowerCase()===tabSel.toLowerCase())tabSel=null;
+    COMPS.push({
+      id:idx+1,name,sheetId:sid,tabReg,tabInt,tabSel,
+      regFormUrl:v(iForm)||'',
+      website:'',interviewMode:'',registrationDate:'',driveDate:'',
+      roles:[],salary:'',location:'',notes:'',eligSummary:'',jdUrl:'',
+    });
+  });
+
+  // Parse admin data
+  if(adminCsv){
+    const rows=parseCSV(adminCsv);
+    if(rows.length>=2){
+      const hdr=rows[0].map(h=>h.toLowerCase().replace(/[^a-z0-9]/g,''));
+      const col=(...ks)=>{for(const k of ks){const i=hdr.findIndex(h=>h.includes(k));if(i!==-1)return i;}return -1;};
+      const iC=col('company'),iW=col('website'),iMo=col('interview'),iDD=col('drive'),iRD=col('reg');
+      const iRo=col('role'),iN=col('note'),iSal=col('salary','package','ctc','stipend');
+      const iLoc=col('location','loc'),iEl=col('elig');
+      const _jd=col('jd'),_lk=col('link'); const iJd=_jd!==-1?_jd:_lk;
+      rows.slice(1).forEach(r=>{
+        const nm=(r[iC]||'').trim(); if(!nm)return;
+        const c=COMPS.find(x=>x.name.toLowerCase()===nm.toLowerCase()); if(!c)return;
+        if(iW!==-1)c.website=r[iW]||'';
+        if(iMo!==-1)c.interviewMode=r[iMo]||'';
+        if(iDD!==-1)c.driveDate=r[iDD]||'';
+        if(iRD!==-1)c.registrationDate=r[iRD]||'';
+        if(iRo!==-1)c.roles=(r[iRo]||'').split(',').map(s=>s.trim()).filter(Boolean);
+        if(iN!==-1)c.notes=r[iN]||'';
+        if(iSal!==-1)c.salary=r[iSal]||'';
+        if(iLoc!==-1)c.location=r[iLoc]||'';
+        if(iEl!==-1)c.eligSummary=r[iEl]||'';
+        if(iJd!==-1)c.jdUrl=(r[iJd]||'').trim();
+      });
+    }
+  }
+}
+
+/* ══════════════════════════════════════════════════════
+   CHECK STATUS IN ALL COMPANIES
+══════════════════════════════════════════════════════ */
+async function loadStatus(){
+  const em = ST.email.toLowerCase();
+  STATUS = {};
+  await Promise.all(COMPS.map(async c=>{
+    const fetchTab = async tab=>{
+      if(!tab)return[];
+      try{
+        const j=await apiFetch(c.sheetId,tab,'json');
+        return jsonToRows(j);
+      }catch(e){return[];}
+    };
+    const [rr,ir,sr]=await Promise.all([fetchTab(c.tabReg),fetchTab(c.tabInt),fetchTab(c.tabSel)]);
+    const has=rows=>rows.some(r=>(r[2]||'').toLowerCase().trim()===em);
+    STATUS[c.id]={reg:has(rr),int:has(ir),sel:has(sr)};
+  }));
+}
+
+/* ══════════════════════════════════════════════════════
+   ELIGIBILITY
+══════════════════════════════════════════════════════ */
+function isEligible(s){
+  return s.tenth>=60 && s.twelfth>=60 && (s.backlogs||'').toLowerCase()==='no';
+}
+
+/* ══════════════════════════════════════════════════════
+   RENDER PORTAL
+══════════════════════════════════════════════════════ */
+function renderPortal(){
+  document.getElementById('login-page').style.display  = 'none';
+  document.getElementById('portal-page').style.display = 'block';
+  document.getElementById('nav-name').textContent = ST.name;
+
+  const elig = isEligible(ST);
+  renderProfile(elig);
+  renderInelig(elig);
+  renderStatus();
+  if(elig) renderAvailable();
+  else document.getElementById('avail-wrap').innerHTML='';
+}
+
+/* Profile */
+function renderProfile(elig){
+  const s=ST;
+  const photoHtml=s.photoUrl
+    ?`<img class="profile-photo" src="${xe(s.photoUrl)}" alt="${xe(s.name)}" onerror="this.style.display='none';document.getElementById('ph-ini').style.display='flex';"/><div id="ph-ini" class="profile-ini" style="display:none">${ini(s.name)}</div>`
+    :`<div id="ph-ini" class="profile-ini">${ini(s.name)}</div>`;
+
+  const pfRow=(k,v)=>`<div class="pf-row"><span class="pf-k">${k}</span><span class="pf-v">${xe(v||'—')}</span></div>`;
+
+  document.getElementById('profile-wrap').innerHTML=`
+    <div class="profile-card">
+      <div class="profile-photo-wrap">${photoHtml}</div>
+      <div class="profile-name">${xe(s.name)}</div>
+      <div class="profile-sub">${xe(s.course)}</div>
+      <div class="profile-sub2">Sem ${xe(s.semester)} · Sec ${xe(s.section)}</div>
+      <span class="elig-badge ${elig?'elig-yes':'elig-no'}">${elig?'✓ Eligible':'✗ Not Eligible'}</span>
+      <div class="profile-fields">
+        ${pfRow('📧 Email',s.email)}
+        ${pfRow('📱 Phone',s.phone)}
+        ${pfRow('📚 Course',s.course)}
+        ${pfRow('📅 Semester',s.semester)}
+        ${pfRow('🏛️ Section',s.section)}
+        ${pfRow('📊 10th %',s.tenth+'%')}
+        ${pfRow('📊 12th %',s.twelfth+'%')}
+        ${pfRow('⚠️ Backlogs',s.backlogs)}
+      </div>
+      ${s.resume?`<a href="${xe(s.resume)}" target="_blank" rel="noopener" class="btn-resume">📄 View Resume ↗</a>`:''}
+    </div>`;
+}
+
+/* Ineligible banner */
+function renderInelig(elig){
+  if(elig){document.getElementById('inelig-wrap').innerHTML='';return;}
+  const s=ST;
+  const reasons=[];
+  if(s.tenth<60)reasons.push(`10th percentage is ${s.tenth}% (minimum 60% required)`);
+  if(s.twelfth<60)reasons.push(`12th percentage is ${s.twelfth}% (minimum 60% required)`);
+  if((s.backlogs||'').toLowerCase()!=='no')reasons.push('Active backlogs are present in your academic record');
+  document.getElementById('inelig-wrap').innerHTML=`
+    <div class="inelig-banner">
+      <div class="inelig-icon">⚠️</div>
+      <div>
+        <div class="inelig-title">Not Eligible for Campus Placements</div>
+        <ul class="inelig-list">${reasons.map(r=>`<li>${xe(r)}</li>`).join('')}</ul>
+        <div style="font-size:12px;color:#C2410C;font-style:italic;">Contact the Placement Cell for more information.</div>
+      </div>
+    </div>`;
+}
+
+/* Placement status */
+function renderStatus(){
+  const em=ST.email.toLowerCase();
+  const sel=COMPS.filter(c=>STATUS[c.id]?.sel);
+  const intv=COMPS.filter(c=>STATUS[c.id]?.int&&!STATUS[c.id]?.sel);
+  const reg=COMPS.filter(c=>STATUS[c.id]?.reg&&!STATUS[c.id]?.int&&!STATUS[c.id]?.sel);
+  const total=sel.length+intv.length+reg.length;
+
+  const makeGroup=(emoji,title,list,hdrCls,pillCls)=>{
+    if(!list.length)return'';
+    return`<div class="status-group">
+      <div class="status-group-hdr ${hdrCls}">${emoji} ${title}<span class="cnt">${list.length}</span></div>
+      ${list.map(c=>`<div class="status-row">
+        ${logoHtml(c.name,c.website,c.id-1,40)}
+        <div class="status-info">
+          <div class="status-co-name">${xe(c.name)}</div>
+          <div class="status-detail">${c.roles.length?xe(c.roles.slice(0,2).join(', ')+(c.roles.length>2?' +more':'')):''}${c.driveDate?` · Drive: ${fmtD(c.driveDate)}`:''}</div>
+        </div>
+        <span class="status-pill ${pillCls}">${title}</span>
+      </div>`).join('')}
+    </div>`;
+  };
+
+  const content=total
+    ?`<div>${makeGroup('🎉','Selected',sel,'shdr-sel','spill-sel')}${makeGroup('⭐','Shortlisted',intv,'shdr-int','spill-int')}${makeGroup('📋','Registered',reg,'shdr-reg','spill-reg')}</div>`
+    :`<div class="empty-state"><div class="empty-icon">📭</div><p>No applications yet.<br>Browse available companies below to apply.</p></div>`;
+
+  document.getElementById('status-wrap').innerHTML=`
+    <div class="sp-section">
+      <div class="sp-sec-head">
+        <span class="sp-sec-title">📊 Your Placement Status</span>
+        ${total?`<span class="count-chip">${total} compan${total!==1?'ies':'y'}</span>`:''}
+      </div>
+      ${content}
+    </div>`;
+}
+
+/* Available companies */
+function renderAvailable(){
+  const applied=new Set(COMPS.filter(c=>{const s=STATUS[c.id];return s&&(s.reg||s.int||s.sel);}).map(c=>c.id));
+  const avail=COMPS.filter(c=>!applied.has(c.id));
+
+  if(!avail.length){
+    document.getElementById('avail-wrap').innerHTML=`
+      <div class="sp-section">
+        <div class="sp-sec-head"><span class="sp-sec-title">🏢 Available Companies</span></div>
+        <div class="empty-state"><div class="empty-icon">🎊</div><p>You have applied to all available companies!</p></div>
+      </div>`;
+    return;
+  }
+
+  const cards=avail.map(c=>{
+    const chips=[
+      c.roles.length    ?mkChip('💼',c.roles.join(', ')):null,
+      c.salary          ?mkChip('💰',c.salary):null,
+      c.location        ?mkChip('📍',c.location):null,
+      c.driveDate       ?mkChip('📅',fmtD(c.driveDate)):null,
+      c.interviewMode   ?mkChip('🖥️',c.interviewMode):null,
+    ].filter(Boolean).join('');
+    return`<div class="co-card" onclick="openCoModal(${c.id})">
+      <div class="co-card-head">${logoHtml(c.name,c.website,c.id-1,52)}<div class="co-card-name">${xe(c.name)}</div></div>
+      <div class="co-chips">${chips||'<span class="chip-empty">Details coming soon</span>'}</div>
+      ${c.eligSummary?`<div class="elig-sum">${xe(c.eligSummary)}</div>`:''}
+      <button class="btn-apply-card" onclick="event.stopPropagation();openCoModal(${c.id})">View Details &amp; Apply →</button>
+    </div>`;
+  }).join('');
+
+  document.getElementById('avail-wrap').innerHTML=`
+    <div class="sp-section">
+      <div class="sp-sec-head">
+        <span class="sp-sec-title">🏢 Available Companies</span>
+        <span class="count-chip">${avail.length} open</span>
+      </div>
+      <div class="co-grid">${cards}</div>
+    </div>`;
+}
+
+function mkChip(icon,text){
+  return`<div class="chip"><span>${icon}</span><span>${xe(text)}</span></div>`;
+}
+
+/* ══════════════════════════════════════════════════════
+   COMPANY MODAL
+══════════════════════════════════════════════════════ */
+function openCoModal(id){
+  const c=COMPS.find(x=>x.id===id); if(!c)return;
+  const mfRow=(k,v)=>`<div class="mf-row"><span class="mf-k">${xe(k)}</span><span class="mf-v">${xe(v)}</span></div>`;
+
+  const rows=[
+    c.roles.length          ?mfRow('Roles Offered',    c.roles.join(', ')):null,
+    c.salary                ?mfRow('Package / Stipend', c.salary):null,
+    c.location              ?mfRow('Location',          c.location):null,
+    c.driveDate             ?mfRow('Drive Date',         fmtD(c.driveDate)):null,
+    c.registrationDate      ?mfRow('Reg. Deadline',      fmtD(c.registrationDate)):null,
+    c.interviewMode         ?mfRow('Interview Mode',     c.interviewMode):null,
+    mfRow('Eligibility', c.eligSummary||'10th ≥ 60%, 12th ≥ 60%, No Active Backlogs'),
+  ].filter(Boolean).join('');
+
+  document.getElementById('co-modal-inner').innerHTML=`
+    <div class="co-modal-head">
+      ${logoHtml(c.name,c.website,c.id-1,60)}
+      <div style="flex:1;min-width:0;">
+        <div class="co-modal-name">${xe(c.name)}</div>
+        <div class="co-modal-badges">
+          ${c.interviewMode?`<span class="badge-pill">${xe(c.interviewMode)}</span>`:''}
+          ${c.driveDate?`<span class="badge-pill badge-date">📅 ${fmtD(c.driveDate)}</span>`:''}
+          ${c.website?`<a href="${xe(c.website)}" target="_blank" rel="noopener" class="badge-link">🔗 Website ↗</a>`:''}
+        </div>
+      </div>
+      <button class="co-modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="co-modal-body">
+      <div class="mf-grid">${rows}</div>
+      ${c.notes?`<div class="jd-box"><div class="jd-box-title">📋 JOB DESCRIPTION</div><div class="jd-box-text">${xe(c.notes).replace(/\n/g,'<br/>')}</div></div>`:''}
+    </div>`;
+
+  const applySlot=document.getElementById('modal-apply-slot');
+  if(c.regFormUrl){
+    applySlot.innerHTML=`<button class="btn-modal-apply" onclick="applyNow('${xe(c.regFormUrl)}')">Apply Now →</button>`;
+  } else {
+    applySlot.innerHTML=`<span class="no-form-txt">Registration form not yet available</span>`;
+  }
+  document.getElementById('co-modal').classList.add('show');
+}
+
+function closeModal(){ document.getElementById('co-modal').classList.remove('show'); }
+function applyNow(url){ window.open(url,'_blank','noopener'); }
+
+/* ══════════════════════════════════════════════════════
+   LOGOUT
+══════════════════════════════════════════════════════ */
+function doLogout(){
+  ST=null; COMPS=[]; STATUS={};
+  document.getElementById('portal-page').style.display='none';
+  document.getElementById('login-page').style.display='';
+  document.getElementById('email-inp').value='';
+  document.getElementById('email-err').textContent='';
+  document.getElementById('email-inp').focus();
+}
+</script>
+</body>
+</html>
