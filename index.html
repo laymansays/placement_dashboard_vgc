@@ -857,9 +857,8 @@ if(!name || name.toLowerCase()==='company' || !sheetCell) return;
     // 3. htmlLinks map     — works for Insert Link cells (green + icon) from HTML export
     const rowNum = idx + 1; // 1-based to match HTML table rows
     let sid = extractSheetId(val(iSheet))
-           || extractSheetId(fmt(iSheet))
-           || htmlLinks[rowNum]
-           || '';
+       || extractSheetId(fmt(iSheet))
+       || '';
     if(!sid) return; // still no ID — company hidden until column B is set
 
     const tabReg = val(iReg) || 'Registered Students';
