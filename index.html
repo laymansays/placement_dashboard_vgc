@@ -1493,7 +1493,7 @@ function companyRowHtml(c){
   const st=STATUS_MAP[statusOf(c)]||STATUS_MAP.upcoming;
   const r=c.studentsRegistered.length,i=c.studentsInterviewed.length,s=c.studentsSelected.length;
   const base=Math.max(r,1);
-  return `<div class="company-row" data-id="${c.id}">
+  return `<div class="company-row" data-id="${Number(c.id)}">
     ${companyLogoHtml(c,48)}
     <div class="co-info">
       <div class="co-name">${xe(c.name)}</div>
