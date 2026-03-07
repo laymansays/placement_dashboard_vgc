@@ -888,11 +888,14 @@ function parseConfigFromJSON(gvizJson, htmlLinks={}){
      Reg Date | Drive Date | POC Name | POC Designation |
      POC Email | POC Phone | Role | JD
 ════════════════════════════════════════════════════ */
-function parseAdminData(csv){
-  const rows = parseCSV(csv);
-  if(rows.length < 2) return {};
-  const hdr = rows[0].map(h=>h.toLowerCase().replace(/[^a-z0-9]/g,''));
-  const col = k => hdr.findIndex(h=>h.includes(k));
+function parseAdminDataFromJSON(json){
+  const table = json.table;
+  if(!table || !table.rows) return {};
+
+  const cols = table.cols.map(c => (c.label||'').toLowerCase().replace(/[^a-z0-9]/g,''));
+
+  const col = k => cols.findIndex(h => h.includes(k));
+
   const iComp     = col('company');
   const iWeb      = col('website');
   const iMode     = col('interview');
@@ -902,35 +905,39 @@ function parseAdminData(csv){
   const iPocDesig = col('desig');
   const iPocEmail = col('email');
   const iPocPhone = col('phone');
-  const iRole    = col('role');
-  const _iJd=col('jd'); const _iLink=col('link');
-  const iJdUrl    = _iJd!==-1?_iJd:_iLink;
+  const iRoles    = col('role');
+  const iNotes    = col('note');
 
   const data = {};
-  rows.slice(1).forEach(r => {
-    const name = (r[iComp]||'').trim();
+
+  table.rows.forEach(row => {
+    const cells = row.c || [];
+    const val = i => (cells[i] && cells[i].v != null) ? String(cells[i].v).trim() : '';
+
+    const name = val(iComp);
     if(!name) return;
-    const Role = (r[iRole]||'').split(',').map(s=>s.trim()).filter(Boolean);
+
+    const roles = (val(iRoles)||'').split(',').map(s=>s.trim()).filter(Boolean);
+
     data[name.toLowerCase()] = {
-      website:         r[iWeb]||'',
-      interviewMode:   r[iMode]||'',
-      registrationDate:r[iRegDate]||'',
-      driveDate:       r[iDriveDate]||'',
-      poc: {
-        name:        r[iPocName]||'',
-        designation: r[iPocDesig]||'',
-        email:       r[iPocEmail]||'',
-        phone:       r[iPocPhone]||''
+      website: val(iWeb),
+      interviewMode: val(iMode),
+      registrationDate: val(iRegDate),
+      driveDate: val(iDriveDate),
+      poc:{
+        name: val(iPocName),
+        designation: val(iPocDesig),
+        email: val(iPocEmail),
+        phone: val(iPocPhone)
       },
-      role,
-      jds: Object.fromEntries(Role.map(rol=>[rol,{text:'',pdf:null}])),
-      notes: r[iNotes]||'',
-      jdUrl: iJdUrl!==-1?(r[iJdUrl]||'').trim():''
+      roles,
+      jds:Object.fromEntries(roles.map(r=>[r,{text:'',pdf:null}])),
+      notes: val(iNotes)
     };
   });
+
   return data;
 }
-
 /* ════════════════════════════════════════════════════
    PARSE STUDENT TAB  (flexible column detection)
 ════════════════════════════════════════════════════ */
