@@ -161,6 +161,13 @@ body{
 .btn-admin-outline{background:none;border:1px solid var(--admin-border);color:var(--admin);}.btn-admin-outline:hover{background:var(--admin-bg);}
 .btn-danger{background:var(--red);color:#fff;}.btn-danger:hover{filter:brightness(1.1);}
 .btn-ghost{background:none;border:none;color:var(--text3);padding:5px 9px;cursor:pointer;}.btn-ghost:hover{color:var(--text);background:var(--bg3);}
+.btn-nav-home-pd{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:6px 14px;border:1.5px solid var(--border2);border-radius:8px;
+  background:none;font-size:13px;font-weight:600;color:var(--text3);
+  text-decoration:none;font-family:inherit;transition:all .15s;
+}
+.btn-nav-home-pd:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-bg);}
 .btn-primary-inv{
   display:inline-flex;align-items:center;gap:8px;padding:10px 24px;
   border-radius:var(--r3);border:1.5px solid rgba(255,255,255,0.35);
@@ -1226,7 +1233,7 @@ function renderNav(){
     const c=COMPANIES.find(x=>x.id===cId);
     right=`<nav class="nav-crumb"><span class="crumb" id="n-h">Home</span><span class="crumb-sep">/</span><span class="crumb" id="n-d">Companies</span><span class="crumb-sep">/</span><span class="crumb-active">${c?xe(c.name):''}</span></nav>`;
   }
-  nb.innerHTML=`<div class="navbar"><a class="nav-brand" id="n-brand"><div class="nav-logo">V</div><div class="nav-name"><span>Vidyavahini</span><span>First Grade Degree College</span></div></a><div class="nav-right"><button class="btn-icon" id="n-theme">🌙</button>${right}</div></div>`;
+  nb.innerHTML=`<div class="navbar"><a class="nav-brand" id="n-brand"><div class="nav-logo">V</div><div class="nav-name"><span>Vidyavahini</span><span>First Grade Degree College</span></div></a><div class="nav-right"><a href="index.html" class="btn-nav-home-pd">← Home</a><button class="btn-icon" id="n-theme">🌙</button>${right}</div></div>`;
   const g=id=>document.getElementById(id);
   g('n-brand').onclick=()=>go('home');
   g('n-theme').onclick=toggleTheme;
