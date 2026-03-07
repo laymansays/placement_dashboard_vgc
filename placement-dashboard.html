@@ -99,7 +99,7 @@ body{
 .nav-brand{display:flex;align-items:center;gap:12px;cursor:pointer;text-decoration:none;}
 .nav-logo{
   width:38px;height:38px;border-radius:10px;flex-shrink:0;
-  background:linear-gradient(135deg,#1E293B 0%,#2563EB 100%);
+  background:#fff;
   display:flex;align-items:center;justify-content:center;
   font-size:16px;font-weight:800;color:#fff;letter-spacing:-0.02em;
 }
@@ -185,7 +185,7 @@ body{
 #loading-screen.hide{opacity:0;pointer-events:none;}
 .loader-logo{
   width:64px;height:64px;border-radius:18px;
-  background:linear-gradient(135deg,#1E293B,#2563EB);
+  background:#fff;
   display:flex;align-items:center;justify-content:center;
   font-size:26px;font-weight:800;color:#fff;
   animation:pulse 2s ease-in-out infinite;
@@ -674,7 +674,7 @@ body.admin-mode .modal{border-top:3px solid var(--admin);}
 
 <!-- LOADING SCREEN -->
 <div id="loading-screen">
-  <div class="loader-logo">V</div>
+  <div class="loader-logo"><img src="logo.jpg" alt="VG" style="width:100%;height:100%;object-fit:contain;border-radius:18px;display:block;"/></div>
   <div>
     <div class="loader-text">Loading Placement Dashboard</div>
     <div class="loader-sub" id="loader-sub">Starting up<span class="loader-dots"><span>.</span><span>.</span><span>.</span></span></div>
@@ -1233,7 +1233,7 @@ function renderNav(){
     const c=COMPANIES.find(x=>x.id===cId);
     right=`<nav class="nav-crumb"><span class="crumb" id="n-h">Home</span><span class="crumb-sep">/</span><span class="crumb" id="n-d">Companies</span><span class="crumb-sep">/</span><span class="crumb-active">${c?xe(c.name):''}</span></nav>`;
   }
-  nb.innerHTML=`<div class="navbar"><a class="nav-brand" id="n-brand"><div class="nav-logo">V</div><div class="nav-name"><span>Vidyavahini</span><span>First Grade Degree College</span></div></a><div class="nav-right"><a href="index.html" class="btn-nav-home-pd">← Home</a><button class="btn-icon" id="n-theme">🌙</button>${right}</div></div>`;
+  nb.innerHTML=`<div class="navbar"><a class="nav-brand" id="n-brand"><div class="nav-logo"><img src="logo.jpg" alt="VG" style="width:100%;height:100%;object-fit:contain;border-radius:10px;display:block;"/></div><div class="nav-name"><span>Vidyavahini</span><span>First Grade Degree College</span></div></a><div class="nav-right"><a href="index.html" class="btn-nav-home-pd">← Home</a><button class="btn-icon" id="n-theme">🌙</button>${right}</div></div>`;
   const g=id=>document.getElementById(id);
   g('n-brand').onclick=()=>go('home');
   g('n-theme').onclick=toggleTheme;
