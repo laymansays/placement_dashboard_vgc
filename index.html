@@ -886,7 +886,7 @@ function parseConfigFromJSON(gvizJson, htmlLinks={}){
    PARSE ADMIN DATA TAB
    Expected columns: Company | Website | Interview Mode |
      Reg Date | Drive Date | POC Name | POC Designation |
-     POC Email | POC Phone | Roles | Notes
+     POC Email | POC Phone | Role | JD
 ════════════════════════════════════════════════════ */
 function parseAdminData(csv){
   const rows = parseCSV(csv);
@@ -902,8 +902,7 @@ function parseAdminData(csv){
   const iPocDesig = col('desig');
   const iPocEmail = col('email');
   const iPocPhone = col('phone');
-  const iRoles    = col('role');
-  const iNotes    = col('note');
+  const iRole    = col('role');
   const _iJd=col('jd'); const _iLink=col('link');
   const iJdUrl    = _iJd!==-1?_iJd:_iLink;
 
