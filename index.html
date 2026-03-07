@@ -1422,7 +1422,7 @@ function buildHome(){
   document.querySelectorAll('.co-card[data-id]').forEach(el=>{
     el.onclick=()=>go('detail',parseInt(el.dataset.id));
   });
-}
+
 
 function coCardHtml(c){
   const st=STATUS_MAP[statusOf(c)]||STATUS_MAP.upcoming;
@@ -1511,7 +1511,7 @@ function bindCompanyRows(){
   document.querySelectorAll('.company-row').forEach(el=>{
     el.onclick=()=>go('detail',parseInt(el.dataset.id));
   });
-}
+
 
 /* ════════════════════════════════════════════════════
    DETAIL VIEW
