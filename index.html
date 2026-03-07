@@ -922,7 +922,7 @@ function parseAdminData(csv){
         email:       r[iPocEmail]||'',
         phone:       r[iPocPhone]||''
       },
-      Role,
+      role,
       jds: Object.fromEntries(Role.map(rol=>[rol,{text:'',pdf:null}])),
       notes: r[iNotes]||'',
       jdUrl: iJdUrl!==-1?(r[iJdUrl]||'').trim():''
@@ -1076,12 +1076,12 @@ async function init(){
     // 2. Fetch Admin Data tab (non-fatal)
     setLoadSub('Loading admin data<span class="loader-dots"><span>.</span><span>.</span><span>.</span></span>');
     try {
-      const adminCSV = await fetchSheetCSV(CONFIG_SHEET_ID, ADMIN_DATA_TAB);
-      ADMIN_DATA = parseAdminData(adminCSV);
-    } catch(e){
-      console.warn('Admin Data tab not found or empty:', e.message);
-      ADMIN_DATA = {};
-    }
+  const adminJSON = await fetchConfigJSON(CONFIG_SHEET_ID, ADMIN_DATA_TAB);
+  ADMIN_DATA = parseAdminDataFromJSON(adminJSON);
+} catch(e){
+  console.warn('Admin Data tab not found or empty:', e.message);
+  ADMIN_DATA = {};
+}
 
     // 3. Merge admin data into companies
     mergeAdminData();
