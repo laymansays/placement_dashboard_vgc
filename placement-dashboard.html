@@ -601,7 +601,6 @@ body.admin-mode .modal{border-top:3px solid var(--admin);}
 </head>
 <body>
 
-
 <div id="placement-login" style="
 position:fixed;
 inset:0;
@@ -611,6 +610,80 @@ justify-content:center;
 background:linear-gradient(135deg,#0f172a,#1e3a8a);
 z-index:2000;
 ">
+
+<div style="
+width:420px;
+background:white;
+padding:40px;
+border-radius:20px;
+text-align:center;
+box-shadow:0 20px 60px rgba(0,0,0,0.25);
+position:relative;
+">
+
+<a href="index.html" style="
+position:absolute;
+left:20px;
+top:20px;
+font-size:13px;
+color:#334155;
+text-decoration:none;
+font-weight:500;
+">← Back</a>
+
+<div style="
+width:64px;
+height:64px;
+margin:auto;
+border-radius:16px;
+background:linear-gradient(135deg,#2563eb,#7c3aed);
+display:flex;
+align-items:center;
+justify-content:center;
+color:white;
+font-size:26px;
+font-weight:800;
+margin-bottom:18px;
+">V</div>
+
+<h2 style="margin-bottom:6px">Placement Cell</h2>
+
+<p style="color:#64748b;margin-bottom:26px">
+Vidyavahini First Grade Degree College
+</p>
+
+<input id="placement-pin" type="password"
+placeholder="Enter Passkey"
+style="
+width:100%;
+padding:12px 14px;
+border-radius:10px;
+border:1px solid #cbd5e1;
+margin-bottom:16px;
+font-size:14px;
+"/>
+
+<button onclick="checkPlacementPin()" style="
+width:100%;
+padding:12px;
+border:none;
+border-radius:10px;
+background:linear-gradient(90deg,#2563eb,#7c3aed);
+color:white;
+font-weight:600;
+cursor:pointer;
+">
+Access Dashboard →
+</button>
+
+<p id="pin-error" style="
+color:#dc2626;
+font-size:13px;
+margin-top:10px;
+"></p>
+
+</div>
+</div>
 
 <div style="
 width:420px;
