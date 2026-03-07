@@ -99,6 +99,13 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
   cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;
 }
 .btn-logout:hover{border-color:#CBD5E1;color:#0F172A;}
+.btn-nav-home{
+  padding:7px 16px;border:1.5px solid #E2E8F0;border-radius:8px;
+  background:none;font-size:13px;font-weight:600;color:#64748B;
+  text-decoration:none;font-family:'Inter',sans-serif;transition:all .15s;
+  display:inline-flex;align-items:center;gap:4px;
+}
+.btn-nav-home:hover{border-color:#2563EB;color:#2563EB;background:#EFF6FF;}
 
 /* ── PORTAL BODY ── */
 .sp-body{display:flex;max-width:1280px;margin:0 auto;min-height:calc(100vh - 62px);}
@@ -344,6 +351,8 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
       <div class="sp-nav-logo">V</div>
       <span class="sp-nav-title">Placement Portal</span>
     </div>
+    <div class="sp-nav-right">
+      <a href="index.html" class="btn-nav-home">← Home</a>
       <span class="sp-nav-name" id="nav-name"></span>
       <button class="btn-logout" id="logout-btn">Logout</button>
     </div>
