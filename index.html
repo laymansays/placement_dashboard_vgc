@@ -523,6 +523,76 @@ body.admin-mode .modal{border-top:3px solid var(--admin);}
   .d-cards,.jd-cards-grid{grid-template-columns:1fr;}
   .dash-summary{grid-template-columns:1fr 1fr;}
 }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   HOME — COMPANY CARD GRID + HOVER TOOLTIP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.co-cards-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+  gap:16px;
+}
+.co-card{
+  background:var(--card-bg);border:1.5px solid var(--border);
+  border-radius:var(--r2);padding:20px 18px 16px;
+  cursor:pointer;transition:all .22s;
+  box-shadow:var(--shadow2);position:relative;
+  overflow:visible;
+}
+.co-card:hover{
+  border-color:var(--blue);
+  box-shadow:0 6px 32px rgba(37,99,235,0.18);
+  transform:translateY(-4px);
+  z-index:10;
+}
+.co-card .co-avatar{margin-bottom:12px;}
+.co-card-name{
+  font-weight:700;font-size:13.5px;color:var(--text);
+  margin-bottom:8px;line-height:1.3;
+}
+.co-card-stats{
+  display:flex;gap:0;margin-top:12px;
+  border-top:1px solid var(--border);padding-top:12px;
+}
+.co-card-stat{
+  flex:1;display:flex;flex-direction:column;align-items:center;
+  border-right:1px solid var(--border);
+}
+.co-card-stat:last-child{border-right:none;}
+.co-card-stat-num{font-size:19px;font-weight:800;color:var(--navy);line-height:1;letter-spacing:-0.02em;}
+.co-card-stat-lbl{font-size:9px;color:var(--text4);font-weight:700;letter-spacing:0.06em;margin-top:3px;}
+
+/* Tooltip — appears above card on hover */
+.co-tooltip{
+  position:absolute;
+  left:50%;bottom:calc(100% + 12px);
+  transform:translateX(-50%) translateY(8px);
+  background:#1E293B;color:#fff;
+  border-radius:12px;padding:14px 16px;
+  min-width:200px;max-width:240px;
+  pointer-events:none;
+  opacity:0;transition:opacity .2s ease,transform .2s ease;
+  box-shadow:0 12px 40px rgba(0,0,0,0.30);
+  z-index:200;font-size:12px;line-height:1.5;
+  border:1px solid rgba(255,255,255,0.08);
+}
+.co-tooltip::after{
+  content:'';position:absolute;
+  top:100%;left:50%;transform:translateX(-50%);
+  border:7px solid transparent;
+  border-top-color:#1E293B;
+}
+.co-card:hover .co-tooltip{opacity:1;transform:translateX(-50%) translateY(0);}
+.co-tooltip-row{display:flex;gap:10px;margin-bottom:5px;}
+.co-tooltip-row:last-child{margin-bottom:0;}
+.co-tooltip-k{font-size:9.5px;color:rgba(255,255,255,0.45);font-weight:700;letter-spacing:0.08em;min-width:46px;padding-top:1px;flex-shrink:0;}
+.co-tooltip-v{color:rgba(255,255,255,0.90);font-weight:500;font-size:12px;}
+
+@media(max-width:640px){
+  .co-cards-grid{grid-template-columns:repeat(2,1fr);gap:12px;}
+  .co-tooltip{display:none;}
+}
+
 </style>
 
 
@@ -804,7 +874,7 @@ function parseConfigFromJSON(gvizJson, htmlLinks={}){
       tabReg, tabInt, tabSel,
       website:'', interviewMode:'', registrationDate:'', driveDate:'',
       poc:{name:'',designation:'',email:'',phone:''},
-      roles:[], jds:{}, notes:'',
+      roles:[], jds:{}, notes:'', jdUrl:'',
       studentsRegistered:[], studentsInterviewed:[], studentsSelected:[],
       _loading:false, _lastFetched:0
     });
@@ -834,6 +904,8 @@ function parseAdminData(csv){
   const iPocPhone = col('phone');
   const iRoles    = col('role');
   const iNotes    = col('note');
+  const _iJd=col('jd'); const _iLink=col('link');
+  const iJdUrl    = _iJd!==-1?_iJd:_iLink;
 
   const data = {};
   rows.slice(1).forEach(r => {
@@ -853,7 +925,8 @@ function parseAdminData(csv){
       },
       roles,
       jds: Object.fromEntries(roles.map(rol=>[rol,{text:'',pdf:null}])),
-      notes: r[iNotes]||''
+      notes: r[iNotes]||'',
+      jdUrl: iJdUrl!==-1?(r[iJdUrl]||'').trim():''
     };
   });
   return data;
@@ -1051,6 +1124,7 @@ function mergeAdminData(){
     c.roles           = ad.roles;
     c.jds             = ad.jds;
     c.notes           = ad.notes;
+    c.jdUrl           = ad.jdUrl||'';
   });
 }
 
@@ -1165,13 +1239,17 @@ function getLogoDomain(c){
 
 function companyLogoHtml(c,size,extraCss){
   const sz=size||48; const domain=getLogoDomain(c);
-  const logoUrl='https://logo.clearbit.com/'+domain+'?size='+sz*2;
+  const clearbit='https://logo.clearbit.com/'+domain+'?size='+sz*2;
+  const gfav='https://www.google.com/s2/favicons?domain='+domain+'&sz=128';
   const grad=avgr(c.id-1);
   const pad=sz>56?8:6; const fsz=Math.round(sz*0.30);
   return '<div class="co-avatar" style="width:'+sz+'px;height:'+sz+'px;'+(extraCss||'')+'">'
-    +'<img src="'+logoUrl+'" '
-    +'onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'" '
+    +'<img class="co-logo-a" src="'+clearbit+'" '
+    +'onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\';" '
     +'style="width:100%;height:100%;object-fit:contain;padding:'+pad+'px;display:block;" />'
+    +'<img class="co-logo-b" src="'+gfav+'" '
+    +'onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';" '
+    +'style="width:100%;height:100%;object-fit:contain;padding:'+(pad+2)+'px;display:none;" />'
     +'<span class="co-ini" style="background:'+grad+';font-size:'+fsz+'px;">'+ini(c.name)+'</span>'
     +'</div>';
 }
@@ -1227,8 +1305,8 @@ function showStatModal(type){
           +'<div class="popup-row-sub"><span class="s-pill '+st.cls+'">'+st.l+'</span></div>'
         +'</div>'
         +'<div style="text-align:right;flex-shrink:0">'
-          +'<div style="font-size:20px;font-weight:800;color:var(--navy);letter-spacing:-0.02em">'+c.studentsRegistered.length+'</div>'
-          +'<div style="font-size:10px;color:var(--text4);font-weight:600">REG</div>'
+          +'<div style="font-size:20px;font-weight:800;color:var(--green);letter-spacing:-0.02em">'+c.studentsSelected.length+'</div>'
+          +'<div style="font-size:10px;color:var(--text4);font-weight:600">PLACED</div>'
         +'</div></div>';
     }).join('');
     openModalWide('All Companies — '+COMPANIES.length+' total',
@@ -1298,7 +1376,7 @@ function buildHome(){
   <div class="home-wrap">
     <div class="home-banner">
       <div class="home-banner-left">
-        <div class="home-eyebrow">PLACEMENT SEASON 2024–25</div>
+        <div class="home-eyebrow">PLACEMENT SEASON 2025–26</div>
         <h1 class="home-title">Campus <em>Placement</em><br>Dashboard</h1>
         <p class="home-sub">Live data from all company sheets — registrations, shortlists and placements in one place.</p>
         <button class="btn-primary-inv" onclick="go('dashboard')">View All Companies →</button>
@@ -1330,16 +1408,43 @@ function buildHome(){
         </div>
       </div>
     </div>
-    <div class="section" style="padding-left:0;padding-right:0">
+    <div class="section" style="padding-left:0;padding-right:0;padding-top:0">
       <div class="section-head">
-        <span class="section-title">Recent Activity</span>
-        <button class="btn btn-outline btn-sm" onclick="go('dashboard')">View All</button>
+        <span class="section-title">All Companies</span>
+        <button class="btn btn-outline btn-sm" onclick="go('dashboard')">See Dashboard &rarr;</button>
       </div>
       <div class="section-divider"></div>
-      <div class="company-list">${recent.map(c=>companyRowHtml(c)).join('')}</div>
+      <div class="co-cards-grid">${COMPANIES.map(c=>coCardHtml(c)).join('')}</div>
     </div>
   </div>`;
-  bindCompanyRows();
+  document.querySelectorAll('.co-card[data-id]').forEach(el=>{
+    el.onclick=()=>go('detail',parseInt(el.dataset.id));
+  });
+}
+
+function coCardHtml(c){
+  const st=STATUS_MAP[statusOf(c)]||STATUS_MAP.upcoming;
+  const r=c.studentsRegistered.length,sel=c.studentsSelected.length,intvw=c.studentsInterviewed.length;
+  const tipRows=[
+    ['STATUS',st.l],
+    c.driveDate?['DRIVE',fmtDate(c.driveDate)]:null,
+    c.interviewMode?['MODE',xe(c.interviewMode)]:null,
+    c.roles&&c.roles.length?['ROLES',xe(c.roles.slice(0,2).join(', ')+(c.roles.length>2?' +more':''))]:null,
+    c.poc&&c.poc.name?['POC',xe(c.poc.name)]:null,
+    sel>0?['PLACED',sel+' students']:null,
+  ].filter(Boolean).map(([k,v])=>
+    '<div class="co-tooltip-row"><span class="co-tooltip-k">'+k+'</span><span class="co-tooltip-v">'+v+'</span></div>'
+  ).join('');
+  return '<div class="co-card" data-id="'+c.id+'">'
+    +'<div class="co-tooltip">'+(tipRows||'<div class="co-tooltip-row"><span class="co-tooltip-v">No details yet</span></div>')+'</div>'
+    +companyLogoHtml(c,44)
+    +'<div class="co-card-name">'+xe(c.name)+'</div>'
+    +'<span class="s-pill '+st.cls+'">'+st.l+'</span>'
+    +'<div class="co-card-stats">'
+    +'<div class="co-card-stat"><div class="co-card-stat-num">'+r+'</div><div class="co-card-stat-lbl">REG</div></div>'
+    +'<div class="co-card-stat"><div class="co-card-stat-num">'+intvw+'</div><div class="co-card-stat-lbl">INT</div></div>'
+    +'<div class="co-card-stat"><div class="co-card-stat-num">'+sel+'</div><div class="co-card-stat-lbl">SEL</div></div>'
+    +'</div></div>';
 }
 
 /* ════════════════════════════════════════════════════
@@ -1508,58 +1613,112 @@ async function buildDetail(id){
 /* ════════════════════════════════════════════════════
    JD SECTION — build HTML
 ════════════════════════════════════════════════════ */
-function buildJDSection(c){
-  const AE=(fn,label)=>adminMode?`<button class="edit-chip" onclick="${fn}">${label||'✏️'}</button>`:'';
-  if(!c.roles||!c.roles.length){
-    if(!adminMode)return '';
-    return `<div class="jd-section"><div class="jd-section-head"><span class="jd-section-title">📋 Job Descriptions</span></div><div class="jd-empty">Add roles first, then JDs will appear here.</div></div>`;
-  }
-  const cards=c.roles.map(role=>{
-    const jd=(c.jds&&c.jds[role])||{};
-    const hasPdf=!!(jd.pdfBase64);
-    return `<div class="jd-card" data-role="${xe(role)}">
-      <div class="jd-card-accent"></div>
-      <div class="jd-card-role">${xe(role)}</div>
-      ${jd.designation?`<div class="jd-card-field"><span class="jd-card-key">TITLE</span><span class="jd-card-val">${xe(jd.designation)}</span></div>`:''}
-      ${jd.location?`<div class="jd-card-field"><span class="jd-card-key">LOCATION</span><span class="jd-card-val">${xe(jd.location)}</span></div>`:''}
-      ${jd.salary?`<div class="jd-card-field"><span class="jd-card-key">SALARY</span><span class="jd-card-val">${xe(jd.salary)}</span></div>`:''}
-      ${hasPdf
-        ?`<div class="jd-card-pdf">📄 <span>${adminMode?'Click to replace PDF':'Click to download JD'}</span></div>`
-        :`<div class="jd-card-no-pdf">${adminMode?'No PDF uploaded — click to add':'No JD PDF attached'}</div>`}
-    </div>`;
-  }).join('');
-
-  const addBtn=adminMode?`<button class="btn btn-outline btn-sm" onclick="openAddJD(${c.id})">+ Add JD</button>`:'';
-  return `<div class="jd-section">
-    <div class="jd-section-head"><span class="jd-section-title">📋 Job Descriptions</span>${addBtn}</div>
-    <div class="jd-cards-grid">${cards}</div>
-  </div>`;
+/* ════════════════════════════════════════════════════
+   GOOGLE DRIVE URL → DIRECT DOWNLOAD CONVERSION
+════════════════════════════════════════════════════ */
+function gdriveDirect(url){
+  if(!url) return '';
+  // /file/d/ID/view
+  const m=url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if(m) return 'https://drive.google.com/uc?export=download&id='+m[1];
+  // open?id=ID
+  const m2=url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  if(m2) return 'https://drive.google.com/uc?export=download&id='+m2[1];
+  return url;
+}
+function triggerUrlDownload(url,filename){
+  const dl=gdriveDirect(url);
+  const a=document.createElement('a');
+  a.href=dl; a.download=filename||'JD.pdf'; a.target='_blank';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
 }
 
 /* ════════════════════════════════════════════════════
+   JD SECTION — all companies, driven by jdUrl + roles
+════════════════════════════════════════════════════ */
+function buildJDSection(c){
+  const AE=(fn,label)=>adminMode?'<button class="edit-chip" onclick="'+fn+'">'+(label||'\u270f\ufe0f')+'</button>':'';
+  const hasRoles=!!(c.roles&&c.roles.length);
+  const hasUrl=!!(c.jdUrl);
+
+  if(!hasRoles&&!hasUrl){
+    if(!adminMode) return '';
+    return '<div class="jd-section"><div class="jd-section-head"><span class="jd-section-title">\ud83d\udccb Job Descriptions</span></div>'
+      +'<div class="jd-empty">Add roles in the Roles card or a JD link in Config Sheet column K.</div></div>';
+  }
+
+  let cards='';
+  if(hasRoles){
+    cards=c.roles.map(function(role){
+      const jd=(c.jds&&c.jds[role])||{};
+      const canDl=hasUrl||!!(jd.pdfBase64);
+      return '<div class="jd-card" data-role="'+xe(role)+'">'
+        +'<div class="jd-card-accent"></div>'
+        +'<div class="jd-card-role">'+xe(role)+'</div>'
+        +(jd.designation?'<div class="jd-card-field"><span class="jd-card-key">TITLE</span><span class="jd-card-val">'+xe(jd.designation)+'</span></div>':'')
+        +(jd.location?'<div class="jd-card-field"><span class="jd-card-key">LOCATION</span><span class="jd-card-val">'+xe(jd.location)+'</span></div>':'')
+        +(jd.salary?'<div class="jd-card-field"><span class="jd-card-key">SALARY</span><span class="jd-card-val">'+xe(jd.salary)+'</span></div>':'')
+        +(canDl
+          ?'<div class="jd-card-pdf">\ud83d\udcc4 <span>'+(adminMode?'Click to edit / replace':'Click to download JD \u2193')+'</span></div>'
+          :'<div class="jd-card-no-pdf">'+(adminMode?'No PDF — click to add':'No JD attached')+'</div>')
+        +'</div>';
+    }).join('');
+  } else {
+    // jdUrl exists but no named roles — generic download card
+    cards='<div class="jd-card" data-role="">'
+      +'<div class="jd-card-accent"></div>'
+      +'<div class="jd-card-role">Job Description</div>'
+      +'<div class="jd-card-field"><span class="jd-card-key">COMPANY</span><span class="jd-card-val">'+xe(c.name)+'</span></div>'
+      +'<div class="jd-card-pdf">\ud83d\udcc4 <span>Click to download JD \u2193</span></div>'
+      +'</div>';
+  }
+
+  const addBtn=adminMode&&hasRoles?'<button class="btn btn-outline btn-sm" onclick="openAddJD('+c.id+')">+ Add JD</button>':'';
+  return '<div class="jd-section">'
+    +'<div class="jd-section-head"><span class="jd-section-title">\ud83d\udccb Job Descriptions</span>'+addBtn+'</div>'
+    +'<div class="jd-cards-grid">'+cards+'</div>'
+    +'</div>';
+}
+/* ════════════════════════════════════════════════════
    JD CARD CLICK — admin: edit  |  view: download PDF
 ════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════
+   JD CARD CLICK — admin: edit | view: download via URL or base64
+════════════════════════════════════════════════════ */
 function handleJDCardClick(c,role){
-  if(adminMode){openEditJD(c.id,role);return;}
+  if(adminMode){
+    // Only open edit if named role exists
+    if(role) openEditJD(c.id,role);
+    else toast('Add roles first to edit JD details','info','💼');
+    return;
+  }
+  // View mode — download priority: jdUrl from sheet > pdfBase64 in memory
+  if(c.jdUrl){
+    const fname=(role||c.name).replace(/\s+/g,'_')+'_JD.pdf';
+    triggerUrlDownload(c.jdUrl,fname);
+    toast('Downloading JD'+(role?' for '+role:''),'success','📥');
+    return;
+  }
   const jd=(c.jds&&c.jds[role])||{};
-  if(!jd.pdfBase64){toast('No JD PDF uploaded for '+role,'info','📄');return;}
-  // Decode base64 and trigger download
-  try{
-    const raw=jd.pdfBase64;
-    const b64=raw.includes(',') ? raw.split(',')[1] : raw;
-    const byteStr=atob(b64);
-    const arr=new Uint8Array(byteStr.length);
-    for(let i=0;i<byteStr.length;i++)arr[i]=byteStr.charCodeAt(i);
-    const blob=new Blob([arr],{type:'application/pdf'});
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement('a');
-    a.href=url; a.download=role.replace(/\s+/g,'_')+'_JD.pdf';
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    setTimeout(()=>URL.revokeObjectURL(url),3000);
-    toast('Downloading JD for '+role,'success','📥');
-  }catch(e){toast('Download failed: '+e.message,'error');}
+  if(jd.pdfBase64){
+    try{
+      const raw=jd.pdfBase64;
+      const b64=raw.includes(',')?raw.split(',')[1]:raw;
+      const byteStr=atob(b64);
+      const arr=new Uint8Array(byteStr.length);
+      for(let i=0;i<byteStr.length;i++) arr[i]=byteStr.charCodeAt(i);
+      const blob=new Blob([arr],{type:'application/pdf'});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url; a.download=(role||c.name).replace(/\s+/g,'_')+'_JD.pdf';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(()=>URL.revokeObjectURL(url),3000);
+      toast('Downloading JD'+(role?' for '+role:''),'success','📥');
+    }catch(e){toast('Download failed: '+e.message,'error');}
+    return;
+  }
+  toast('No JD available'+(role?' for '+role:''),'info','📄');
 }
-
 /* ════════════════════════════════════════════════════
    JD ADMIN EDIT MODAL
 ════════════════════════════════════════════════════ */
