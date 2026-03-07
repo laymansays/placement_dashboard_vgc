@@ -1194,14 +1194,8 @@ function toggleTheme(){ const d=document.documentElement; d.setAttribute('data-t
    ADMIN BAR
 ════════════════════════════════════════════════════ */
 function renderAdminBar(){
-  const r=document.getElementById('admin-bar');
-  if(!adminMode){ r.innerHTML=''; return; }
-  r.innerHTML=`<div class="admin-bar"><span>🛡️ Admin Mode active</span><div class="admin-bar-actions"><button class="btn btn-admin-outline btn-sm" id="ab-diag">🔍 Diagnostics</button><button class="btn btn-admin-outline btn-sm" id="ab-refresh">↺ Reload Config</button><button class="btn btn-admin-outline btn-sm" id="ab-exit">Exit Admin</button></div></div>`;
-  document.getElementById('ab-diag').onclick=showDiagnostics;
-  document.getElementById('ab-refresh').onclick=()=>{ init(); toast('Reloading config…','info','↺'); };
-  document.getElementById('ab-exit').onclick=()=>{ adminMode=false; document.body.classList.remove('admin-mode'); sessionStorage.removeItem('placementAdmin'); go(view,cId); toast('Admin Mode off','info','🔒'); };
+  document.getElementById('admin-bar').innerHTML='';
 }
-
 /* ════════════════════════════════════════════════════
    ADMIN PIN
 ════════════════════════════════════════════════════ */
