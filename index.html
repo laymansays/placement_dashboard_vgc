@@ -846,8 +846,10 @@ function parseConfigFromJSON(gvizJson, htmlLinks={}){
     const val = i => (cells[i] && cells[i].v != null) ? String(cells[i].v).trim() : '';
     const fmt = i => (cells[i] && cells[i].f)         ? String(cells[i].f).trim() : '';
 
-    const name = val(iComp);
-    if(!name || name.toLowerCase()==='company') return;
+const name = val(iComp);
+const sheetCell = val(iSheet) || fmt(iSheet);
+
+if(!name || name.toLowerCase()==='company' || !sheetCell) return;
 
     // Sheet ID resolution priority:
     // 1. gviz JSON cell.v  — works for =HYPERLINK() formula cells (v = the URL)
