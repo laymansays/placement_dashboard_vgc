@@ -398,7 +398,7 @@ body.admin-mode .d-stat{background:var(--admin-bg);}
 .d-field-v.empty{color:var(--text4);font-style:italic;}
 .edit-chip{font-size:10px;background:var(--admin-bg);color:var(--admin);border:1px solid var(--admin-border);border-radius:var(--r5);padding:2px 9px;cursor:pointer;margin-left:auto;font-weight:700;transition:all .15s;}
 .edit-chip:hover{background:var(--admin);color:#fff;}
-.roles-wrap{display:flex;flex-wrap:wrap;gap:7px;}
+.Role-wrap{display:flex;flex-wrap:wrap;gap:7px;}
 .role-chip{font-size:12px;font-weight:600;padding:4px 12px;border-radius:var(--r5);background:var(--blue-bg);color:#1E40AF;border:1px solid var(--blue-border);}
 
 /* ── JD CARDS ── */
@@ -874,7 +874,7 @@ function parseConfigFromJSON(gvizJson, htmlLinks={}){
       tabReg, tabInt, tabSel,
       website:'', interviewMode:'', registrationDate:'', driveDate:'',
       poc:{name:'',designation:'',email:'',phone:''},
-      roles:[], jds:{}, notes:'', jdUrl:'',
+      Role:[], jds:{}, notes:'', jdUrl:'',
       studentsRegistered:[], studentsInterviewed:[], studentsSelected:[],
       _loading:false, _lastFetched:0
     });
@@ -910,7 +910,7 @@ function parseAdminData(csv){
   rows.slice(1).forEach(r => {
     const name = (r[iComp]||'').trim();
     if(!name) return;
-    const roles = (r[iRoles]||'').split(',').map(s=>s.trim()).filter(Boolean);
+    const Role = (r[iRole]||'').split(',').map(s=>s.trim()).filter(Boolean);
     data[name.toLowerCase()] = {
       website:         r[iWeb]||'',
       interviewMode:   r[iMode]||'',
@@ -922,8 +922,8 @@ function parseAdminData(csv){
         email:       r[iPocEmail]||'',
         phone:       r[iPocPhone]||''
       },
-      roles,
-      jds: Object.fromEntries(roles.map(rol=>[rol,{text:'',pdf:null}])),
+      Role,
+      jds: Object.fromEntries(Role.map(rol=>[rol,{text:'',pdf:null}])),
       notes: r[iNotes]||'',
       jdUrl: iJdUrl!==-1?(r[iJdUrl]||'').trim():''
     };
@@ -1120,7 +1120,7 @@ function mergeAdminData(){
     c.registrationDate= ad.registrationDate;
     c.driveDate       = ad.driveDate;
     c.poc             = ad.poc;
-    c.roles           = ad.roles;
+    c.Role           = ad.Role;
     c.jds             = ad.jds;
     c.notes           = ad.notes;
     c.jdUrl           = ad.jdUrl||'';
@@ -1428,7 +1428,7 @@ function coCardHtml(c){
     ['STATUS',st.l],
     c.driveDate?['DRIVE',fmtDate(c.driveDate)]:null,
     c.interviewMode?['MODE',xe(c.interviewMode)]:null,
-    c.roles&&c.roles.length?['ROLES',xe(c.roles.slice(0,2).join(', ')+(c.roles.length>2?' +more':''))]:null,
+    c.Role&&c.Role.length?['Role',xe(c.Role.slice(0,2).join(', ')+(c.Role.length>2?' +more':''))]:null,
     c.poc&&c.poc.name?['POC',xe(c.poc.name)]:null,
     sel>0?['PLACED',sel+' students']:null,
   ].filter(Boolean).map(([k,v])=>
@@ -1527,7 +1527,7 @@ async function buildDetail(id){
     `<div class="d-field"><div class="d-field-k">${l}</div>`+
     `<div class="d-field-v${!c[k]?' empty':''}">${k==='registrationDate'||k==='driveDate'?fmtDate(c[k]):xe(c[k])||'—'}</div></div>`
   ).join('');
-  const rolesHtml=c.roles.length?c.roles.map(r=>`<span class="role-chip">${xe(r)}</span>`).join('')
+  const RoleHtml=c.Role.length?c.Role.map(r=>`<span class="role-chip">${xe(r)}</span>`).join('')
     :'<span class="d-field-v empty">—</span>';
   const AE=(fn,label)=>adminMode?`<button class="edit-chip" onclick="${fn}">${label||'✏️ Edit'}</button>`:'';
 
@@ -1570,9 +1570,9 @@ async function buildDetail(id){
         <div class="d-card-lbl">👤 POINT OF CONTACT</div>${pocHtml}</div>
       <div class="d-card">${AE(`openEditDrive(${c.id})`)}
         <div class="d-card-lbl">📅 DRIVE DETAILS</div>${driveHtml}</div>
-      <div class="d-card">${AE(`openEditRoles(${c.id})`)}
-        <div class="d-card-lbl">💼 ROLES OFFERED</div>
-        <div class="roles-wrap">${rolesHtml}</div></div>
+      <div class="d-card">${AE(`openEditRole(${c.id})`)}
+        <div class="d-card-lbl">💼 Role OFFERED</div>
+        <div class="Role-wrap">${RoleHtml}</div></div>
     </div>
 
     ${buildJDSection(c)}
@@ -1633,22 +1633,22 @@ function triggerUrlDownload(url,filename){
 }
 
 /* ════════════════════════════════════════════════════
-   JD SECTION — all companies, driven by jdUrl + roles
+   JD SECTION — all companies, driven by jdUrl + role
 ════════════════════════════════════════════════════ */
 function buildJDSection(c){
   const AE=(fn,label)=>adminMode?'<button class="edit-chip" onclick="'+fn+'">'+(label||'\u270f\ufe0f')+'</button>':'';
-  const hasRoles=!!(c.roles&&c.roles.length);
+  const hasRole=!!(c.Role&&c.Role.length);
   const hasUrl=!!(c.jdUrl);
 
-  if(!hasRoles&&!hasUrl){
+  if(!hasRole&&!hasUrl){
     if(!adminMode) return '';
     return '<div class="jd-section"><div class="jd-section-head"><span class="jd-section-title">\ud83d\udccb Job Descriptions</span></div>'
-      +'<div class="jd-empty">Add roles in the Roles card or a JD link in Config Sheet column K.</div></div>';
+      +'<div class="jd-empty">Add Role in the Role card or a JD link in Config Sheet column K.</div></div>';
   }
 
   let cards='';
-  if(hasRoles){
-    cards=c.roles.map(function(role){
+  if(hasRole){
+    cards=c.Role.map(function(role){
       const jd=(c.jds&&c.jds[role])||{};
       const canDl=hasUrl||!!(jd.pdfBase64);
       return '<div class="jd-card" data-role="'+xe(role)+'">'
@@ -1663,7 +1663,7 @@ function buildJDSection(c){
         +'</div>';
     }).join('');
   } else {
-    // jdUrl exists but no named roles — generic download card
+    // jdUrl exists but no named Role — generic download card
     cards='<div class="jd-card" data-role="">'
       +'<div class="jd-card-accent"></div>'
       +'<div class="jd-card-role">Job Description</div>'
@@ -1672,7 +1672,7 @@ function buildJDSection(c){
       +'</div>';
   }
 
-  const addBtn=adminMode&&hasRoles?'<button class="btn btn-outline btn-sm" onclick="openAddJD('+c.id+')">+ Add JD</button>':'';
+  const addBtn=adminMode&&hasRole?'<button class="btn btn-outline btn-sm" onclick="openAddJD('+c.id+')">+ Add JD</button>':'';
   return '<div class="jd-section">'
     +'<div class="jd-section-head"><span class="jd-section-title">\ud83d\udccb Job Descriptions</span>'+addBtn+'</div>'
     +'<div class="jd-cards-grid">'+cards+'</div>'
@@ -1688,7 +1688,7 @@ function handleJDCardClick(c,role){
   if(adminMode){
     // Only open edit if named role exists
     if(role) openEditJD(c.id,role);
-    else toast('Add roles first to edit JD details','info','💼');
+    else toast('Add Role first to edit JD details','info','💼');
     return;
   }
   // View mode — download priority: jdUrl from sheet > pdfBase64 in memory
@@ -1753,9 +1753,9 @@ function openEditJD(id,role){
 
 function openAddJD(id){
   const c=COMPANIES.find(x=>x.id===id);
-  if(!c.roles||!c.roles.length){toast('Add roles first via the Roles card','info','💼');return;}
+  if(!c.Role||!c.Role.length){toast('Add Role first via the Role card','info','💼');return;}
   window._jdPdf=null;
-  const sel=c.roles.map(r=>`<option value="${xe(r)}">${xe(r)}</option>`).join('');
+  const sel=c.Role.map(r=>`<option value="${xe(r)}">${xe(r)}</option>`).join('');
   openModal('Add Job Description',`
     <div class="form-row"><label class="form-label">Role</label>
       <select class="form-select" id="jd-role-sel"><option value="">— Select —</option>${sel}</select></div>
@@ -1882,19 +1882,19 @@ function saveDrive(id){
   closeModal(); go('detail',id); toast('Drive details updated (update Config Sheet to persist)','success');
 }
 
-function openEditRoles(id){
+function openEditRole(id){
   const c=COMPANIES.find(x=>x.id===id);
-  openModal('Edit Roles',`
-    <div class="form-row"><label class="form-label">Roles (comma-separated)</label>
-    <input class="form-input" id="roles-inp" value="${xe(c.roles.join(', '))}"/>
+  openModal('Edit Role',`
+    <div class="form-row"><label class="form-label">Role (comma-separated)</label>
+    <input class="form-input" id="Role-inp" value="${xe(c.Role.join(', '))}"/>
     <div class="form-hint">e.g. Software Engineer, Data Analyst, HR Executive</div></div>
     ${SAVE_NOTE}`,
-    `<button class="btn btn-outline btn-sm" onclick="closeModal()">Cancel</button><button class="btn btn-admin btn-sm" onclick="saveRoles(${id})">Save</button>`);
+    `<button class="btn btn-outline btn-sm" onclick="closeModal()">Cancel</button><button class="btn btn-admin btn-sm" onclick="saveRole(${id})">Save</button>`);
 }
-function saveRoles(id){
+function saveRole(id){
   const c=COMPANIES.find(x=>x.id===id);
-  c.roles=document.getElementById('roles-inp').value.split(',').map(s=>s.trim()).filter(Boolean);
-  closeModal(); go('detail',id); toast('Roles updated (update Config Sheet to persist)','success');
+  c.Role=document.getElementById('Role-inp').value.split(',').map(s=>s.trim()).filter(Boolean);
+  closeModal(); go('detail',id); toast('Role updated (update Config Sheet to persist)','success');
 }
 
 /* ════════════════════════════════════════════════════
