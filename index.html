@@ -855,10 +855,7 @@ if(!name || name.toLowerCase()==='company' || !sheetCell) return;
     // 1. gviz JSON cell.v  — works for =HYPERLINK() formula cells (v = the URL)
     // 2. gviz JSON cell.f  — formatted value fallback
     // 3. htmlLinks map     — works for Insert Link cells (green + icon) from HTML export
-    const rowNum = idx + 1; // 1-based to match HTML table rows
-    let sid = extractSheetId(val(iSheet))
-       || extractSheetId(fmt(iSheet))
-       || '';
+    let sid = extractSheetId(val(iSheet)) || extractSheetId(fmt(iSheet)) || '';
     if(!sid) return; // still no ID — company hidden until column B is set
 
     const tabReg = val(iReg) || 'Registered Students';
@@ -1070,9 +1067,7 @@ async function init(){
   try {
     // 1. Fetch config as JSON + HTML simultaneously for maximum hyperlink coverage
     //    JSON gives us =HYPERLINK() formula URLs; HTML gives us Insert-Link URLs
-    const [configJSON, htmlLinks] = await Promise.all([
-      fetchConfigJSON(CONFIG_SHEET_ID, CONFIG_TAB),
-      fetchConfigHTMLLinks(CONFIG_SHEET_ID).catch(()=>({}))
+    COMPANIES = parseConfigFromJSON(configJSON);
     ]);
     setLoadSub('Parsing company list<span class="loader-dots"><span>.</span><span>.</span><span>.</span></span>');
     COMPANIES = parseConfigFromJSON(configJSON, htmlLinks);
