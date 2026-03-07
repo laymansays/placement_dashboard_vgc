@@ -663,16 +663,7 @@ margin-bottom:16px;
 font-size:14px;
 "/>
 
-<button onclick="checkPlacementPin()" style="
-width:100%;
-padding:12px;
-border:none;
-border-radius:10px;
-background:linear-gradient(90deg,#2563eb,#7c3aed);
-color:white;
-font-weight:600;
-cursor:pointer;
-">
+<button onclick="checkPlacementPin()">
 Access Dashboard →
 </button>
 
@@ -2276,10 +2267,7 @@ function checkPlacementPin(){
 
     document.getElementById("placement-login").style.display = "none";
 
-    
-  init();
-    
-   // start dashboard
+    init();   // this loads the dashboard
 
   }else{
 
