@@ -633,8 +633,12 @@ body.admin-mode .modal{border-top:3px solid var(--admin);}
   box-shadow:0 4px 16px rgba(79,70,229,0.32);transition:all .2s;
 }
 .pl-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(79,70,229,0.42);}
-.pl-back{display:block;margin-top:16px;font-size:12px;color:#94A3B8;text-decoration:none;}
-.pl-back:hover{color:#64748B;}
+.pl-back{
+  position:absolute;top:20px;left:24px;
+  font-size:12.5px;color:#64748B;font-weight:600;
+  text-decoration:none;transition:color .15s;
+}
+.pl-back:hover{color:#0F172A;}
 
 </style>
 
@@ -654,7 +658,7 @@ body.admin-mode .modal{border-top:3px solid var(--admin);}
     <input id="placement-pin" type="tel" maxlength="4" inputmode="numeric" placeholder="••••" autocomplete="off"/>
     <p id="pin-error"></p>
     <button class="pl-btn" onclick="checkPlacementPin()">Access Dashboard →</button>
-    <a href="index.html" class="pl-back">← Back to Home</a>
+    <a href="index.html" class="pl-back">← Home</a>
   </div>
 </div>
 
