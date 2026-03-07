@@ -182,7 +182,7 @@ body{
 <nav class="nav">
   <a class="nav-brand" href="index.html">
     <div class="nav-logo">V</div>
-    <span class="nav-college">Vidyavahini Placement Dahsboard</span>
+    <span class="nav-college">Vidyavahini Placement Cell</span>
   </a>
   <span class="nav-year">2025–26</span>
 </nav>
@@ -238,7 +238,7 @@ body{
           <span class="portal-btn-sub">Track your applications</span>
         </div>
       </a>
-      <a class="portal-btn btn-placement" href="placement-dashboard.html">
+      <a class="portal-btn btn-placement" href="placement.html">
         <div class="portal-btn-icon">📊</div>
         <div class="portal-btn-text">
           <span class="portal-btn-label">Placement Cell</span>
@@ -264,6 +264,21 @@ const setNum = (id, val) => {
   el.textContent = val;
 };
 
+// Count valid student rows from a GViz JSON response using the same
+// column-detection + name/email filter that the placement dashboard uses.
+function countValidRows(json){
+  const table = json && json.table;
+  if(!table || !table.rows) return 0;
+  const cols = (table.cols || []).map(c => (c.label || '').toLowerCase());
+  const iName  = cols.findIndex(h => h.includes('name'));
+  const iEmail = cols.findIndex(h => h.includes('email') || h.includes('mail'));
+  return table.rows.filter(row => {
+    const name  = (iName  >= 0 && row.c && row.c[iName]  && row.c[iName].v)  ? String(row.c[iName].v).trim()  : '';
+    const email = (iEmail >= 0 && row.c && row.c[iEmail] && row.c[iEmail].v) ? String(row.c[iEmail].v).trim() : '';
+    return name || email;
+  }).length;
+}
+
 async function loadIndexStats(){
   let companies = [], totalReg = 0, drivesDone = 0, totalSel = 0;
   try{
@@ -278,7 +293,7 @@ async function loadIndexStats(){
     return;
   }
 
-  // Fetch company sheets in parallel for aggregated stats
+  // Fetch company sheets in parallel — mirrors placement dashboard logic exactly
   await Promise.allSettled(companies.map(async c => {
     try{
       const fetchTab = async (tab) => {
@@ -288,27 +303,30 @@ async function loadIndexStats(){
         const text = await res.text();
         if(text.trimStart().startsWith('<')) return 0;
         const json = JSON.parse(text.replace(/^[^(]*\(/,'').replace(/\);?\s*$/,''));
-        if(json.status==='error') return 0;
-        const rows = (json.table && json.table.rows) ? json.table.rows : [];
-        // Subtract 1 for header row if present
-        return Math.max(0, rows.length - (rows.length>0 && !rows[0].c?.[2]?.v ? 1 : 0));
+        if(json.status === 'error') return 0;
+        return countValidRows(json);   // ← same filter as dashboard
       };
-      const [reg, sel] = await Promise.all([fetchTab(c.tabReg), fetchTab(c.tabSel)]);
+      const [reg, int_, sel] = await Promise.all([
+        fetchTab(c.tabReg),
+        fetchTab(c.tabInt),   // ← also fetch interviewed tab
+        fetchTab(c.tabSel),
+      ]);
       totalReg += reg;
       totalSel += sel;
-      if(sel > 0) drivesDone++;
+      // Mirror dashboard: drive is "done" when sel > 0 OR int > 0
+      if(sel > 0 || int_ > 0) drivesDone++;
     }catch(e){
       console.warn('[stats] company', c.name, e.message);
     }
 
-    // Update stats incrementally as each company loads
-    setNum('st-reg', totalReg);
+    // Update incrementally as each company resolves
+    setNum('st-reg',    totalReg);
     setNum('st-drives', drivesDone);
     setNum('st-placed', totalSel);
   }));
 
   // Final update
-  setNum('st-reg', totalReg);
+  setNum('st-reg',    totalReg);
   setNum('st-drives', drivesDone);
   setNum('st-placed', totalSel);
 }
