@@ -602,16 +602,16 @@ body.admin-mode .modal{border-top:3px solid var(--admin);}
 <body>
 
 <script>
-if(sessionStorage.getItem('placementAdmin') !== '1'){
-  const pin = prompt("Enter Placement Cell Passcode");
-  if(pin !== "2525"){
+if(sessionStorage.getItem('placementAccess') !== 'granted'){
+  const pin = prompt("Enter Placement Cell Passkey");
+
+  if(pin === "2525"){
+    sessionStorage.setItem('placementAccess','granted');
+  } else {
     alert("Access denied");
     window.location.href = "index.html";
-  } else {
-    sessionStorage.setItem('placementAdmin','1');
   }
-}
-</script>
+}</script>
 
   
 <div id="toast-root"></div>
