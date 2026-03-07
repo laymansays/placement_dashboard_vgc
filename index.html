@@ -128,20 +128,31 @@ body{
 .portal-btn-label{font-size:15px;font-weight:800;line-height:1.2;}
 .portal-btn-sub{font-size:11.5px;font-weight:500;opacity:.65;margin-top:2px;}
 
-.btn-student{
-  background:linear-gradient(135deg,#1D4ED8,#2563EB);color:#fff;
-  box-shadow:0 8px 32px rgba(37,99,235,0.35);
-}
-.btn-student .portal-btn-icon{background:rgba(255,255,255,0.16);}
-.btn-student:hover{transform:translateY(-3px);box-shadow:0 12px 44px rgba(37,99,235,0.50);}
-
+/* Both cards identical and neutral by default */
+.btn-student,
 .btn-placement{
-  background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.9);
+  background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.90);
   border:1.5px solid rgba(255,255,255,0.14);
   box-shadow:0 4px 16px rgba(0,0,0,0.20);
 }
+.btn-student .portal-btn-icon,
 .btn-placement .portal-btn-icon{background:rgba(255,255,255,0.10);}
-.btn-placement:hover{background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.25);transform:translateY(-3px);}
+
+/* Student → blue on hover */
+.btn-student:hover{
+  background:linear-gradient(135deg,#1D4ED8,#2563EB);color:#fff;
+  border-color:transparent;
+  transform:translateY(-3px);box-shadow:0 12px 44px rgba(37,99,235,0.50);
+}
+.btn-student:hover .portal-btn-icon{background:rgba(255,255,255,0.16);}
+
+/* Placement → indigo on hover */
+.btn-placement:hover{
+  background:linear-gradient(135deg,#4F46E5,#7c3aed);color:#fff;
+  border-color:transparent;
+  transform:translateY(-3px);box-shadow:0 12px 44px rgba(79,70,229,0.50);
+}
+.btn-placement:hover .portal-btn-icon{background:rgba(255,255,255,0.16);}
 
 /* ── FOOTER ── */
 .footer{
@@ -227,7 +238,7 @@ body{
           <span class="portal-btn-sub">Track your applications</span>
         </div>
       </a>
-      <a class="portal-btn btn-placement" href="placement-dashboard.html">
+      <a class="portal-btn btn-placement" href="placement.html">
         <div class="portal-btn-icon">📊</div>
         <div class="portal-btn-text">
           <span class="portal-btn-label">Placement Cell</span>
@@ -324,6 +335,5 @@ function animateCount(id, target){
 
 loadIndexStats();
 </script>
-  <script src="placement.js"></script>
 </body>
 </html>
