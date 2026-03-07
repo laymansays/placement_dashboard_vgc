@@ -161,6 +161,13 @@ body{
 .btn-admin-outline{background:none;border:1px solid var(--admin-border);color:var(--admin);}.btn-admin-outline:hover{background:var(--admin-bg);}
 .btn-danger{background:var(--red);color:#fff;}.btn-danger:hover{filter:brightness(1.1);}
 .btn-ghost{background:none;border:none;color:var(--text3);padding:5px 9px;cursor:pointer;}.btn-ghost:hover{color:var(--text);background:var(--bg3);}
+.btn-nav-home-pd{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:6px 14px;border:1.5px solid var(--border2);border-radius:8px;
+  background:none;font-size:13px;font-weight:600;color:var(--text3);
+  text-decoration:none;font-family:inherit;transition:all .15s;
+}
+.btn-nav-home-pd:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-bg);}
 .btn-primary-inv{
   display:inline-flex;align-items:center;gap:8px;padding:10px 24px;
   border-radius:var(--r3);border:1.5px solid rgba(255,255,255,0.35);
@@ -593,6 +600,53 @@ body.admin-mode .modal{border-top:3px solid var(--admin);}
   .co-tooltip{display:none;}
 }
 
+
+/* ── PLACEMENT LOGIN GATE ── */
+#placement-login{
+  position:fixed;inset:0;z-index:2000;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(150deg,#0F172A 0%,#1E293B 50%,#1e3a8a 100%);
+  padding:24px;
+}
+#placement-login.hidden{display:none;}
+.pl-card{
+  background:#fff;border-radius:20px;padding:48px 44px 40px;
+  width:100%;max-width:420px;text-align:center;
+  box-shadow:0 32px 80px rgba(0,0,0,0.28);position:relative;
+}
+.pl-logo{
+  width:60px;height:60px;border-radius:16px;margin:0 auto 18px;
+  background:linear-gradient(135deg,#4F46E5,#7c3aed);
+  display:flex;align-items:center;justify-content:center;
+  font-size:26px;font-weight:900;color:#fff;
+  box-shadow:0 8px 24px rgba(79,70,229,0.40);
+}
+.pl-heading{font-size:24px;font-weight:800;color:#0F172A;letter-spacing:-0.03em;margin-bottom:6px;}
+.pl-sub{font-size:13px;color:#64748B;margin-bottom:28px;line-height:1.5;}
+.pl-label{display:block;font-size:11.5px;font-weight:700;color:#374151;margin-bottom:7px;text-align:left;letter-spacing:0.04em;}
+#placement-pin{
+  width:100%;padding:12px 16px;border:1.5px solid #E2E8F0;border-radius:10px;
+  font-family:inherit;font-size:22px;font-weight:700;text-align:center;
+  color:#0F172A;background:#F8FAFC;outline:none;
+  letter-spacing:0.25em;transition:all .15s;
+  -webkit-text-security:disc;
+}
+#placement-pin:focus{border-color:#4F46E5;background:#fff;box-shadow:0 0 0 3px rgba(79,70,229,0.12);}
+#pin-error{min-height:20px;font-size:12.5px;color:#EF4444;font-weight:600;margin:8px 0 0;text-align:left;}
+.pl-btn{
+  width:100%;margin-top:16px;padding:13px 20px;border:none;border-radius:10px;
+  background:linear-gradient(135deg,#4F46E5,#7c3aed);color:#fff;
+  font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;
+  box-shadow:0 4px 16px rgba(79,70,229,0.32);transition:all .2s;
+}
+.pl-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(79,70,229,0.42);}
+.pl-back{
+  position:absolute;top:20px;left:24px;
+  font-size:12.5px;color:#64748B;font-weight:600;
+  text-decoration:none;transition:color .15s;
+}
+.pl-back:hover{color:#0F172A;}
+
 </style>
 
 
@@ -600,6 +654,21 @@ body.admin-mode .modal{border-top:3px solid var(--admin);}
 
 </head>
 <body>
+
+<!-- ── PLACEMENT CELL LOGIN GATE ── -->
+<div id="placement-login">
+  <div class="pl-card">
+    <div class="pl-logo">🛡️</div>
+    <h1 class="pl-heading">Placement Cell</h1>
+    <p class="pl-sub">Enter the 4-digit passkey to access<br>the Placement Dashboard.</p>
+    <label class="pl-label" for="placement-pin">PASSKEY</label>
+    <input id="placement-pin" type="tel" maxlength="4" inputmode="numeric" placeholder="••••" autocomplete="off"/>
+    <p id="pin-error"></p>
+    <button class="pl-btn" onclick="checkPlacementPin()">Access Dashboard →</button>
+    <a href="index.html" class="pl-back">← Home</a>
+  </div>
+</div>
+
 
 <div id="toast-root"></div>
 
@@ -1091,6 +1160,10 @@ async function init(){
     _clearCountdown();
     document.getElementById('loading-screen').classList.add('hide');
     document.getElementById('app').classList.add('ready');
+    // Auto-activate admin if arriving from placement cell login
+    if(sessionStorage.getItem('placementAdmin')==='1'){
+      adminMode=true; document.body.classList.add('admin-mode');
+    }
     go('home');
 
     // 5. Fetch all student data in background
@@ -1160,11 +1233,10 @@ function renderNav(){
     const c=COMPANIES.find(x=>x.id===cId);
     right=`<nav class="nav-crumb"><span class="crumb" id="n-h">Home</span><span class="crumb-sep">/</span><span class="crumb" id="n-d">Companies</span><span class="crumb-sep">/</span><span class="crumb-active">${c?xe(c.name):''}</span></nav>`;
   }
-  nb.innerHTML=`<div class="navbar"><a class="nav-brand" id="n-brand"><div class="nav-logo"><img src="logo.jpg" alt="VG" style="width:100%;height:100%;object-fit:contain;border-radius:10px;display:block;"/></div><div class="nav-name"><span>Vidyavahini</span><span>First Grade Degree College</span></div></a><div class="nav-right"><button class="btn-admin-toggle${adminMode?' active':''}" id="n-admin"><span class="admin-dot"></span>${adminMode?'🛡️ Admin ON':'🔑 Admin'}</button><button class="btn-icon" id="n-theme">🌙</button>${right}</div></div>`;
+  nb.innerHTML=`<div class="navbar"><a class="nav-brand" id="n-brand"><div class="nav-logo"><img src="logo.jpg" alt="VG" style="width:100%;height:100%;object-fit:contain;border-radius:10px;display:block;"/></div><div class="nav-name"><span>Vidyavahini</span><span>First Grade Degree College</span></div></a><div class="nav-right"><a href="index.html" class="btn-nav-home-pd">← Home</a><button class="btn-icon" id="n-theme">🌙</button>${right}</div></div>`;
   const g=id=>document.getElementById(id);
   g('n-brand').onclick=()=>go('home');
   g('n-theme').onclick=toggleTheme;
-  g('n-admin').onclick=handleAdmin;
   updateThemeIcon();
   if(g('n-home'))  g('n-home').onclick=()=>go('home');
   if(g('n-h'))     g('n-h').onclick=()=>go('home');
@@ -1183,7 +1255,7 @@ function renderAdminBar(){
   r.innerHTML=`<div class="admin-bar"><span>🛡️ Admin Mode active</span><div class="admin-bar-actions"><button class="btn btn-admin-outline btn-sm" id="ab-diag">🔍 Diagnostics</button><button class="btn btn-admin-outline btn-sm" id="ab-refresh">↺ Reload Config</button><button class="btn btn-admin-outline btn-sm" id="ab-exit">Exit Admin</button></div></div>`;
   document.getElementById('ab-diag').onclick=showDiagnostics;
   document.getElementById('ab-refresh').onclick=()=>{ init(); toast('Reloading config…','info','↺'); };
-  document.getElementById('ab-exit').onclick=()=>{ adminMode=false; document.body.classList.remove('admin-mode'); go(view,cId); toast('Admin Mode off','info','🔒'); };
+  document.getElementById('ab-exit').onclick=()=>{ adminMode=false; document.body.classList.remove('admin-mode'); sessionStorage.removeItem('placementAdmin'); go(view,cId); toast('Admin Mode off','info','🔒'); };
 }
 
 /* ════════════════════════════════════════════════════
@@ -2049,9 +2121,26 @@ async function showDiagnostics(){
 }
 
 /* ════════════════════════════════════════════════════
-   BOOT
+   PLACEMENT CELL LOGIN GATE
 ════════════════════════════════════════════════════ */
-init();
+function checkPlacementPin(){
+  var pin = (document.getElementById('placement-pin').value || '').trim();
+  var errEl = document.getElementById('pin-error');
+  errEl.textContent = '';
+  if(pin.length < 4){ errEl.textContent = 'Please enter the 4-digit passkey.'; return; }
+  if(pin === '2525'){
+    document.getElementById('placement-login').classList.add('hidden');
+    init();
+  } else {
+    errEl.textContent = 'Incorrect Passkey. Please try again.';
+    document.getElementById('placement-pin').value = '';
+    document.getElementById('placement-pin').focus();
+  }
+}
+
+document.getElementById('placement-pin').addEventListener('keydown', function(e){
+  if(e.key === 'Enter') checkPlacementPin();
+});
 
 
 
