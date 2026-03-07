@@ -1,0 +1,1768 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Placement Dashboard · Vidyavahini First Grade Degree College</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+/* ══════════════════════════════════════════════════════════
+   VIDYAVAHINI — CAMPUS PLACEMENT DASHBOARD
+   Design language: Collegiate Clarity
+   Display: DM Serif Display  ·  UI: Inter  ·  Mono: JetBrains Mono
+   Palette: Deep Navy · Warm Ivory · Antique Gold
+══════════════════════════════════════════════════════════ */
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:'Inter',sans-serif;
+  font-size:14.5px;line-height:1.65;
+  background:var(--bg);color:var(--text);
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  font-feature-settings:'kern' 1,'liga' 1,'cv11' 1;
+}
+
+/* ── Light theme (default) ─────────────────────────────── */
+:root{
+  /* Page surfaces */
+  --bg:#EFECE4;
+  --bg2:#FAF9F5;
+  --bg3:#E5E1D6;
+  --bg4:#D6D1C4;
+
+  /* Borders — navy-tinted warm grays */
+  --border:rgba(18,36,72,0.07);
+  --border2:rgba(18,36,72,0.11);
+  --border3:rgba(18,36,72,0.20);
+
+  /* Typography */
+  --text:#141C2B;
+  --text2:#2B3A54;
+  --text3:#556070;
+  --text4:#8FA2B4;
+
+  /* Deep collegiate navy */
+  --navy:#182B4A;
+  --navy2:#1E3762;
+  --navy-bg:rgba(24,43,74,0.05);
+  --navy-border:rgba(24,43,74,0.16);
+
+  /* Antique gold — restrained, institutional */
+  --gold:#7A600C;
+  --gold2:#8E7014;
+  --gold-bg:rgba(122,96,12,0.06);
+  --gold-border:rgba(122,96,12,0.20);
+
+  /* Semantic — muted, legible */
+  --green:#195438;
+  --green-bg:rgba(25,84,56,0.06);
+  --green-border:rgba(25,84,56,0.18);
+  --amber:#7C3A0C;
+  --amber-bg:rgba(124,58,12,0.06);
+  --amber-border:rgba(124,58,12,0.18);
+  --red:#6A1620;
+  --red-bg:rgba(106,22,32,0.06);
+  --red-border:rgba(106,22,32,0.16);
+
+  /* Component surfaces */
+  --nav-bg:#FFFFFF;
+  --card-bg:#FFFFFF;
+  --card-hover:#FDFCF8;
+  --modal-bg:#FFFFFF;
+
+  /* Elevation — gentle, not dramatic */
+  --shadow:0 1px 2px rgba(0,0,0,0.03),0 3px 12px rgba(18,36,72,0.07);
+  --shadow2:0 1px 2px rgba(18,36,72,0.06);
+  --shadow3:0 4px 28px rgba(18,36,72,0.12),0 1px 4px rgba(0,0,0,0.04);
+
+  /* Geometry */
+  --r1:10px;--r2:7px;--r3:5px;--r4:3px;
+
+  /* Admin amber */
+  --admin:#65350C;
+  --admin-bg:rgba(101,53,12,0.06);
+  --admin-border:rgba(101,53,12,0.20);
+}
+
+/* ── Dark theme ────────────────────────────────────────── */
+[data-theme="dark"]{
+  --bg:#0B0F1A;--bg2:#111826;--bg3:#192234;--bg4:#202D44;
+  --border:rgba(130,165,220,0.07);--border2:rgba(130,165,220,0.11);--border3:rgba(130,165,220,0.19);
+  --text:#D4E0EE;--text2:#8AAAC8;--text3:#3E5470;--text4:#263A56;
+  --navy:#3868B8;--navy2:#4878CC;--navy-bg:rgba(56,104,184,0.10);--navy-border:rgba(56,104,184,0.24);
+  --gold:#A88E18;--gold2:#BCA022;--gold-bg:rgba(168,142,24,0.10);--gold-border:rgba(168,142,24,0.26);
+  --green:#18845A;--green-bg:rgba(24,132,90,0.10);--green-border:rgba(24,132,90,0.24);
+  --amber:#B86820;--amber-bg:rgba(184,104,32,0.10);--amber-border:rgba(184,104,32,0.24);
+  --red:#AC2840;--red-bg:rgba(172,40,64,0.10);--red-border:rgba(172,40,64,0.24);
+  --nav-bg:#111826;--card-bg:#111826;--card-hover:#192234;--modal-bg:#111826;
+  --shadow:0 1px 4px rgba(0,0,0,0.4),0 4px 18px rgba(0,0,0,0.35);
+  --shadow2:0 1px 4px rgba(0,0,0,0.30);
+  --shadow3:0 6px 40px rgba(0,0,0,0.55),0 2px 8px rgba(0,0,0,0.35);
+  --admin:#C07C20;--admin-bg:rgba(192,124,32,0.09);--admin-border:rgba(192,124,32,0.26);
+}
+
+/* ═══════════════════════════════════════════════════════
+   NAVBAR
+═══════════════════════════════════════════════════════ */
+.navbar{
+  position:sticky;top:0;z-index:100;
+  background:var(--nav-bg);
+  border-bottom:1px solid var(--border2);
+  height:58px;display:flex;align-items:center;
+  justify-content:space-between;padding:0 48px;
+}
+.nav-brand{display:flex;align-items:center;gap:12px;cursor:pointer;text-decoration:none;}
+/* Crest — monogram mark */
+.nav-logo{
+  width:36px;height:36px;border-radius:6px;flex-shrink:0;
+  background:var(--navy);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'DM Serif Display',serif;font-size:16px;color:#fff;
+  letter-spacing:0.02em;
+}
+.nav-name{display:flex;flex-direction:column;line-height:1.2;}
+.nav-name span:first-child{
+  font-family:'DM Serif Display',serif;font-weight:400;
+  font-size:15px;color:var(--text);letter-spacing:0.01em;
+}
+.nav-name span:last-child{
+  font-size:10px;color:var(--text4);letter-spacing:0.04em;
+  font-style:italic;font-family:'DM Serif Display',serif;
+}
+.nav-right{display:flex;align-items:center;gap:7px;}
+.btn-icon{
+  background:none;border:1px solid var(--border2);border-radius:var(--r3);
+  padding:5px 9px;cursor:pointer;font-size:13px;color:var(--text3);
+  transition:all .15s;line-height:1.4;
+}
+.btn-icon:hover{background:var(--bg3);border-color:var(--border3);color:var(--text);}
+.btn-admin-toggle{
+  display:flex;align-items:center;gap:6px;
+  padding:5px 13px;border-radius:var(--r3);
+  border:1px solid var(--border2);background:none;
+  cursor:pointer;font-size:11.5px;font-weight:500;
+  color:var(--text3);transition:all .15s;font-family:inherit;
+}
+.btn-admin-toggle:hover,.btn-admin-toggle.active{
+  background:var(--admin-bg);border-color:var(--admin-border);color:var(--admin);
+}
+.admin-dot{width:5px;height:5px;border-radius:50%;background:var(--text4);transition:background .2s;flex-shrink:0;}
+.btn-admin-toggle.active .admin-dot{background:var(--admin);box-shadow:0 0 0 2px var(--admin-bg);}
+.nav-crumb{display:flex;align-items:center;gap:5px;font-size:12.5px;color:var(--text3);}
+.crumb{cursor:pointer;transition:color .15s;}.crumb:hover{color:var(--navy);}
+.crumb-sep{opacity:.35;font-size:10px;margin:0 1px;}
+.crumb-active{font-weight:600;color:var(--text2);}
+
+/* ═══════════════════════════════════════════════════════
+   ADMIN / REFRESH BARS
+═══════════════════════════════════════════════════════ */
+.admin-bar{
+  background:var(--admin-bg);border-bottom:1px solid var(--admin-border);
+  padding:7px 48px;display:flex;align-items:center;
+  justify-content:space-between;gap:12px;
+  font-size:11.5px;font-weight:600;color:var(--admin);
+}
+.admin-bar-actions{display:flex;gap:7px;align-items:center;}
+.refresh-bar{
+  background:var(--navy-bg);border-bottom:1px solid var(--border);
+  padding:5px 48px;font-size:12px;color:var(--text3);
+  display:none;align-items:center;gap:8px;
+}
+.refresh-bar.show{display:flex;}
+.spin{animation:spin .8s linear infinite;display:inline-block;}
+
+/* ═══════════════════════════════════════════════════════
+   BUTTONS
+═══════════════════════════════════════════════════════ */
+.btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:7px 18px;border-radius:var(--r3);
+  border:1px solid transparent;
+  font-size:12.5px;font-weight:500;cursor:pointer;
+  transition:all .15s;font-family:inherit;white-space:nowrap;
+}
+.btn-sm{padding:4px 12px;font-size:12px;}
+.btn-xs{padding:2px 8px;font-size:11px;}
+.btn-primary{background:var(--navy);color:#fff;}
+.btn-primary:hover{background:var(--navy2);}
+.btn-navy{background:var(--navy);color:#fff;}
+.btn-navy:hover{background:var(--navy2);}
+.btn-outline{background:none;border-color:var(--border3);color:var(--text2);}
+.btn-outline:hover{background:var(--bg3);}
+.btn-admin{background:var(--admin);color:#fff;}
+.btn-admin:hover{filter:brightness(1.08);}
+.btn-admin-outline{background:none;border:1px solid var(--admin-border);color:var(--admin);}
+.btn-admin-outline:hover{background:var(--admin-bg);}
+.btn-danger{background:var(--red);color:#fff;}
+.btn-danger:hover{filter:brightness(1.10);}
+.btn-ghost{background:none;border:none;color:var(--text3);padding:5px 9px;}
+.btn-ghost:hover{color:var(--text);background:var(--bg3);}
+/* Inverted CTA — on dark navy backgrounds */
+.btn-primary-inv{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:9px 22px;border-radius:var(--r3);
+  border:1px solid rgba(255,255,255,0.28);
+  background:rgba(255,255,255,0.08);
+  color:rgba(255,255,255,0.90);
+  font-size:12.5px;font-weight:500;font-family:inherit;
+  cursor:pointer;transition:all .2s;width:fit-content;
+}
+.btn-primary-inv:hover{background:rgba(255,255,255,0.16);border-color:rgba(255,255,255,0.48);}
+
+/* ═══════════════════════════════════════════════════════
+   LOADING SCREEN
+═══════════════════════════════════════════════════════ */
+#loading-screen{
+  position:fixed;inset:0;background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:20px;z-index:1000;transition:opacity .4s;
+}
+#loading-screen.hide{opacity:0;pointer-events:none;}
+.loader-logo{
+  width:60px;height:60px;border-radius:10px;
+  background:var(--navy);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'DM Serif Display',serif;font-size:24px;color:#fff;
+  animation:pulse 2.2s ease-in-out infinite;
+}
+.loader-text{
+  font-family:'DM Serif Display',serif;font-size:19px;
+  color:var(--text);text-align:center;
+}
+.loader-sub{font-size:12.5px;color:var(--text3);text-align:center;margin-top:3px;}
+.loader-dots span{animation:blink 1.4s infinite;display:inline-block;}
+.loader-dots span:nth-child(2){animation-delay:.22s;}
+.loader-dots span:nth-child(3){animation-delay:.44s;}
+
+/* ═══════════════════════════════════════════════════════
+   ERROR SCREEN
+═══════════════════════════════════════════════════════ */
+#error-screen{display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:60px 24px;text-align:center;}
+#error-screen.show{display:flex;}
+.error-icon{font-size:36px;opacity:.7;}
+.error-title{font-family:'DM Serif Display',serif;font-size:22px;color:var(--text);}
+.error-msg{font-size:13.5px;color:var(--text3);max-width:480px;line-height:1.7;}
+
+/* ═══════════════════════════════════════════════════════
+   APP SHELL
+═══════════════════════════════════════════════════════ */
+#app{display:none;}#app.ready{display:block;}
+
+/* ═══════════════════════════════════════════════════════
+   HOME VIEW
+   Layout: navy editorial panel (left) + white stats (right)
+═══════════════════════════════════════════════════════ */
+.home-wrap{max-width:1080px;margin:0 auto;padding:0 48px;}
+
+.home-banner{
+  display:grid;
+  grid-template-columns:1fr 300px;
+  border-radius:var(--r1);overflow:hidden;
+  box-shadow:var(--shadow);
+  margin:36px 0 32px;
+}
+
+/* Editorial navy panel */
+.home-banner-left{
+  background:var(--navy);
+  padding:52px 56px;
+  display:flex;flex-direction:column;justify-content:center;
+  position:relative;overflow:hidden;
+}
+/* Subtle geometry — layered arcs, no distracting shapes */
+.home-banner-left::before{
+  content:'';position:absolute;
+  top:-120px;right:-120px;
+  width:340px;height:340px;border-radius:50%;
+  border:1px solid rgba(255,255,255,0.04);pointer-events:none;
+}
+.home-banner-left::after{
+  content:'';position:absolute;
+  top:-80px;right:-80px;
+  width:220px;height:220px;border-radius:50%;
+  border:1px solid rgba(255,255,255,0.03);pointer-events:none;
+}
+
+/* Eyebrow: season tag — gold italic, restrained */
+.home-eyebrow{
+  display:inline-flex;align-items:center;gap:10px;
+  font-size:11px;
+  color:rgba(200,160,48,0.80);
+  font-style:italic;font-family:'DM Serif Display',serif;
+  letter-spacing:0.06em;margin-bottom:18px;
+}
+.home-eyebrow::before{
+  content:'';display:block;width:20px;height:1px;
+  background:rgba(200,160,48,0.50);flex-shrink:0;
+}
+
+.home-title{
+  font-family:'DM Serif Display',serif;font-weight:400;
+  font-size:clamp(26px,2.8vw,40px);line-height:1.12;
+  color:#FFFFFF;margin-bottom:14px;letter-spacing:-0.01em;
+}
+.home-title em{font-style:italic;color:rgba(226,190,72,0.86);}
+.home-sub{
+  font-size:13.5px;color:rgba(255,255,255,0.45);
+  line-height:1.75;max-width:340px;margin-bottom:30px;font-weight:400;
+}
+
+/* White stats panel */
+.home-banner-right{
+  background:var(--card-bg);
+  display:grid;grid-template-columns:1fr 1fr;
+  grid-template-rows:1fr 1fr;
+  border-left:1px solid var(--border2);
+}
+.stat-tile{
+  padding:28px 22px;
+  border-bottom:1px solid var(--border2);
+  border-right:1px solid var(--border2);
+  display:flex;flex-direction:column;justify-content:flex-end;
+  transition:background .15s;position:relative;overflow:hidden;
+}
+.stat-tile:nth-child(2),.stat-tile:nth-child(4){border-right:none;}
+.stat-tile:nth-child(3),.stat-tile:nth-child(4){border-bottom:none;}
+.stat-tile:hover{background:var(--bg2);}
+/* navy bottom bar reveals on hover */
+.stat-tile::after{
+  content:'';position:absolute;
+  bottom:0;left:0;right:0;height:2px;
+  background:var(--navy);
+  transform:scaleX(0);transform-origin:left;transition:transform .22s;
+}
+.stat-tile:hover::after{transform:scaleX(1);}
+/* No emoji icons — clean */
+.stat-tile-icon{display:none;}
+.stat-tile-num{
+  font-family:'DM Serif Display',serif;font-weight:400;
+  font-size:48px;line-height:1;color:var(--navy);
+  margin-bottom:5px;letter-spacing:-0.03em;
+}
+.stat-tile-lbl{font-size:11.5px;color:var(--text3);font-weight:500;letter-spacing:0.01em;}
+
+/* ═══════════════════════════════════════════════════════
+   SECTION WRAPPER
+═══════════════════════════════════════════════════════ */
+.section{max-width:1080px;margin:0 auto;padding:0 48px 60px;}
+.section-head{
+  display:flex;align-items:baseline;justify-content:space-between;
+  margin-bottom:16px;
+}
+.section-title{
+  font-family:'DM Serif Display',serif;font-weight:400;
+  font-size:20px;color:var(--text);letter-spacing:0.01em;
+}
+.section-divider{width:100%;height:1px;background:var(--border2);margin-bottom:18px;}
+
+/* Filter pills — modern, pill-shaped */
+.filters{display:flex;gap:5px;flex-wrap:wrap;}
+.filter-chip{
+  padding:4px 14px;border-radius:20px;
+  border:1px solid var(--border2);background:none;
+  font-size:11.5px;font-weight:500;color:var(--text3);
+  cursor:pointer;transition:all .15s;font-family:inherit;
+}
+.filter-chip:hover{border-color:var(--navy-border);color:var(--navy);background:var(--navy-bg);}
+.filter-chip.active{background:var(--navy);border-color:var(--navy);color:#fff;}
+
+/* ═══════════════════════════════════════════════════════
+   COMPANY LIST
+═══════════════════════════════════════════════════════ */
+.company-list{
+  display:flex;flex-direction:column;
+  border:1px solid var(--border2);border-radius:var(--r2);
+  overflow:hidden;box-shadow:var(--shadow2);
+}
+.company-row{
+  display:grid;
+  grid-template-columns:48px 1fr auto auto;
+  align-items:center;gap:18px;
+  padding:15px 22px;
+  background:var(--card-bg);
+  border-bottom:1px solid var(--border);
+  cursor:pointer;transition:background .12s;
+  position:relative;
+}
+.company-row:last-child{border-bottom:none;}
+.company-row:hover{background:var(--card-hover);}
+/* Slim gold left accent */
+.company-row::before{
+  content:'';position:absolute;
+  left:0;top:18%;bottom:18%;width:2px;
+  background:var(--gold);border-radius:0 2px 2px 0;
+  transform:scaleY(0);transition:transform .18s cubic-bezier(.4,0,.2,1);
+  transform-origin:center;
+}
+.company-row:hover::before{transform:scaleY(1);}
+
+/* Avatar */
+.co-avatar{
+  width:46px;height:46px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'DM Serif Display',serif;font-weight:400;
+  font-size:16px;color:#fff;flex-shrink:0;letter-spacing:0.02em;
+}
+.co-info{min-width:0;}
+.co-name{
+  font-weight:600;font-size:13.5px;color:var(--text);
+  margin-bottom:4px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+/* Pipeline bar — reg / int / sel proportions */
+.co-funnel{
+  display:flex;gap:1px;height:2px;border-radius:2px;
+  overflow:hidden;background:var(--bg4);
+  width:min(140px,100%);
+}
+.co-funnel-r{background:rgba(24,43,74,0.28);transition:width .45s;}
+.co-funnel-i{background:rgba(124,58,12,0.45);transition:width .45s;}
+.co-funnel-s{background:rgba(25,84,56,0.55);transition:width .45s;}
+
+.co-counts{display:flex;gap:22px;align-items:center;}
+.co-count{text-align:right;}
+.co-count-num{
+  font-family:'DM Serif Display',serif;font-weight:400;
+  font-size:22px;color:var(--navy);line-height:1;letter-spacing:-0.01em;
+}
+.co-count-lbl{font-size:10px;color:var(--text4);margin-top:2px;}
+
+/* Status tags — document annotation style */
+.s-pill{
+  font-size:10.5px;font-weight:500;padding:3px 10px;
+  border-radius:var(--r4);white-space:nowrap;
+}
+.s-completed{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);}
+.s-results_awaited{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border);}
+.s-registered_sent{background:var(--navy-bg);color:var(--navy);border:1px solid var(--navy-border);}
+.s-upcoming{background:var(--bg3);color:var(--text3);border:1px solid var(--border2);}
+/* On dark hero */
+.s-pill-inv{
+  font-size:10.5px;font-weight:500;padding:3px 10px;border-radius:var(--r4);
+  white-space:nowrap;
+  background:rgba(255,255,255,0.10);color:rgba(255,255,255,0.78);
+  border:1px solid rgba(255,255,255,0.18);
+}
+
+/* ═══════════════════════════════════════════════════════
+   DASHBOARD SUMMARY STRIP
+═══════════════════════════════════════════════════════ */
+.dash-summary{
+  display:flex;border:1px solid var(--border2);
+  border-radius:var(--r2);overflow:hidden;
+  margin-bottom:22px;box-shadow:var(--shadow2);
+}
+.dash-sum-tile{
+  flex:1;background:var(--card-bg);border-right:1px solid var(--border2);
+  padding:16px 22px;
+}
+.dash-sum-tile:last-child{border-right:none;}
+.dash-sum-num{
+  font-family:'DM Serif Display',serif;font-weight:400;
+  font-size:32px;color:var(--navy);line-height:1;letter-spacing:-0.02em;
+}
+.dash-sum-lbl{font-size:11px;color:var(--text3);margin-top:4px;font-weight:500;}
+
+.empty-state{text-align:center;padding:64px 24px;color:var(--text3);}
+.empty-icon{font-size:28px;margin-bottom:14px;opacity:.5;}
+.empty-title{font-family:'DM Serif Display',serif;font-size:19px;color:var(--text2);margin-bottom:6px;}
+.empty-sub{font-size:13px;line-height:1.65;}
+
+/* ═══════════════════════════════════════════════════════
+   DETAIL VIEW
+═══════════════════════════════════════════════════════ */
+.detail-wrap{max-width:1080px;margin:0 auto;padding:32px 48px 60px;}
+
+/* Company hero — full-width editorial header */
+.d-hero{
+  background:var(--navy);
+  border-radius:var(--r1);
+  padding:32px 40px;margin-bottom:16px;
+  display:flex;gap:24px;align-items:flex-start;
+  position:relative;overflow:hidden;
+}
+.d-hero::before{
+  content:'';position:absolute;
+  top:-120px;right:-80px;
+  width:320px;height:320px;border-radius:50%;
+  border:1px solid rgba(255,255,255,0.04);pointer-events:none;
+}
+.d-hero::after{
+  content:'';position:absolute;
+  bottom:-80px;right:80px;
+  width:200px;height:200px;border-radius:50%;
+  border:1px solid rgba(255,255,255,0.03);pointer-events:none;
+}
+.d-avatar{
+  width:58px;height:58px;border-radius:8px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'DM Serif Display',serif;font-weight:400;
+  font-size:20px;color:#fff;letter-spacing:0.02em;
+  background:rgba(255,255,255,0.10);
+  border:1px solid rgba(255,255,255,0.16);
+}
+.d-name{
+  font-family:'DM Serif Display',serif;font-weight:400;
+  font-size:28px;color:#fff;
+  margin-bottom:10px;line-height:1.1;letter-spacing:-0.01em;
+}
+.d-badges{display:flex;gap:7px;flex-wrap:wrap;align-items:center;}
+.mode-pill{
+  font-size:10.5px;font-weight:500;padding:3px 9px;border-radius:var(--r4);
+  background:rgba(255,255,255,0.08);
+  color:rgba(255,255,255,0.65);border:1px solid rgba(255,255,255,0.15);
+}
+.d-link{
+  font-size:11.5px;color:rgba(255,255,255,0.70);
+  text-decoration:none;font-weight:500;
+  padding:3px 9px;border:1px solid rgba(255,255,255,0.22);
+  border-radius:var(--r4);transition:all .15s;
+}
+.d-link:hover{background:rgba(255,255,255,0.12);color:#fff;}
+.live-badge{
+  font-size:11px;font-weight:500;
+  color:rgba(255,255,255,0.50);
+  padding:3px 9px;border-radius:var(--r4);
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.12);
+  cursor:pointer;display:inline-flex;align-items:center;gap:5px;
+  transition:all .15s;
+}
+.live-badge:hover{color:rgba(255,255,255,0.82);border-color:rgba(255,255,255,0.26);}
+
+/* Stat number cards */
+.d-stats{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
+  margin-bottom:14px;border:1px solid var(--border2);
+  border-radius:var(--r2);overflow:hidden;box-shadow:var(--shadow2);
+}
+.d-stat{
+  background:var(--card-bg);border-right:1px solid var(--border2);
+  padding:22px 26px;cursor:pointer;transition:background .12s;
+  position:relative;
+}
+.d-stat:last-child{border-right:none;}
+.d-stat:hover{background:var(--bg2);}
+/* Underline animation on hover */
+.d-stat::after{
+  content:'';position:absolute;
+  bottom:0;left:26px;right:26px;height:2px;
+  background:var(--navy);
+  transform:scaleX(0);transform-origin:left;transition:transform .2s;
+}
+.d-stat:hover::after{transform:scaleX(1);}
+body.admin-mode .d-stat{background:var(--admin-bg);}
+.d-stat-num{
+  font-family:'DM Serif Display',serif;font-weight:400;
+  font-size:46px;color:var(--navy);line-height:1;
+  margin-bottom:5px;letter-spacing:-0.03em;
+}
+.d-stat-lbl{font-size:11.5px;color:var(--text3);font-weight:500;}
+
+/* Info cards — accent left border per card */
+.d-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(238px,1fr));gap:12px;margin-bottom:14px;}
+.d-card{
+  background:var(--card-bg);
+  border:1px solid var(--border2);
+  border-left:3px solid transparent;
+  border-radius:var(--r2);padding:20px 22px;
+  position:relative;box-shadow:var(--shadow2);
+}
+.d-card:nth-child(1){border-left-color:var(--navy);}
+.d-card:nth-child(2){border-left-color:var(--gold);}
+.d-card:nth-child(3){border-left-color:var(--green);}
+.d-card-lbl{
+  font-size:11px;font-weight:600;color:var(--text3);
+  padding-bottom:10px;margin-bottom:12px;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:6px;letter-spacing:0.03em;
+}
+.d-field{display:flex;flex-direction:column;gap:2px;margin-bottom:10px;}
+.d-field:last-child{margin-bottom:0;}
+.d-field-k{font-size:10px;color:var(--text4);font-weight:500;letter-spacing:0.02em;}
+.d-field-v{font-size:13.5px;color:var(--text2);font-weight:500;line-height:1.4;}
+.d-field-v.empty{color:var(--text4);font-style:italic;}
+.edit-chip{
+  font-size:10px;background:var(--admin-bg);color:var(--admin);
+  border:1px solid var(--admin-border);border-radius:var(--r4);
+  padding:2px 8px;cursor:pointer;margin-left:auto;font-weight:600;transition:all .15s;
+}
+.edit-chip:hover{background:var(--admin);color:#fff;}
+.roles-wrap{display:flex;flex-wrap:wrap;gap:6px;}
+.role-chip{
+  font-size:12px;font-weight:500;padding:3px 11px;
+  border-radius:var(--r4);background:var(--navy-bg);
+  color:var(--navy);border:1px solid var(--navy-border);
+}
+
+/* ═══════════════════════════════════════════════════════
+   STUDENT TABLES
+═══════════════════════════════════════════════════════ */
+.student-section{
+  background:var(--card-bg);border:1px solid var(--border2);
+  border-radius:var(--r2);margin-bottom:12px;overflow:hidden;box-shadow:var(--shadow2);
+}
+.student-section-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 22px;border-bottom:1px solid var(--border2);
+  background:var(--bg2);
+}
+.student-section-title{font-size:13px;font-weight:600;color:var(--text2);}
+.student-count{
+  font-family:'DM Serif Display',serif;font-weight:400;
+  font-size:20px;color:var(--navy);line-height:1;
+}
+.student-table{width:100%;border-collapse:collapse;font-size:13px;}
+/* Table headers: sentence-case, NOT all-caps */
+.student-table th{
+  background:var(--bg2);
+  padding:9px 20px;text-align:left;
+  font-size:11px;font-weight:600;color:var(--text3);
+  border-bottom:1px solid var(--border2);
+  letter-spacing:0.01em;
+}
+.student-table td{
+  padding:10px 20px;border-bottom:1px solid var(--border);color:var(--text2);
+}
+.student-table tr:last-child td{border-bottom:none;}
+/* Subtle zebra — academic register feel */
+.student-table tbody tr:nth-child(even) td{background:rgba(18,36,72,0.018);}
+.student-table tbody tr:hover td{background:var(--navy-bg);}
+.no-data{
+  text-align:center;padding:28px;
+  color:var(--text4);font-size:13px;font-style:italic;
+}
+
+/* ═══════════════════════════════════════════════════════
+   MODAL
+═══════════════════════════════════════════════════════ */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(8,14,28,0.50);
+  backdrop-filter:blur(5px);z-index:500;
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  opacity:0;pointer-events:none;transition:opacity .2s;
+}
+.modal-overlay.open{opacity:1;pointer-events:auto;}
+.modal{
+  background:var(--modal-bg);border:1px solid var(--border2);
+  border-top:3px solid var(--navy);border-radius:var(--r2);
+  width:100%;max-width:530px;max-height:88vh;overflow-y:auto;
+  transform:translateY(10px);transition:transform .22s,opacity .22s;
+  box-shadow:var(--shadow3);opacity:0;
+}
+body.admin-mode .modal{border-top-color:var(--admin);}
+.modal-overlay.open .modal{transform:translateY(0);opacity:1;}
+.modal-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 22px;border-bottom:1px solid var(--border2);
+}
+.modal-title{font-family:'DM Serif Display',serif;font-weight:400;font-size:18px;color:var(--text);}
+.modal-close{
+  background:none;border:none;font-size:20px;cursor:pointer;
+  color:var(--text3);line-height:1;padding:2px 6px;transition:color .15s;
+}
+.modal-close:hover{color:var(--text);}
+.modal-body{padding:20px 22px;}
+.modal-footer{padding:12px 22px;border-top:1px solid var(--border2);display:flex;justify-content:flex-end;gap:8px;}
+
+/* Forms */
+.form-row{margin-bottom:14px;}
+.form-label{display:block;font-size:11.5px;font-weight:600;color:var(--text3);margin-bottom:5px;letter-spacing:0.01em;}
+.form-input,.form-textarea,.form-select{
+  width:100%;padding:8px 12px;border:1px solid var(--border2);
+  border-radius:var(--r3);background:var(--bg2);color:var(--text);
+  font-size:13.5px;font-family:inherit;transition:border-color .15s,box-shadow .15s;
+}
+.form-input:focus,.form-textarea:focus,.form-select:focus{
+  outline:none;border-color:var(--navy);box-shadow:0 0 0 3px var(--navy-bg);
+}
+.form-textarea{resize:vertical;min-height:80px;font-family:'JetBrains Mono',monospace;font-size:12px;}
+.form-hint{font-size:11.5px;color:var(--text4);margin-top:4px;}
+
+/* PIN */
+.pin-row{display:flex;gap:10px;justify-content:center;margin:20px 0;}
+.pin-cell{
+  width:52px;height:56px;border:1px solid var(--border2);border-radius:var(--r3);
+  font-family:'DM Serif Display',serif;font-size:24px;
+  text-align:center;background:var(--bg3);color:var(--text);
+  transition:all .15s;-webkit-text-security:disc;
+}
+.pin-cell:focus{outline:none;border-color:var(--navy);box-shadow:0 0 0 3px var(--navy-bg);}
+.pin-error{text-align:center;font-size:12.5px;color:var(--red);min-height:18px;}
+
+/* Paste zone */
+.paste-zone{background:var(--admin-bg);border:1px dashed var(--admin-border);border-radius:var(--r3);padding:14px;margin-bottom:16px;}
+.paste-zone-title{font-size:11.5px;font-weight:600;color:var(--admin);margin-bottom:6px;}
+.paste-textarea{
+  width:100%;min-height:68px;padding:8px;
+  border:1px solid var(--admin-border);border-radius:var(--r3);
+  background:var(--bg2);color:var(--text);
+  font-family:'JetBrains Mono',monospace;font-size:12px;resize:vertical;
+}
+.paste-textarea:focus{outline:none;border-color:var(--admin);}
+
+/* Toast notifications */
+#toast-root{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;}
+.toast{
+  display:flex;align-items:center;gap:10px;padding:10px 16px;
+  border-radius:var(--r3);background:var(--card-bg);border:1px solid var(--border2);
+  box-shadow:var(--shadow3);font-size:13px;font-weight:500;color:var(--text);
+  animation:slideUp .2s ease;min-width:220px;
+}
+.toast.success{border-left:3px solid var(--green);}
+.toast.error{border-left:3px solid var(--red);}
+.toast.info{border-left:3px solid var(--navy);}
+
+/* ═══════════════════════════════════════════════════════
+   ANIMATIONS
+═══════════════════════════════════════════════════════ */
+@keyframes blink{0%,80%,100%{opacity:0;}40%{opacity:1;}}
+@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.04);}}
+@keyframes slideUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ═══════════════════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════════════════ */
+@media(max-width:900px){
+  .home-banner{grid-template-columns:1fr;}
+  .home-banner-left{padding:36px 32px;}
+  .home-banner-right{grid-template-columns:1fr 1fr;border-left:none;border-top:1px solid var(--border2);}
+  .stat-tile:nth-child(1),.stat-tile:nth-child(2){border-bottom:1px solid var(--border2);}
+  .stat-tile:nth-child(2){border-right:none;}
+  .stat-tile:nth-child(3){border-right:1px solid var(--border2);}
+}
+@media(max-width:640px){
+  .navbar,.admin-bar,.refresh-bar{padding-left:20px;padding-right:20px;}
+  .home-wrap,.section,.detail-wrap{padding-left:20px;padding-right:20px;}
+  .company-row{grid-template-columns:42px 1fr auto;}
+  .co-counts{display:none;}
+  .d-stats{grid-template-columns:repeat(2,1fr);}
+  .d-cards{grid-template-columns:1fr;}
+  .dash-summary{display:grid;grid-template-columns:1fr 1fr;}
+  .dash-sum-tile:nth-child(1),.dash-sum-tile:nth-child(2){border-bottom:1px solid var(--border2);}
+  .dash-sum-tile:nth-child(2),.dash-sum-tile:nth-child(4){border-right:none;}
+}
+</style>
+</head>
+<body>
+
+<div id="toast-root"></div>
+
+<!-- LOADING SCREEN -->
+<div id="loading-screen">
+  <div class="loader-logo">V</div>
+  <div>
+    <div class="loader-text">Loading Placement Dashboard</div>
+    <div class="loader-sub" id="loader-sub">Starting up<span class="loader-dots"><span>.</span><span>.</span><span>.</span></span></div>
+  </div>
+</div>
+
+<!-- ERROR SCREEN -->
+<div id="error-screen">
+  <div class="error-icon">⚠️</div>
+  <div class="error-title">Could not load config</div>
+  <div class="error-msg" id="error-msg">Unable to read the Placement Dashboard Config sheet.</div>
+  <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:16px 20px;text-align:left;max-width:480px;font-size:12px;line-height:1.8;color:var(--text2);margin-top:4px;">
+    <strong>Checklist:</strong><br>
+    1. Config Sheet is shared as <strong>"Anyone with the link → Viewer"</strong><br>
+    2. Column B contains the <strong>raw Sheet ID</strong> (not a hyperlink) — e.g. <code style="font-family:monospace;background:var(--bg4);padding:1px 5px;border-radius:3px">1LpZNHaX…</code><br>
+    3. Tab names in your sheet must be exactly <strong>CONFIG_TAB</strong> and <strong>ADMIN_MODE</strong><br>
+    4. All company sheets are also shared publicly
+  </div>
+  <button class="btn btn-primary" style="margin-top:12px" onclick="init()">↺ Retry</button>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <nav id="navbar"></nav>
+  <div id="admin-bar"></div>
+  <div id="refresh-bar" class="refresh-bar"><span class="spin">↻</span> Refreshing student data from sheets…</div>
+  <main id="main"></main>
+</div>
+
+<div id="modal-overlay" class="modal-overlay">
+  <div class="modal" id="modal-box">
+    <div class="modal-head">
+      <span class="modal-title" id="modal-title">—</span>
+      <button class="modal-close" id="modal-close">×</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-footer" id="modal-footer"></div>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════
+   CONFIG
+════════════════════════════════════════════════════ */
+const CONFIG_SHEET_ID = '1Mb9jrzZMSta5NYs28i3STS2tYNqhMtabj3wktvHiYmw';
+const CONFIG_TAB      = 'CONFIG_TAB';   // Main config tab — tab renamed by user
+const ADMIN_DATA_TAB  = 'ADMIN_MODE';   // Admin overrides tab — tab renamed by user
+const ADMIN_PIN       = '1234';
+const CACHE_TTL       = 60000;          // 60s per company
+
+/* ════════════════════════════════════════════════════
+   STATE
+════════════════════════════════════════════════════ */
+let COMPANIES   = [];   // Built from config sheet
+let ADMIN_DATA  = {};   // Keyed by company name, from Admin Data tab
+let view        = 'home';
+let cId         = null;
+let adminMode   = false;
+let filters     = { status: 'all' };
+
+/* ════════════════════════════════════════════════════
+   HELPERS
+════════════════════════════════════════════════════ */
+function xe(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function ini(n){ return (n||'?').split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase() || '?'; }
+const GRAD = [['#1B3055','#8A6C10'],['#1A5E3C','#1B3055'],['#8A6C10','#7A1A28'],['#1C5A72','#1A5E3C'],['#3C2060','#1B3055'],['#1A5E3C','#1C5A72'],['#7A1A28','#8A6C10'],['#1B3055','#3C2060']];
+function avgr(i){ const p=GRAD[i%GRAD.length]; return `linear-gradient(135deg,${p[0]},${p[1]})`; }
+function fmtDate(d){ if(!d)return'—'; try{return new Date(d).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});}catch{return d;} }
+
+const STATUS_MAP = {
+  completed:        { l:'Completed',        cls:'s-completed' },
+  results_awaited:  { l:'Results Awaited',  cls:'s-results_awaited' },
+  registered_sent:  { l:'Reg. Sent',        cls:'s-registered_sent' },
+  upcoming:         { l:'Upcoming',         cls:'s-upcoming' }
+};
+function statusOf(c){
+  if(c.studentsSelected.length>0)  return 'completed';
+  if(c.studentsInterviewed.length>0) return 'results_awaited';
+  if(c.studentsRegistered.length>0)  return 'registered_sent';
+  return 'upcoming';
+}
+
+/* ════════════════════════════════════════════════════
+   TOAST
+════════════════════════════════════════════════════ */
+function toast(msg, type='info', icon){
+  const icons={info:'ℹ️',success:'✅',error:'❌'};
+  const r=document.getElementById('toast-root'),t=document.createElement('div');
+  t.className=`toast ${type}`;
+  t.innerHTML=`<span>${icon||icons[type]}</span><span>${msg}</span>`;
+  r.appendChild(t);
+  setTimeout(()=>{t.style.cssText='opacity:0;transform:translateY(8px);transition:all .3s';setTimeout(()=>t.remove(),300);},2800);
+}
+
+/* ════════════════════════════════════════════════════
+   MODAL
+════════════════════════════════════════════════════ */
+function openModal(title, bodyHtml, footerHtml=''){
+  document.getElementById('modal-title').textContent=title;
+  document.getElementById('modal-body').innerHTML=bodyHtml;
+  document.getElementById('modal-footer').innerHTML=footerHtml;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function closeModal(){ document.getElementById('modal-overlay').classList.remove('open'); }
+document.getElementById('modal-close').onclick=closeModal;
+document.getElementById('modal-overlay').onclick=e=>{ if(e.target===document.getElementById('modal-overlay'))closeModal(); };
+document.addEventListener('keydown',e=>{ if(e.key==='Escape')closeModal(); });
+
+/* ════════════════════════════════════════════════════
+   FETCH helpers
+════════════════════════════════════════════════════ */
+
+// CSV fetch — used for all student data tabs
+// Wraps fetch with a timeout so a hanging request surfaces as an error
+// instead of spinning the loading screen forever.
+async function fetchWithTimeout(url, ms=8000){
+  const ctrl = new AbortController();
+  const tid  = setTimeout(() => ctrl.abort(), ms);
+  try {
+    const res = await fetch(url, { signal: ctrl.signal });
+    clearTimeout(tid);
+    return res;
+  } catch(e) {
+    clearTimeout(tid);
+    if(e.name === 'AbortError') throw new Error(`Request timed out after ${ms/1000}s — check your internet connection and that the sheet is public.`);
+    throw e;
+  }
+}
+
+async function fetchSheetCSV(sheetId, tabName){
+  const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(tabName)}`;
+  const res = await fetchWithTimeout(url);
+  if(!res.ok) throw new Error(`HTTP ${res.status}`);
+  const text = await res.text();
+  if(text.trimStart().startsWith('<'))
+    throw new Error(`Sheet not public or ID invalid (tab: "${tabName}")`);
+  return text;
+}
+
+// Fetch config sheet as gviz JSON (for =HYPERLINK() formula cells: cell.v = the URL)
+async function fetchConfigJSON(sheetId, tabName){
+  const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(tabName)}`;
+  const res = await fetchWithTimeout(url);
+  if(!res.ok) throw new Error(`HTTP ${res.status}`);
+  const text = await res.text();
+  if(text.trimStart().startsWith('<'))
+    throw new Error('Config sheet is not shared publicly. Share it as "Anyone with the link → Viewer".');
+  const jsonStr = text.replace(/^[^(]*\(/, '').replace(/\);\s*$/, '');
+  return JSON.parse(jsonStr);
+}
+
+// Fetch config sheet as HTML and extract hyperlink hrefs from column B.
+// This handles Google Sheets "Insert Link" cells (green + icon) which gviz JSON
+// does NOT expose the URL for — only the HTML export preserves the <a href>.
+async function fetchConfigHTMLLinks(sheetId){
+  const url = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=html`;
+  const res = await fetchWithTimeout(url, 10000);
+  if(!res.ok) return {};
+  const html = await res.text();
+  if(html.trimStart().startsWith('{')) return {}; // redirect JSON, skip
+  // Parse the HTML table rows; extract row index → href from column B anchor tags
+  const links = {};
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+  const rows = doc.querySelectorAll('table tr');
+  rows.forEach((tr, ri) => {
+    if(ri === 0) return; // skip header
+    const tds = tr.querySelectorAll('td');
+    if(tds.length < 2) return;
+    const a = tds[1].querySelector('a[href]');
+    if(a){
+      const href = a.getAttribute('href');
+      const sid = extractSheetId(href);
+      if(sid) links[ri] = sid; // ri = 1-based data row index
+    }
+  });
+  return links;
+}
+
+/* ════════════════════════════════════════════════════
+   PARSE CSV  (handles quoted fields + commas)
+════════════════════════════════════════════════════ */
+function parseCSV(csv){
+  const rows=[];
+  let cur='',inQ=false,row=[];
+  for(let i=0;i<csv.length;i++){
+    const ch=csv[i];
+    if(ch==='"'){if(inQ&&csv[i+1]==='"'){cur+='"';i++;}else inQ=!inQ;}
+    else if(ch===','&&!inQ){row.push(cur.trim());cur='';}
+    else if((ch==='\n'||ch==='\r')&&!inQ){if(ch==='\r'&&csv[i+1]==='\n')i++;row.push(cur.trim());rows.push(row);row=[];cur='';}
+    else cur+=ch;
+  }
+  if(cur||row.length) {row.push(cur.trim());rows.push(row);}
+  return rows.filter(r=>r.some(c=>c));
+}
+
+/* ════════════════════════════════════════════════════
+   PARSE CONFIG SHEET from gviz JSON
+   Columns: A=Company  B=Sheet ID (hyperlink OK)
+            C=Reg Tab  D=Int Tab  E=Sel Tab
+════════════════════════════════════════════════════ */
+function extractSheetId(raw){
+  if(!raw) return '';
+  raw = String(raw).trim();
+  // Decode URI encoding
+  try { raw = decodeURIComponent(raw); } catch(e) {}
+  // Google redirect URL: https://www.google.com/url?q=https://docs.google.com/...
+  const redir = raw.match(/[?&]q=([^&]+)/);
+  if(redir) return extractSheetId(decodeURIComponent(redir[1]));
+  // Standard spreadsheet URL → extract /d/{ID}
+  const m = raw.match(/\/d\/([a-zA-Z0-9_-]{20,})/);
+  if(m) return m[1];
+  // Plain ID (44-char alphanumeric string)
+  if(/^[a-zA-Z0-9_-]{20,}$/.test(raw)) return raw;
+  return '';
+}
+
+// htmlLinks = { rowIndex(1-based): sheetId } from fetchConfigHTMLLinks fallback
+function parseConfigFromJSON(gvizJson, htmlLinks={}){
+  const table = gvizJson.table;
+  if(!table || !table.rows) return [];
+
+  const cols = (table.cols||[]).map(c=>(c.label||'').toLowerCase().trim());
+  const ci = (...ks) => { for(const k of ks){ const i=cols.findIndex(c=>c.includes(k)); if(i!==-1)return i; } return -1; };
+
+  const iComp = ci('company')                     !== -1 ? ci('company')                     : 0;
+  const iSheet= ci('sheet')                       !== -1 ? ci('sheet')                       : 1;
+  const iReg  = ci('reg')                         !== -1 ? ci('reg')                         : 2;
+  const iInt  = ci('int','interview','shortlist')  !== -1 ? ci('int','interview','shortlist')  : 3;
+  const iSel  = ci('sel','select')                !== -1 ? ci('sel','select')                : 4;
+
+  const companies = [];
+  table.rows.forEach((row, idx) => {
+    const cells = row.c || [];
+    const val = i => (cells[i] && cells[i].v != null) ? String(cells[i].v).trim() : '';
+    const fmt = i => (cells[i] && cells[i].f)         ? String(cells[i].f).trim() : '';
+
+    const name = val(iComp);
+    if(!name || name.toLowerCase()==='company') return;
+
+    // Sheet ID resolution priority:
+    // 1. gviz JSON cell.v  — works for =HYPERLINK() formula cells (v = the URL)
+    // 2. gviz JSON cell.f  — formatted value fallback
+    // 3. htmlLinks map     — works for Insert Link cells (green + icon) from HTML export
+    const rowNum = idx + 1; // 1-based to match HTML table rows
+    let sid = extractSheetId(val(iSheet))
+           || extractSheetId(fmt(iSheet))
+           || htmlLinks[rowNum]
+           || '';
+    if(!sid) return; // still no ID — company hidden until column B is set
+
+    const tabReg = val(iReg) || 'Registered Students';
+    let   tabInt = val(iInt) || null;
+    let   tabSel = val(iSel) || null;
+    // If Int/Sel tab names are the same as Reg (e.g. not yet filled in config),
+    // treat them as null so we don't silently return Registered data for all stages.
+    if(tabInt && tabInt.toLowerCase()===tabReg.toLowerCase()) tabInt=null;
+    if(tabSel && tabSel.toLowerCase()===tabReg.toLowerCase()) tabSel=null;
+    if(tabInt && tabSel && tabInt.toLowerCase()===tabSel.toLowerCase()) tabSel=null;
+
+    companies.push({
+      id: idx + 1, name, sheetId: sid,
+      tabReg, tabInt, tabSel,
+      website:'', interviewMode:'', registrationDate:'', driveDate:'',
+      poc:{name:'',designation:'',email:'',phone:''},
+      roles:[], jds:{}, notes:'',
+      studentsRegistered:[], studentsInterviewed:[], studentsSelected:[],
+      _loading:false, _lastFetched:0
+    });
+  });
+  return companies;
+}
+
+/* ════════════════════════════════════════════════════
+   PARSE ADMIN DATA TAB
+   Expected columns: Company | Website | Interview Mode |
+     Reg Date | Drive Date | POC Name | POC Designation |
+     POC Email | POC Phone | Roles | Notes
+════════════════════════════════════════════════════ */
+function parseAdminData(csv){
+  const rows = parseCSV(csv);
+  if(rows.length < 2) return {};
+  const hdr = rows[0].map(h=>h.toLowerCase().replace(/[^a-z0-9]/g,''));
+  const col = k => hdr.findIndex(h=>h.includes(k));
+  const iComp     = col('company');
+  const iWeb      = col('website');
+  const iMode     = col('interview');
+  const iRegDate  = col('reg');
+  const iDriveDate= col('drive');
+  const iPocName  = col('pocname') !== -1 ? col('pocname') : col('name');
+  const iPocDesig = col('desig');
+  const iPocEmail = col('email');
+  const iPocPhone = col('phone');
+  const iRoles    = col('role');
+  const iNotes    = col('note');
+
+  const data = {};
+  rows.slice(1).forEach(r => {
+    const name = (r[iComp]||'').trim();
+    if(!name) return;
+    const roles = (r[iRoles]||'').split(',').map(s=>s.trim()).filter(Boolean);
+    data[name.toLowerCase()] = {
+      website:         r[iWeb]||'',
+      interviewMode:   r[iMode]||'',
+      registrationDate:r[iRegDate]||'',
+      driveDate:       r[iDriveDate]||'',
+      poc: {
+        name:        r[iPocName]||'',
+        designation: r[iPocDesig]||'',
+        email:       r[iPocEmail]||'',
+        phone:       r[iPocPhone]||''
+      },
+      roles,
+      jds: Object.fromEntries(roles.map(rol=>[rol,{text:'',pdf:null}])),
+      notes: r[iNotes]||''
+    };
+  });
+  return data;
+}
+
+/* ════════════════════════════════════════════════════
+   PARSE STUDENT TAB  (flexible column detection)
+════════════════════════════════════════════════════ */
+function parseStudentTab(csv){
+  const rows = parseCSV(csv);
+  if(rows.length < 2) return [];
+  const hdr = rows[0].map(h=>(h||'').toLowerCase());
+  const detect = ks => hdr.findIndex(h=>ks.some(k=>h.includes(k)));
+  const iName  = detect(['name']);
+  const iEmail = detect(['email','mail']);
+  const iPhone = detect(['phone','mobile','contact','ph']);
+  const iClass = detect(['class','section','branch','course','dept']);
+  return rows.slice(1).map((r,i) => ({
+    id: `#${String(i+1).padStart(3,'0')}`,
+    name:  (iName  !== -1 ? r[iName]  : '') || '',
+    email: (iEmail !== -1 ? r[iEmail] : '') || '',
+    phone: (iPhone !== -1 ? r[iPhone] : '') || '',
+    class: (iClass !== -1 ? r[iClass] : '') || '',
+  })).filter(s => s.name || s.email);
+}
+
+// Parse student data from gviz JSON table (used by loadStudents)
+function parseStudentFromJSON(json){
+  const table = json.table;
+  if(!table || !table.rows || !table.cols) return [];
+
+  const cols = table.cols.map(c => (c.label||'').toLowerCase());
+  const detect = ks => cols.findIndex(h => ks.some(k => h.includes(k)));
+
+  const iName  = detect(['name']);
+  const iEmail = detect(['email','mail']);
+  const iPhone = detect(['phone','mobile','contact','ph']);
+  const iClass = detect(['class','section','branch','course','dept']);
+
+  const val = (row, i) => {
+    if(i === -1 || !row.c || !row.c[i]) return '';
+    const c = row.c[i];
+    return String(c.v != null ? c.v : (c.f || '')).trim();
+  };
+
+  return table.rows.map((row, i) => ({
+    id:    `#${String(i+1).padStart(3,'0')}`,
+    name:  val(row, iName),
+    email: val(row, iEmail),
+    phone: val(row, iPhone),
+    class: val(row, iClass),
+  })).filter(s => s.name || s.email);
+}
+
+/* ════════════════════════════════════════════════════
+   LOAD LIVE STUDENTS for one company
+════════════════════════════════════════════════════ */
+async function loadStudents(company, force=false){
+  if(!force && company._lastFetched && Date.now()-company._lastFetched < CACHE_TTL) return;
+  if(company._loading) return;
+  company._loading = true;
+
+  const fetchTab = async (tabName) => {
+    if(!tabName) return [];
+    try {
+      // Use JSON endpoint so we get status:"error" when tab doesn't exist.
+      // The CSV endpoint silently returns the first sheet's data for missing tabs.
+      const url = `https://docs.google.com/spreadsheets/d/${company.sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(tabName)}`;
+      const res = await fetchWithTimeout(url);
+      if(!res.ok) throw new Error(`HTTP ${res.status}`);
+      const text = await res.text();
+      if(text.trimStart().startsWith('<')) throw new Error('Sheet not public');
+      const json = JSON.parse(text.replace(/^[^(]*\(/, '').replace(/\);?\s*$/, ''));
+      // status:"error" means tab name not found — return empty, not fallback data
+      if(json.status === 'error') {
+        console.warn(`[${company.name}] tab "${tabName}" not found — returning 0`);
+        return [];
+      }
+      return parseStudentFromJSON(json);
+    } catch(e) {
+      console.warn(`[${company.name}] tab "${tabName}" failed:`, e.message);
+      return [];
+    }
+  };
+
+  // Deduplicate: if multiple tabs point to the same name, fetch once
+  const tabs = [
+    [company.tabReg, 'studentsRegistered'],
+    [company.tabInt, 'studentsInterviewed'],
+    [company.tabSel, 'studentsSelected']
+  ];
+  const fetched = {};
+  await Promise.all(tabs.map(async ([tab, key]) => {
+    if(!tab) { company[key]=[]; return; }
+    if(fetched[tab] !== undefined){ company[key]=fetched[tab]; return; }
+    const data = await fetchTab(tab);
+    fetched[tab] = data;
+    company[key] = data;
+  }));
+
+  company._loading = false;
+  company._lastFetched = Date.now();
+}
+
+/* ════════════════════════════════════════════════════
+   INIT — load config sheet, then companies
+════════════════════════════════════════════════════ */
+async function init(){
+  console.log('[Dashboard] init() started — CONFIG_SHEET_ID:', CONFIG_SHEET_ID);
+  document.getElementById('loading-screen').classList.remove('hide');
+  document.getElementById('error-screen').classList.remove('show');
+  document.getElementById('app').classList.remove('ready');
+
+  // Show a countdown so the user knows the page is working, not frozen
+  let _countdown = 8;
+  const _cdEl = document.createElement('div');
+  _cdEl.id = 'load-countdown';
+  _cdEl.style.cssText = 'font-size:11px;color:var(--text4);margin-top:8px;';
+  _cdEl.textContent = '';
+  document.querySelector('.loader-logo').parentNode.appendChild(_cdEl);
+  const _cdTimer = setInterval(() => {
+    _countdown--;
+    if(_countdown > 0) _cdEl.textContent = `Timeout in ${_countdown}s if unreachable`;
+    else clearInterval(_cdTimer);
+  }, 1000);
+  const _clearCountdown = () => { clearInterval(_cdTimer); _cdEl.remove(); };
+
+  const setLoadSub = msg => {
+    const el = document.getElementById('loader-sub');
+    if(el) el.innerHTML = msg;
+  };
+  setLoadSub('Connecting to Google Sheets<span class="loader-dots"><span>.</span><span>.</span><span>.</span></span>');
+
+  try {
+    // 1. Fetch config as JSON + HTML simultaneously for maximum hyperlink coverage
+    //    JSON gives us =HYPERLINK() formula URLs; HTML gives us Insert-Link URLs
+    const [configJSON, htmlLinks] = await Promise.all([
+      fetchConfigJSON(CONFIG_SHEET_ID, CONFIG_TAB),
+      fetchConfigHTMLLinks(CONFIG_SHEET_ID).catch(()=>({}))
+    ]);
+    setLoadSub('Parsing company list<span class="loader-dots"><span>.</span><span>.</span><span>.</span></span>');
+    COMPANIES = parseConfigFromJSON(configJSON, htmlLinks);
+
+    if(!COMPANIES.length){
+      throw new Error('No companies with valid Sheet IDs found. Make sure Column B in your config sheet contains the Google Sheet URL (as a hyperlink or plain URL), and the config sheet is shared as "Anyone with the link → Viewer".');
+    }
+
+    // 2. Fetch Admin Data tab (non-fatal)
+    setLoadSub('Loading admin data<span class="loader-dots"><span>.</span><span>.</span><span>.</span></span>');
+    try {
+      const adminCSV = await fetchSheetCSV(CONFIG_SHEET_ID, ADMIN_DATA_TAB);
+      ADMIN_DATA = parseAdminData(adminCSV);
+    } catch(e){
+      console.warn('Admin Data tab not found or empty:', e.message);
+      ADMIN_DATA = {};
+    }
+
+    // 3. Merge admin data into companies
+    mergeAdminData();
+
+    // 4. Show app
+    _clearCountdown();
+    document.getElementById('loading-screen').classList.add('hide');
+    document.getElementById('app').classList.add('ready');
+    go('home');
+
+    // 5. Fetch all student data in background
+    loadAllStudents();
+
+  } catch(e){
+    _clearCountdown();
+    console.error('Init failed:', e);
+    document.getElementById('loading-screen').classList.add('hide');
+    document.getElementById('error-screen').classList.add('show');
+    const raw = e.message || 'Unknown error';
+    const isTimeout = raw.includes('timed out');
+    const isNetwork = raw.includes('Failed to fetch') || raw.includes('NetworkError') || raw.includes('fetch');
+    let friendly = raw;
+    if(isTimeout) friendly = 'Request timed out. Check your internet connection and verify the config sheet is shared as "Anyone with the link → Viewer".';
+    else if(isNetwork) friendly = 'Could not reach Google Sheets. Make sure you are connected to the internet and the config sheet is publicly shared.';
+    document.getElementById('error-msg').textContent = friendly;
+    console.error('[Init error]', e);
+  }
+}
+
+function mergeAdminData(){
+  COMPANIES.forEach(c => {
+    const ad = ADMIN_DATA[c.name.toLowerCase()];
+    if(!ad) return;
+    c.website         = ad.website;
+    c.interviewMode   = ad.interviewMode;
+    c.registrationDate= ad.registrationDate;
+    c.driveDate       = ad.driveDate;
+    c.poc             = ad.poc;
+    c.roles           = ad.roles;
+    c.jds             = ad.jds;
+    c.notes           = ad.notes;
+  });
+}
+
+async function loadAllStudents(){
+  document.getElementById('refresh-bar').classList.add('show');
+  await Promise.all(COMPANIES.map(c => loadStudents(c)));
+  document.getElementById('refresh-bar').classList.remove('show');
+  if(view==='home') buildHome();
+  else if(view==='dashboard') buildDashboard();
+  else if(view==='detail') buildDetail(cId);
+}
+
+/* ════════════════════════════════════════════════════
+   NAVIGATION
+════════════════════════════════════════════════════ */
+function go(v, id){
+  view=v; if(id!==undefined) cId=id;
+  renderNav();
+  renderAdminBar();
+  if(v==='home')           buildHome();
+  else if(v==='dashboard') buildDashboard();
+  else if(v==='detail')    buildDetail(id);
+}
+
+/* ════════════════════════════════════════════════════
+   NAVBAR
+════════════════════════════════════════════════════ */
+function renderNav(){
+  const nb = document.getElementById('navbar');
+  let right = '';
+  if(view==='dashboard') right=`<button class="btn-ghost btn" id="n-home">← Home</button>`;
+  if(view==='detail'){
+    const c=COMPANIES.find(x=>x.id===cId);
+    right=`<nav class="nav-crumb"><span class="crumb" id="n-h">Home</span><span class="crumb-sep">/</span><span class="crumb" id="n-d">Companies</span><span class="crumb-sep">/</span><span class="crumb-active">${c?xe(c.name):''}</span></nav>`;
+  }
+  nb.innerHTML=`<div class="navbar"><a class="nav-brand" id="n-brand"><div class="nav-logo">V</div><div class="nav-name"><span>Vidyavahini</span><span>First Grade Degree College</span></div></a><div class="nav-right"><button class="btn-admin-toggle${adminMode?' active':''}" id="n-admin"><span class="admin-dot"></span>${adminMode?'🛡️ Admin ON':'🔑 Admin'}</button><button class="btn-icon" id="n-theme">🌙</button>${right}</div></div>`;
+  const g=id=>document.getElementById(id);
+  g('n-brand').onclick=()=>go('home');
+  g('n-theme').onclick=toggleTheme;
+  g('n-admin').onclick=handleAdmin;
+  updateThemeIcon();
+  if(g('n-home'))  g('n-home').onclick=()=>go('home');
+  if(g('n-h'))     g('n-h').onclick=()=>go('home');
+  if(g('n-d'))     g('n-d').onclick=()=>go('dashboard');
+}
+
+function updateThemeIcon(){ const b=document.getElementById('n-theme'); if(b)b.textContent=document.documentElement.getAttribute('data-theme')==='light'?'🌙':'☀️'; }
+function toggleTheme(){ const d=document.documentElement; d.setAttribute('data-theme',d.getAttribute('data-theme')==='dark'?'light':'dark'); updateThemeIcon(); }
+
+/* ════════════════════════════════════════════════════
+   ADMIN BAR
+════════════════════════════════════════════════════ */
+function renderAdminBar(){
+  const r=document.getElementById('admin-bar');
+  if(!adminMode){ r.innerHTML=''; return; }
+  r.innerHTML=`<div class="admin-bar"><span>🛡️ Admin Mode active</span><div class="admin-bar-actions"><button class="btn btn-admin-outline btn-sm" id="ab-diag">🔍 Diagnostics</button><button class="btn btn-admin-outline btn-sm" id="ab-refresh">↺ Reload Config</button><button class="btn btn-admin-outline btn-sm" id="ab-exit">Exit Admin</button></div></div>`;
+  document.getElementById('ab-diag').onclick=showDiagnostics;
+  document.getElementById('ab-refresh').onclick=()=>{ init(); toast('Reloading config…','info','↺'); };
+  document.getElementById('ab-exit').onclick=()=>{ adminMode=false; document.body.classList.remove('admin-mode'); go(view,cId); toast('Admin Mode off','info','🔒'); };
+}
+
+/* ════════════════════════════════════════════════════
+   ADMIN PIN
+════════════════════════════════════════════════════ */
+function handleAdmin(){
+  if(adminMode){ adminMode=false; document.body.classList.remove('admin-mode'); go(view,cId); return; }
+  let pin='';
+  const upd=(err=false)=>{
+    document.querySelectorAll('.pin-cell').forEach((el,i)=>{ el.value=pin[i]||''; if(i===pin.length)el.focus(); });
+    document.getElementById('pe').textContent=err?'Incorrect PIN. Try again.':'';
+  };
+  const chk=()=>{
+    if(pin===ADMIN_PIN){ closeModal(); adminMode=true; document.body.classList.add('admin-mode'); go(view,cId); toast('Admin Mode enabled','success','🛡️'); }
+    else{ upd(true); setTimeout(()=>{ pin=''; upd(false); },800); }
+  };
+  openModal('Admin Access',`<p style="font-size:13px;color:var(--text3);margin-bottom:16px;text-align:center;">Enter PIN to enable admin mode</p><div class="pin-row">${[0,1,2,3].map(i=>`<input class="pin-cell" id="pc${i}" maxlength="1" inputmode="numeric" pattern="[0-9]"/>`).join('')}</div><div class="pin-error" id="pe"></div>`);
+  setTimeout(()=>{ document.getElementById('pc0')?.focus(); },50);
+  const onKey=e=>{
+    if(e.key>='0'&&e.key<='9'&&pin.length<4){ pin+=e.key; upd(); if(pin.length===4)chk(); }
+    if(e.key==='Backspace'&&pin.length){ pin=pin.slice(0,-1); upd(); }
+  };
+  document.addEventListener('keydown',onKey);
+  const orig=closeModal;
+  document.getElementById('modal-close').onclick=()=>{ document.removeEventListener('keydown',onKey); closeModal(); };
+}
+
+/* ════════════════════════════════════════════════════
+   HOME VIEW
+════════════════════════════════════════════════════ */
+function buildHome(){
+  const total = COMPANIES.length;
+  const regs  = COMPANIES.reduce((s,c)=>s+c.studentsRegistered.length,0);
+  const ints  = COMPANIES.reduce((s,c)=>s+c.studentsInterviewed.length,0);
+  const sel   = COMPANIES.reduce((s,c)=>s+c.studentsSelected.length,0);
+  const done  = COMPANIES.filter(c=>c.studentsSelected.length>0||c.studentsInterviewed.length>0).length;
+
+  const recent = [...COMPANIES].sort((a,b)=>b.studentsRegistered.length-a.studentsRegistered.length).slice(0,4);
+
+  document.getElementById('main').innerHTML=`
+  <div class="home-wrap">
+    <div class="home-banner">
+      <div class="home-banner-left">
+        <div class="home-eyebrow">🎓 Placement Season 2025–26</div>
+        <h1 class="home-title">Campus <em>Placement</em> Dashboard</h1>
+        <p class="home-sub">Live data from all company sheets — registrations, shortlists and final selections in one place.</p>
+        <button class="btn-primary-inv" onclick="go('dashboard')">View All Companies →</button>
+      </div>
+      <div class="home-banner-right">
+        <div class="stat-tile"><div class="stat-tile-icon">🏢</div><div class="stat-tile-num">${total}</div><div class="stat-tile-lbl">Companies</div></div>
+        <div class="stat-tile"><div class="stat-tile-icon">📋</div><div class="stat-tile-num">${regs}</div><div class="stat-tile-lbl">Registrations</div></div>
+        <div class="stat-tile"><div class="stat-tile-icon">✅</div><div class="stat-tile-num">${done}</div><div class="stat-tile-lbl">Drives Done</div></div>
+        <div class="stat-tile"><div class="stat-tile-icon">🎉</div><div class="stat-tile-num">${sel}</div><div class="stat-tile-lbl">Placed</div></div>
+      </div>
+    </div>
+
+    <div class="section" style="padding-left:0;padding-right:0">
+      <div class="section-head">
+        <span class="section-title">Recent Activity</span>
+        <button class="btn btn-outline btn-sm" onclick="go('dashboard')">View All</button>
+      </div>
+      <div class="section-divider"></div>
+      <div class="company-list">
+        ${recent.map(c=>companyRowHtml(c)).join('')}
+      </div>
+    </div>
+  </div>`;
+
+  bindCompanyRows();
+}
+
+/* ════════════════════════════════════════════════════
+   DASHBOARD VIEW
+════════════════════════════════════════════════════ */
+function buildDashboard(){
+  const statusFilters = ['all','upcoming','registered_sent','results_awaited','completed'];
+  let list = COMPANIES;
+  if(filters.status !== 'all') list = list.filter(c=>statusOf(c)===filters.status);
+
+  const total = COMPANIES.length;
+  const regs  = COMPANIES.reduce((s,c)=>s+c.studentsRegistered.length,0);
+  const ints  = COMPANIES.reduce((s,c)=>s+c.studentsInterviewed.length,0);
+  const sel   = COMPANIES.reduce((s,c)=>s+c.studentsSelected.length,0);
+
+  document.getElementById('main').innerHTML=`
+  <div class="section" style="padding-top:24px;">
+    <div class="dash-summary">
+      <div class="dash-sum-tile"><div class="dash-sum-num">${total}</div><div class="dash-sum-lbl">Companies</div></div>
+      <div class="dash-sum-tile"><div class="dash-sum-num">${regs}</div><div class="dash-sum-lbl">Registered</div></div>
+      <div class="dash-sum-tile"><div class="dash-sum-num">${ints}</div><div class="dash-sum-lbl">Interviewed</div></div>
+      <div class="dash-sum-tile"><div class="dash-sum-num">${sel}</div><div class="dash-sum-lbl">Selected</div></div>
+    </div>
+    <div class="section-head">
+      <span class="section-title">All Companies</span>
+      <div class="filters">
+        ${statusFilters.map(s=>`<button class="filter-chip${filters.status===s?' active':''}" onclick="setFilter('${s}')">${s==='all'?'All':STATUS_MAP[s]?.l||s}</button>`).join('')}
+      </div>
+    </div>
+    <div class="section-divider"></div>
+    ${list.length ? `<div class="company-list">${list.map(c=>companyRowHtml(c)).join('')}</div>`
+      : `<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-title">No companies match this filter</div></div>`}
+  </div>`;
+
+  bindCompanyRows();
+}
+
+function setFilter(s){ filters.status=s; buildDashboard(); }
+
+function companyRowHtml(c){
+  const st = STATUS_MAP[statusOf(c)] || STATUS_MAP.upcoming;
+  const r = c.studentsRegistered.length, i = c.studentsInterviewed.length, s = c.studentsSelected.length;
+  const base = Math.max(r, 1);
+  const rPct = 100, iPct = Math.round(i/base*100), sPct = Math.round(s/base*100);
+  return `<div class="company-row" data-id="${c.id}">
+    <div class="co-avatar" style="background:${avgr(c.id-1)}">${ini(c.name)}</div>
+    <div class="co-info">
+      <div class="co-name">${xe(c.name)}</div>
+      <div class="co-funnel">
+        <div class="co-funnel-r" style="width:${rPct}%"></div>
+        <div class="co-funnel-i" style="width:${iPct}%"></div>
+        <div class="co-funnel-s" style="width:${sPct}%"></div>
+      </div>
+    </div>
+    <div class="co-counts">
+      <div class="co-count"><div class="co-count-num">${r}</div><div class="co-count-lbl">Reg</div></div>
+      <div class="co-count"><div class="co-count-num">${i}</div><div class="co-count-lbl">Int</div></div>
+      <div class="co-count"><div class="co-count-num">${s}</div><div class="co-count-lbl">Sel</div></div>
+    </div>
+    <span class="s-pill ${st.cls}">${st.l}</span>
+  </div>`;
+}
+
+function bindCompanyRows(){
+  document.querySelectorAll('.company-row').forEach(el=>{
+    el.onclick=()=>go('detail', parseInt(el.dataset.id));
+  });
+}
+
+/* ════════════════════════════════════════════════════
+   DETAIL VIEW
+════════════════════════════════════════════════════ */
+async function buildDetail(id){
+  const c = COMPANIES.find(x=>x.id===id);
+  if(!c){ go('dashboard'); return; }
+
+  const st = STATUS_MAP[statusOf(c)] || STATUS_MAP.upcoming;
+  const rate = c.studentsInterviewed.length ? Math.round(c.studentsSelected.length/c.studentsInterviewed.length*100) : 0;
+
+  const pocHtml = ['name','designation','email','phone'].map(k=>`<div class="d-field"><div class="d-field-k">${k.charAt(0).toUpperCase()+k.slice(1)}</div><div class="d-field-v${!c.poc[k]?' empty':''}">${xe(c.poc[k])||'—'}</div></div>`).join('');
+  const driveHtml = [['registrationDate','Reg. Date'],['driveDate','Drive Date'],['interviewMode','Mode'],['notes','Notes']].map(([k,l])=>`<div class="d-field"><div class="d-field-k">${l}</div><div class="d-field-v${!c[k]?' empty':''}">${k==='registrationDate'||k==='driveDate'?fmtDate(c[k]):xe(c[k])||'—'}</div></div>`).join('');
+  const rolesHtml = c.roles.length ? c.roles.map(r=>`<span class="role-chip">${xe(r)}</span>`).join('') : '<span class="d-field-v empty">—</span>';
+
+  const AE = (fn,label='✏️ Edit') => adminMode ? `<button class="edit-chip" onclick="${fn}">${label}</button>` : '';
+
+  document.getElementById('main').innerHTML=`
+  <div class="detail-wrap">
+
+    <div class="d-hero">
+      <div class="d-avatar" style="background:${avgr(c.id-1)}">${ini(c.name)}</div>
+      <div style="flex:1;min-width:0;">
+        <div class="d-name">${xe(c.name)}</div>
+        <div class="d-badges">
+          <span class="s-pill-inv">${st.l}</span>
+          ${c.interviewMode?`<span class="mode-pill">${xe(c.interviewMode)}</span>`:''}
+          ${c.website?`<a class="d-link" href="${xe(c.website)}" target="_blank" rel="noopener">🔗 Website ↗</a>`:''}
+          <span class="live-badge" id="live-btn">🔄 Live · click to refresh</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="d-stats">
+      <div class="d-stat" id="dsr"><div class="d-stat-num">${c.studentsRegistered.length}</div><div class="d-stat-lbl">Registered${adminMode?' <small style="opacity:.5">✏</small>':''}</div></div>
+      <div class="d-stat" id="dsi"><div class="d-stat-num">${c.studentsInterviewed.length}</div><div class="d-stat-lbl">Interviewed${adminMode?' <small style="opacity:.5">✏</small>':''}</div></div>
+      <div class="d-stat" id="dss"><div class="d-stat-num">${c.studentsSelected.length}</div><div class="d-stat-lbl">Selected${adminMode?' <small style="opacity:.5">✏</small>':''}</div></div>
+      ${c.studentsInterviewed.length>0?`<div class="d-stat" style="cursor:default"><div class="d-stat-num" style="color:var(--${rate>=70?'green':rate>=40?'amber':'red'})">${rate}%</div><div class="d-stat-lbl">Selection Rate</div></div>`:''}
+    </div>
+
+    <div class="d-cards">
+      <div class="d-card">${AE(`openEditPOC(${c.id})`,'✏️ Edit')}
+        <div class="d-card-lbl">👤 Point of Contact</div>${pocHtml}</div>
+      <div class="d-card">${AE(`openEditDrive(${c.id})`,'✏️ Edit')}
+        <div class="d-card-lbl">📅 Drive Details</div>${driveHtml}</div>
+      <div class="d-card">${AE(`openEditRoles(${c.id})`,'✏️ Edit')}
+        <div class="d-card-lbl">💼 Roles</div><div class="roles-wrap">${rolesHtml}</div></div>
+    </div>
+
+    ${buildStudentSection('Registered Students', c.studentsRegistered, 'dsr-full')}
+    ${buildStudentSection('Interviewed / Shortlisted', c.studentsInterviewed, 'dsi-full')}
+    ${buildStudentSection('Selected Students', c.studentsSelected, 'dss-full')}
+
+  </div>`;
+
+  // Live badge click
+  document.getElementById('live-btn').onclick=async()=>{
+    const btn=document.getElementById('live-btn');
+    if(!btn) return;
+    btn.textContent='⏳ Refreshing…';
+    await loadStudents(c, true);
+    go('detail', id);
+  };
+
+  // Stat card clicks → scroll to section
+  const scroll=sid=>document.getElementById(sid)?.scrollIntoView({behavior:'smooth',block:'start'});
+  document.getElementById('dsr').onclick=()=>{ if(adminMode) openEditStudents(c.id,'studentsRegistered'); else scroll('dsr-full'); };
+  document.getElementById('dsi').onclick=()=>{ if(adminMode) openEditStudents(c.id,'studentsInterviewed'); else scroll('dsi-full'); };
+  document.getElementById('dss').onclick=()=>{ if(adminMode) openEditStudents(c.id,'studentsSelected'); else scroll('dss-full'); };
+}
+
+function buildStudentSection(title, students, anchorId){
+  if(!students.length) return `<div id="${anchorId}" class="student-section"><div class="student-section-head"><span class="student-section-title">${title}</span><span class="student-count">0</span></div><div class="no-data">📭 No records yet</div></div>`;
+  const hasBranch = students.some(s=>s.class);
+  const hasPhone  = students.some(s=>s.phone);
+  const hasEmail  = students.some(s=>s.email);
+  return `<div id="${anchorId}" class="student-section">
+    <div class="student-section-head"><span class="student-section-title">${title}</span><span class="student-count">${students.length}</span></div>
+    <table class="student-table">
+      <thead><tr><th>#</th><th>Name</th>${hasEmail?'<th>Email</th>':''}${hasBranch?'<th>Class</th>':''}${hasPhone?'<th>Phone</th>':''}</tr></thead>
+      <tbody>${students.map(s=>`<tr><td>${xe(s.id)}</td><td>${xe(s.name)||'—'}</td>${hasEmail?`<td>${xe(s.email)||'—'}</td>`:''}${hasBranch?`<td>${xe(s.class)||'—'}</td>`:''}${hasPhone?`<td>${xe(s.phone)||'—'}</td>`:''}</tr>`).join('')}</tbody>
+    </table>
+  </div>`;
+}
+
+/* ════════════════════════════════════════════════════
+   ADMIN EDIT MODALS
+   Note: These allow overriding values in memory.
+   To persist, the user edits the Admin Data tab in the Config Sheet.
+   A note in each modal reminds them of this.
+════════════════════════════════════════════════════ */
+const SAVE_NOTE = `<p style="font-size:11px;color:var(--text3);margin-top:12px;padding:8px 10px;background:var(--amber-bg);border-radius:6px;border:1px solid var(--admin-border);">💡 To persist these changes, also update the <strong>Admin Data</strong> tab in your Config Sheet.</p>`;
+
+function openEditPOC(id){
+  const c=COMPANIES.find(x=>x.id===id);
+  openModal('Edit Point of Contact',`
+    ${['name','designation','email','phone'].map(k=>`<div class="form-row"><label class="form-label">${k.charAt(0).toUpperCase()+k.slice(1)}</label><input class="form-input" id="poc-${k}" value="${xe(c.poc[k]||'')}"/></div>`).join('')}
+    ${SAVE_NOTE}`,
+    `<button class="btn btn-outline btn-sm" onclick="closeModal()">Cancel</button><button class="btn btn-admin btn-sm" onclick="savePOC(${id})">Save</button>`);
+}
+function savePOC(id){
+  const c=COMPANIES.find(x=>x.id===id);
+  ['name','designation','email','phone'].forEach(k=>c.poc[k]=document.getElementById(`poc-${k}`).value.trim());
+  closeModal(); go('detail',id); toast('POC updated (update Config Sheet to persist)','success');
+}
+
+function openEditDrive(id){
+  const c=COMPANIES.find(x=>x.id===id);
+  openModal('Edit Drive Details',`
+    <div class="form-row"><label class="form-label">Website URL</label><input class="form-input" id="drv-web" value="${xe(c.website||'')}"/></div>
+    <div class="form-row"><label class="form-label">Interview Mode</label>
+      <select class="form-select" id="drv-mode"><option value="">—</option>${['Virtual','In-Person','Hybrid'].map(m=>`<option${c.interviewMode===m?' selected':''}>${m}</option>`).join('')}</select></div>
+    <div class="form-row"><label class="form-label">Registration Date</label><input class="form-input" type="date" id="drv-rdate" value="${c.registrationDate||''}"/></div>
+    <div class="form-row"><label class="form-label">Drive Date</label><input class="form-input" type="date" id="drv-ddate" value="${c.driveDate||''}"/></div>
+    <div class="form-row"><label class="form-label">Notes</label><textarea class="form-textarea" id="drv-notes">${xe(c.notes||'')}</textarea></div>
+    ${SAVE_NOTE}`,
+    `<button class="btn btn-outline btn-sm" onclick="closeModal()">Cancel</button><button class="btn btn-admin btn-sm" onclick="saveDrive(${id})">Save</button>`);
+}
+function saveDrive(id){
+  const c=COMPANIES.find(x=>x.id===id);
+  c.website=document.getElementById('drv-web').value.trim();
+  c.interviewMode=document.getElementById('drv-mode').value;
+  c.registrationDate=document.getElementById('drv-rdate').value;
+  c.driveDate=document.getElementById('drv-ddate').value;
+  c.notes=document.getElementById('drv-notes').value.trim();
+  closeModal(); go('detail',id); toast('Drive details updated (update Config Sheet to persist)','success');
+}
+
+function openEditRoles(id){
+  const c=COMPANIES.find(x=>x.id===id);
+  openModal('Edit Roles',`
+    <div class="form-row"><label class="form-label">Roles (comma-separated)</label>
+    <input class="form-input" id="roles-inp" value="${xe(c.roles.join(', '))}"/>
+    <div class="form-hint">e.g. Software Engineer, Data Analyst, HR Executive</div></div>
+    ${SAVE_NOTE}`,
+    `<button class="btn btn-outline btn-sm" onclick="closeModal()">Cancel</button><button class="btn btn-admin btn-sm" onclick="saveRoles(${id})">Save</button>`);
+}
+function saveRoles(id){
+  const c=COMPANIES.find(x=>x.id===id);
+  c.roles=document.getElementById('roles-inp').value.split(',').map(s=>s.trim()).filter(Boolean);
+  closeModal(); go('detail',id); toast('Roles updated (update Config Sheet to persist)','success');
+}
+
+/* ════════════════════════════════════════════════════
+   ADMIN EDIT STUDENTS (manual override)
+════════════════════════════════════════════════════ */
+function openEditStudents(id, key){
+  const c=COMPANIES.find(x=>x.id===id);
+  const titles={studentsRegistered:'Registered',studentsInterviewed:'Interviewed',studentsSelected:'Selected'};
+  let rows=[...c[key]];
+
+  const render=()=>{
+    const allChecked = rows.length > 0 && rows.every(r=>r._checked);
+    document.getElementById('st-sel-all').checked = allChecked;
+    document.getElementById('st-sel-all').indeterminate = !allChecked && rows.some(r=>r._checked);
+    const nChecked = rows.filter(r=>r._checked).length;
+    const delBtn = document.getElementById('st-del-sel');
+    if(delBtn){ delBtn.textContent = nChecked ? `Delete Selected (${nChecked})` : 'Delete Selected'; delBtn.disabled = !nChecked; }
+    document.getElementById('st-tbody').innerHTML=rows.map((s,i)=>`
+      <tr style="${s._checked?'background:var(--red-bg)':''}">
+        <td style="padding:4px 6px;width:32px"><input type="checkbox" ${s._checked?'checked':''} onchange="stRows[${i}]._checked=this.checked;stRender()" style="cursor:pointer"/></td>
+        <td style="color:var(--text4);font-size:11px;padding:4px 6px">${String(i+1).padStart(3,'0')}</td>
+        <td><input class="form-input" style="padding:4px 8px;font-size:12px" value="${xe(s.name||'')}" onchange="stRows[${i}].name=this.value"/></td>
+        <td><input class="form-input" style="padding:4px 8px;font-size:12px" value="${xe(s.email||'')}" onchange="stRows[${i}].email=this.value"/></td>
+        <td><button onclick="stRows.splice(${i},1);stRender()" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:16px;padding:0 6px;line-height:1" title="Remove row">×</button></td>
+      </tr>`).join('');
+  };
+  window.stRows = rows;
+  window.stRender = render;
+
+  openModal(`Edit ${titles[key]} Students`,`
+    <div class="paste-zone">
+      <div class="paste-zone-title">📋 Paste from Google Sheets</div>
+      <textarea class="paste-textarea" id="paste-in" placeholder="Copy cells from Google Sheets and paste here (Name + Email columns)…"></textarea>
+      <button class="btn btn-admin-outline btn-xs" style="margin-top:6px" onclick="applyPaste()">⚡ Parse & Add Rows</button>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;gap:8px;">
+      <div style="font-size:11px;color:var(--text3)" id="st-count-lbl"></div>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-outline btn-xs" onclick="stRows.push({id:'',name:'',email:''});stRender()">+ Add Row</button>
+        <button class="btn btn-outline btn-xs" id="st-del-sel" disabled onclick="window.stRows=stRows.filter(r=>!r._checked);stRender()">Delete Selected</button>
+        <button class="btn btn-outline btn-xs" id="st-clear-all" onclick="if(confirm('Clear all '+stRows.length+' entries?')){window.stRows=[];stRender();}">Clear All</button>
+      </div>
+    </div>
+    <table style="width:100%;border-collapse:collapse;font-size:12px;">
+      <thead><tr>
+        <th style="padding:4px 6px;width:32px"><input type="checkbox" id="st-sel-all" onchange="stRows.forEach(r=>r._checked=this.checked);stRender()" style="cursor:pointer"/></th>
+        <th style="text-align:left;padding:4px 6px;font-size:10px;color:var(--text3)">#</th>
+        <th style="text-align:left;padding:4px 8px;font-size:10px;color:var(--text3)">Name</th>
+        <th style="text-align:left;padding:4px 8px;font-size:10px;color:var(--text3)">Email</th>
+        <th></th>
+      </tr></thead>
+      <tbody id="st-tbody"></tbody>
+    </table>
+    ${SAVE_NOTE}`,
+    `<button class="btn btn-outline btn-sm" onclick="closeModal()">Cancel</button><button class="btn btn-admin btn-sm" onclick="saveStudents(${id},'${key}')">Save ${titles[key]}</button>`);
+
+  render();
+  const lbl=document.getElementById('st-count-lbl');
+  if(lbl) setInterval(()=>{ const n=stRows.length; if(lbl)lbl.textContent=`${n} entr${n===1?'y':'ies'}`; },200);
+
+  window.applyPaste=()=>{
+    const raw=document.getElementById('paste-in').value;
+    const lines=raw.trim().split('\n');
+    let added=0,dups=0;
+    lines.forEach(line=>{
+      const cols=line.split('\t');
+      let name='',email='';
+      cols.forEach(col=>{ col=col.trim(); if(col.includes('@'))email=col; else if(col&&!col.match(/^\d{2}[-/]\d{2}/))name=col; });
+      if(!name&&!email) return;
+      const isDup=stRows.some(r=>(email&&r.email.toLowerCase()===email.toLowerCase())||(name&&!email&&r.name.toLowerCase()===name.toLowerCase()));
+      if(isDup){dups++;return;}
+      stRows.push({id:'',name,email}); added++;
+    });
+    document.getElementById('paste-in').value='';
+    render();
+    toast(`Added ${added} row${added!==1?'s':''}${dups?` · ${dups} duplicate${dups>1?'s':''} skipped`:''}`,added?'success':'info');
+  };
+}
+
+function saveStudents(id, key){
+  const c=COMPANIES.find(x=>x.id===id);
+  c[key]=window.stRows.filter(s=>s.name||s.email).map((s,i)=>({...s,id:`#${String(i+1).padStart(3,'0')}`}));
+  closeModal(); go('detail',id); toast(`${key.replace('students','')} list updated`,'success');
+}
+
+/* ════════════════════════════════════════════════════
+   DIAGNOSTICS — shows fetch results for each company
+════════════════════════════════════════════════════ */
+
+async function showDiagnostics(){
+  openModal('Sheet Fetch Diagnostics',
+    '<p style="font-size:12px;color:var(--text3);margin-bottom:14px">' +
+    'Testing each company sheet. <strong style="color:var(--amber)">If a row shows "Failed to fetch"</strong>: ' +
+    'click "Open Sheet" — if Google asks you to sign in, the sheet is not public. ' +
+    'Set sharing to <em>Anyone with the link &rarr; Viewer</em>.' +
+    '</p><div id="diag-body"><div style="text-align:center;padding:24px;color:var(--text3)">Running tests\u2026</div></div>'
+  );
+
+  var diagFetch = function(sheetId, tab) {
+    var url = 'https://docs.google.com/spreadsheets/d/' + sheetId + '/gviz/tq?tqx=out:json&sheet=' + encodeURIComponent(tab);
+    return fetchWithTimeout(url, 10000).then(function(res) {
+      if(!res.ok) return { ok:false, err:'HTTP ' + res.status };
+      return res.text();
+    }).then(function(text) {
+      if(typeof text !== 'string') return text; // already error obj
+      if(text.trimStart().startsWith('<')) return { ok:false, err:'Sheet not public (received login page)' };
+      var j = JSON.parse(text.replace(/^[^(]*\(/, '').replace(/\);?\s*$/, ''));
+      if(j.status === 'error') return { ok:false, err:'Tab not found in this sheet' };
+      var rows = parseStudentFromJSON(j);
+      return { ok:true, rows: rows.length };
+    }).catch(function(e) {
+      var msg = e.message || String(e);
+      if(msg.includes('timed out')) return { ok:false, err:'Timed out — sheet may not be public' };
+      if(msg.includes('Failed to fetch') || msg.includes('NetworkError'))
+        return { ok:false, err:'Cannot reach sheet — verify it is shared as "Anyone with link"' };
+      return { ok:false, err: msg };
+    });
+  };
+
+  Promise.all(COMPANIES.map(function(c) {
+    var tests = [
+      { tab: c.tabReg, key: 'Registered' },
+      { tab: c.tabInt, key: 'Interviewed' },
+      { tab: c.tabSel, key: 'Selected' }
+    ];
+    return Promise.all(tests.map(function(t) {
+      if(!t.tab) return Promise.resolve(
+        '<div style="color:var(--text4);font-size:12px">&mdash; ' + t.key + ': not configured</div>'
+      );
+      return diagFetch(c.sheetId, t.tab).then(function(r) {
+        if(r.ok)
+          return '<div style="color:var(--green);font-size:12.5px">&#10003; ' + t.key + ' (' + xe(t.tab) + '): ' + r.rows + ' rows</div>';
+        return '<div style="color:var(--red);font-size:12.5px">&#10007; ' + t.key + ' (' + xe(t.tab) + '): ' + r.err + '</div>';
+      });
+    })).then(function(results) {
+      return '<div style="margin-bottom:12px;padding:13px 15px;border:1px solid var(--border2);border-radius:8px;background:var(--bg3)">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">' +
+          '<span style="font-weight:700;font-size:13.5px">' + xe(c.name) + '</span>' +
+          '<a href="https://docs.google.com/spreadsheets/d/' + c.sheetId + '/edit" target="_blank" rel="noopener"' +
+          ' style="font-size:11px;color:var(--navy);text-decoration:none;padding:2px 9px;border:1px solid var(--navy-border);border-radius:4px;font-weight:600">' +
+          'Open Sheet &#8599;</a>' +
+        '</div>' +
+        '<div style="font-family:\'JetBrains Mono\',monospace;font-size:9.5px;color:var(--text4);margin-bottom:8px;word-break:break-all">ID: ' + c.sheetId + '</div>' +
+        '<div style="display:flex;flex-direction:column;gap:5px">' + results.join('') + '</div>' +
+      '</div>';
+    });
+  })).then(function(rows) {
+    var body = document.getElementById('diag-body');
+    if(body) body.innerHTML = rows.join('');
+  });
+}
+
+/* ════════════════════════════════════════════════════
+   BOOT
+════════════════════════════════════════════════════ */
+init();
+</script>
+</body>
+</html>
