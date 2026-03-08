@@ -10,6 +10,23 @@ const WEBLLM_CDN    = 'https://esm.run/@mlc-ai/web-llm';
 
 let _engine     = null;   // cached engine instance
 let _engineBusy = false;
+let _preloading = false;
+
+// ── Silent background preload — call on student login ──
+async function preloadWebLLM() {
+  if (_engine || _preloading) return;   // already loaded or loading
+  if (!isWebGPUSupported())   return;   // silently skip if unsupported
+  _preloading = true;
+  try {
+    console.log('[AI] Background model preload started…');
+    await loadWebLLM();
+    console.log('[AI] Model ready.');
+  } catch(e) {
+    console.warn('[AI] Preload failed silently:', e.message);
+  } finally {
+    _preloading = false;
+  }
+}
 
 // ── Check if WebGPU is available ──────────────────────
 function isWebGPUSupported() {
@@ -51,7 +68,7 @@ function gradeInstruction(mode) {
 
 // ── Call WebLLM with resume text ──────────────────────
 async function rewriteWithAI(rawText, gradeMode, onProgress) {
-  if (_engineBusy) throw new Error('AI is already processing. Please wait.');
+  if (_engineBusy) throw new Error('AI is already processing. Please wait a moment and try again.');
   _engineBusy = true;
 
   try {
