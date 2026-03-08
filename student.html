@@ -102,8 +102,11 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
 
 /* \u2500\u2500 PORTAL BODY \u2500\u2500 */
 .sp-body{display:flex;max-width:1280px;margin:0 auto;min-height:calc(100vh - 62px);}
-.sp-sidebar{width:300px;flex-shrink:0;padding:32px 24px 40px;position:sticky;top:62px;max-height:calc(100vh - 62px);overflow-y:auto;}
-.sp-main{flex:1;min-width:0;padding:32px 40px 64px;border-left:1px solid #E2E8F0;}
+.sp-sidebar{width:var(--sidebar-w,300px);flex-shrink:0;padding:32px 24px 40px;position:sticky;top:62px;max-height:calc(100vh - 62px);overflow-y:auto;}
+.sp-resizer{width:6px;flex-shrink:0;cursor:col-resize;background:transparent;position:relative;transition:background .15s;}
+.sp-resizer::after{content:'';position:absolute;inset:0 2px;background:#E2E8F0;border-radius:3px;transition:background .15s;}
+.sp-resizer:hover::after,.sp-resizer.dragging::after{background:#6D0E6A;}
+.sp-main{flex:1;min-width:0;padding:32px 40px 64px;border-left:none;}
 
 /* \u2500\u2500 PROFILE CARD \u2500\u2500 */
 .profile-card{
@@ -133,7 +136,10 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
 .pf-row{display:flex;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px solid #F1F5F9;}
 .pf-row:last-child{border-bottom:none;}
 .pf-k{font-size:11.5px;color:#94A3B8;font-weight:600;white-space:nowrap;flex-shrink:0;}
-.pf-v{font-size:12.5px;color:#1E293B;font-weight:500;text-align:right;word-break:break-all;}
+.pf-v{font-size:12.5px;color:#1E293B;font-weight:500;text-align:right;overflow:hidden;white-space:nowrap;min-width:0;max-width:160px;position:relative;}
+.pf-v .pf-scroll{display:inline-block;white-space:nowrap;}
+.pf-v:hover .pf-scroll{animation:marquee-scroll 4s linear infinite;}
+@keyframes marquee-scroll{0%{transform:translateX(0);}30%{transform:translateX(0);}70%{transform:translateX(calc(-100% + 160px));}100%{transform:translateX(calc(-100% + 160px));}}
 .btn-resume{
   display:block;width:100%;padding:11px;border-radius:10px;
   background:#EFF6FF;color:#6D0E6A;border:1px solid #BFDBFE;
@@ -274,9 +280,8 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
 .jd-box-title{font-size:12px;font-weight:700;color:#64748B;margin-bottom:10px;letter-spacing:.04em;}
 .jd-box-text{font-size:13.5px;color:#1E293B;line-height:1.7;}
 .co-modal-footer{
-  display:flex;align-items:center;justify-content:flex-end;gap:10px;
-  padding:16px 24px;border-top:1px solid #F1F5F9;
-  position:sticky;bottom:0;background:#fff;
+  display:flex;align-items:center;gap:10px;
+  padding:14px 20px;border-top:1px solid #F1E8F1;flex-shrink:0;
 }
 .btn-modal-close{
   padding:10px 20px;border:1.5px solid #E2E8F0;border-radius:10px;
@@ -359,6 +364,61 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
 .rw-preview .rw-edu-inst{font-size:12px;color:#555;margin:8px 0 1px;}
 .rw-preview .rw-edu-grade{font-size:11.5px;color:#6D0E6A;font-weight:600;margin:1px 0 2px;}
 .rw-preview .rw-edu-gap{height:8px;}
+
+/* ── Congratulations Banner ── */
+.congrats-banner{margin-bottom:16px;}
+.congrats-inner{
+  display:flex;align-items:flex-start;gap:14px;
+  background:linear-gradient(135deg,#FFF7ED,#FEF3C7);
+  border:1.5px solid #FDE68A;border-left:5px solid #F59E0B;
+  border-radius:14px;padding:18px 20px;position:relative;
+}
+.congrats-icon{font-size:32px;line-height:1;flex-shrink:0;}
+.congrats-title{font-size:15px;font-weight:800;color:#92400E;margin-bottom:3px;}
+.congrats-sub{font-size:13px;color:#78350F;line-height:1.5;}
+.congrats-close{
+  position:absolute;top:10px;right:12px;background:none;border:none;
+  color:#92400E;font-size:16px;cursor:pointer;opacity:.6;
+}
+.congrats-close:hover{opacity:1;}
+/* ── Drive completed cards ── */
+.co-card-done{opacity:.8;}
+.drive-done-banner{display:flex;align-items:center;gap:10px;padding:12px 0;}
+.drive-done-icon{font-size:20px;}
+.drive-done-title{font-size:13px;font-weight:700;color:#065F46;}
+.drive-done-sub{font-size:12px;color:#6B7280;}
+.btn-placed-card{
+  width:100%;padding:9px;border-radius:10px;border:1.5px solid #6D0E6A;
+  background:#fff;color:#6D0E6A;font-size:13px;font-weight:700;
+  font-family:'Inter',sans-serif;cursor:pointer;
+}
+/* ── Section sub-headers ── */
+.sp-sec-sub-head{
+  font-size:12px;font-weight:700;color:#64748B;text-transform:uppercase;
+  letter-spacing:.06em;margin:0 0 12px;padding:0;
+  display:flex;align-items:center;gap:8px;
+}
+.count-chip{
+  display:inline-flex;align-items:center;padding:2px 8px;
+  background:#F7F0F7;color:#6D0E6A;border-radius:999px;
+  font-size:11px;font-weight:700;
+}
+.count-chip-done{background:#F1F5F9;color:#64748B;}
+/* ── Placed list in modal ── */
+.placed-list-head{font-size:12px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;}
+.placed-list{display:flex;flex-direction:column;gap:6px;}
+.placed-row{display:flex;align-items:center;gap:10px;padding:8px 12px;background:#F8FAFC;border-radius:8px;}
+.placed-num{font-size:11px;font-weight:700;color:#94A3B8;min-width:18px;}
+.placed-name{font-size:13.5px;font-weight:600;color:#1A0519;}
+/* ── Resume buttons uniform spacing ── */
+.resume-btn-group{display:flex;flex-direction:column;gap:10px;margin-top:14px;}
+.btn-resume{
+  display:block;width:100%;padding:11px;border-radius:10px;
+  background:#F7F0F7;color:#6D0E6A;border:1.5px solid #D3B6D2;
+  text-decoration:none;text-align:center;font-size:13px;font-weight:700;
+  font-family:'Inter',sans-serif;transition:all .15s;
+}
+.btn-resume:hover{background:#EDE0EC;}
 </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -407,10 +467,12 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
 
   <!-- Body -->
   <div class="sp-body">
-    <aside class="sp-sidebar">
+    <aside class="sp-sidebar" id="sp-sidebar">
       <div id="profile-wrap"></div>
     </aside>
+    <div class="sp-resizer" id="sp-resizer"></div>
     <main class="sp-main">
+      <div id="congrats-banner" class="congrats-banner" style="display:none;"></div>
       <div id="inelig-wrap"></div>
       <div id="status-wrap"></div>
       <div id="avail-wrap"></div>
@@ -423,7 +485,7 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
   <div class="co-modal-box">
     <div id="co-modal-inner"></div>
     <div class="co-modal-footer">
-      <button class="btn-modal-close" id="modal-close-btn">Close</button>
+      <button class="btn-modal-close" id="modal-close-btn" onclick="closeModal()">Close</button>
       <span id="modal-apply-slot"></span>
     </div>
   </div>
@@ -469,10 +531,12 @@ function logoHtml(name,web,idx,sz){
   const size=sz||48; const d=logoDomain(name,web);
   const cb=`https://logo.clearbit.com/${d}?size=${size*2}`;
   const gf=`https://www.google.com/s2/favicons?domain=${d}&sz=128`;
-  const g=grad(idx||0); const pad=size>56?8:6; const fsz=Math.round(size*.30);
+  const g=grad(idx||0); const pad=size>56?8:6; const fsz=Math.round(size*.32);
+  // Images visible by default (opacity:1), initials hidden (opacity:0)
+  // On image error: fade to next fallback; final fallback: show initials on hover
   return `<div class="co-av" style="width:${size}px;height:${size}px;border-radius:${Math.round(size*.21)}px;">
-    <img src="${cb}" style="width:100%;height:100%;object-fit:contain;padding:${pad}px;display:block;" onerror="this.style.display='none';this.nextElementSibling.style.display='block';"/>
-    <img src="${gf}" style="width:100%;height:100%;object-fit:contain;padding:${pad+2}px;display:none;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"/>
+    <img src="${cb}" style="object-fit:contain;padding:${pad}px;" onerror="this.style.opacity='0';this.nextElementSibling.style.opacity='1';"/>
+    <img src="${gf}" style="object-fit:contain;padding:${pad+2}px;opacity:0;" onerror="this.style.opacity='0';this.nextElementSibling.style.opacity='1';this.nextElementSibling.style.zIndex='2';"/>
     <div class="co-av-ini" style="background:${g};font-size:${fsz}px;">${ini(name)}</div>
   </div>`;
 }
@@ -696,6 +760,22 @@ function renderPortal(){
   document.getElementById('portal-page').style.display = 'block';
   document.getElementById('nav-name').textContent = ST.name;
 
+  // ── Congratulate if student is placed/selected ──
+  const isPlaced = Object.values(STATUS).some(s => s && s.sel);
+  if(isPlaced){
+    const companies = COMPS.filter(c => STATUS[c.id]?.sel).map(c=>c.name);
+    const banner = document.getElementById('congrats-banner');
+    if(banner){
+      banner.innerHTML = `<div class="congrats-inner">
+        <span class="congrats-icon">\ud83c\udf89</span>
+        <div><div class="congrats-title">Congratulations, ${xe(ST.name.split(' ')[0])}!</div>
+        <div class="congrats-sub">You have been selected by ${xe(companies.join(', '))}. Wishing you a great career ahead!</div></div>
+        <button class="congrats-close" onclick="this.closest('.congrats-banner').style.display='none'">\u2715</button>
+      </div>`;
+      banner.style.display = 'block';
+    }
+  }
+
   const elig = isEligible(ST);
   renderProfile(elig);
   renderInelig(elig);
@@ -711,7 +791,7 @@ function renderProfile(elig){
     ?`<img class="profile-photo" src="${xe(s.photoUrl)}" alt="${xe(s.name)}" onerror="this.style.display='none';document.getElementById('ph-ini').style.display='flex';"/><div id="ph-ini" class="profile-ini" style="display:none">${ini(s.name)}</div>`
     :`<div id="ph-ini" class="profile-ini">${ini(s.name)}</div>`;
 
-  const pfRow=(k,v)=>`<div class="pf-row"><span class="pf-k">${k}</span><span class="pf-v">${xe(v||'\u2014')}</span></div>`;
+  const pfRow=(k,v)=>`<div class="pf-row"><span class="pf-k">${k}</span><span class="pf-v"><span class="pf-scroll">${xe(v||'\u2014')}</span></span></div>`;
 
   document.getElementById('profile-wrap').innerHTML=`
     <div class="profile-card">
@@ -730,7 +810,10 @@ function renderProfile(elig){
         ${pfRow('\ud83d\udcca 12th %',s.twelfth+'%')}
         ${pfRow('\u26a0\ufe0f Backlogs',s.backlogs)}
       </div>
-      ${s.resume?`<a href="${xe(s.resume)}" target="_blank" rel="noopener" class="btn-resume">&#128196; View Resume &#x2197;</a><button class="btn-rewrite" onclick="openRewriteModal()">&#128203; Format for Placement</button>`:''
+      ${s.resume?`<div class="resume-btn-group">
+        <a href="${xe(s.resume)}" target="_blank" rel="noopener" class="btn-resume">&#128196; View Resume &#x2197;</a>
+        <button class="btn-rewrite" onclick="openRewriteModal()">&#128203; Format for Placement</button>
+      </div>`:''
       }
     </div>`;
 }
@@ -795,8 +878,11 @@ function renderStatus(){
 function renderAvailable(){
   const applied=new Set(COMPS.filter(c=>{const s=STATUS[c.id];return s&&(s.reg||s.int||s.sel);}).map(c=>c.id));
   const avail=COMPS.filter(c=>!applied.has(c.id));
+  // Only show open (pending/ongoing) drives — hide completed ones
+  const open      = avail.filter(c => !STATUS[c.id]?.driveComplete);
+  const completed = avail.filter(c =>  STATUS[c.id]?.driveComplete);
 
-  if(!avail.length){
+  if(!open.length && !completed.length){
     document.getElementById('avail-wrap').innerHTML=`
       <div class="sp-section">
         <div class="sp-sec-head"><span class="sp-sec-title">\ud83c\udfe2 Available Companies</span></div>
@@ -805,7 +891,7 @@ function renderAvailable(){
     return;
   }
 
-  const cards=avail.map(c=>{
+  const openCards = open.map(c=>{
     const chips=[
       c.roles.length    ?mkChip('\ud83d\udcbc',c.roles.join(', ')):null,
       c.salary          ?mkChip('\ud83d\udcb0',c.salary):null,
@@ -821,13 +907,29 @@ function renderAvailable(){
     </div>`;
   }).join('');
 
+  const completedCards = completed.map(c=>{
+    const count = (STATUS[c.id]?.placedNames||[]).length;
+    return`<div class="co-card co-card-done" onclick="openPlacedModal(${c.id})">
+      <div class="co-card-head">${logoHtml(c.name,c.website,c.id-1,52)}<div class="co-card-name">${xe(c.name)}</div></div>
+      <div class="drive-done-banner">
+        <span class="drive-done-icon">\u2705</span>
+        <div><div class="drive-done-title">Drive Completed</div>
+        <div class="drive-done-sub">${count} student${count!==1?'s':''} placed</div></div>
+      </div>
+      <button class="btn-placed-card" onclick="event.stopPropagation();openPlacedModal(${c.id})">View Placed Students \u2192</button>
+    </div>`;
+  }).join('');
+
+  const openSection  = open.length      ? `<div class="sp-sec-sub-head">Open for Applications <span class="count-chip">${open.length}</span></div><div class="co-grid">${openCards}</div>` : '';
+  const doneSection  = completed.length ? `<div class="sp-sec-sub-head" style="margin-top:${open.length?'28px':'0'}">Drive Completed <span class="count-chip count-chip-done">${completed.length}</span></div><div class="co-grid">${completedCards}</div>` : '';
+
   document.getElementById('avail-wrap').innerHTML=`
     <div class="sp-section">
       <div class="sp-sec-head">
         <span class="sp-sec-title">\ud83c\udfe2 Available Companies</span>
-        <span class="count-chip">${avail.length} open</span>
+        ${open.length?`<span class="count-chip">${open.length} open`+'</span>':''}
       </div>
-      <div class="co-grid">${cards}</div>
+      ${openSection}${doneSection}
     </div>`;
 }
 
@@ -871,11 +973,11 @@ function openCoModal(id){
     </div>`;
 
   const applySlot=document.getElementById('modal-apply-slot');
-  if(c.regFormUrl){
-    applySlot.innerHTML=`<button class="btn-modal-apply" onclick="applyNow('${xe(c.regFormUrl)}')">Apply Now \u2192</button>`;
-  } else {
-    applySlot.innerHTML=`<span class="no-form-txt">Registration form not yet available</span>`;
-  }
+  let footerHtml='';
+  if(c.jdUrl) footerHtml+=`<a href="${xe(c.jdUrl)}" target="_blank" rel="noopener" class="btn-modal-dl">\u2b07 Download JD</a>`;
+  if(c.regFormUrl) footerHtml+=`<button class="btn-modal-apply" onclick="applyNow('${xe(c.regFormUrl)}')">Apply Now \u2192</button>`;
+  if(!c.regFormUrl) footerHtml+=`<span class="no-form-txt">Registration form not yet available</span>`;
+  applySlot.innerHTML=footerHtml;
   document.getElementById('co-modal').classList.add('show');
 }
 
@@ -893,6 +995,51 @@ function doLogout(){
   document.getElementById('email-err').textContent='';
   document.getElementById('email-inp').focus();
 }
+
+/* ── SIDEBAR RESIZER ── */
+(function(){
+  const resizer = document.getElementById('sp-resizer');
+  const sidebar = document.getElementById('sp-sidebar');
+  if(!resizer || !sidebar) return;
+  const MIN=200, MAX=520;
+  let dragging=false, startX=0, startW=0;
+
+  resizer.addEventListener('mousedown', e=>{
+    dragging=true; startX=e.clientX;
+    startW=sidebar.getBoundingClientRect().width;
+    resizer.classList.add('dragging');
+    document.body.style.cursor='col-resize';
+    document.body.style.userSelect='none';
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove', e=>{
+    if(!dragging)return;
+    const w=Math.min(MAX,Math.max(MIN,startW+(e.clientX-startX)));
+    document.documentElement.style.setProperty('--sidebar-w',w+'px');
+  });
+  document.addEventListener('mouseup',()=>{
+    if(!dragging)return;
+    dragging=false; resizer.classList.remove('dragging');
+    document.body.style.cursor=''; document.body.style.userSelect='';
+  });
+
+  // ── Auto-size sidebar so email is fully visible ──
+  function autoSizeForEmail(){
+    const emailEl = sidebar.querySelector('.pf-scroll');
+    if(!emailEl) return;
+    const emailW  = emailEl.scrollWidth;
+    const padded  = emailW + 48 + 24; // padding + label width
+    const current = sidebar.getBoundingClientRect().width;
+    if(padded > current){
+      const target = Math.min(MAX, padded);
+      document.documentElement.style.setProperty('--sidebar-w', target+'px');
+    }
+  }
+  // Run after portal loads
+  document.addEventListener('portalReady', autoSizeForEmail);
+  setTimeout(autoSizeForEmail, 600);
+})();
+
 </script>
 
 <div class="rw-modal-overlay" id="rw-modal">
