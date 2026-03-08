@@ -1953,9 +1953,10 @@ function buildStudentSection(title,students,anchorId){
 function _buildReportPDF(title, subtitle, allSections){
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
-  let curY = 0;
+  const DATE_STR = new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
 
-  function addPageHeader(){
+  // ── Draw the college top-bar (purple strip) ──
+  function drawCollegeBar(){
     doc.setFillColor(109,14,106);
     doc.rect(0,0,210,22,'F');
     doc.setTextColor(255,255,255);
@@ -1965,59 +1966,92 @@ function _buildReportPDF(title, subtitle, allSections){
     doc.text('Placement Cell — ' + title, 14, 17);
   }
 
-  addPageHeader();
+  // ── Draw company info block below bar ──
+  // Returns the Y position after the block
+  function drawCompanyBlock(companyName, roles, isContinued){
+    drawCollegeBar();
+    doc.setTextColor(60,60,60);
+    doc.setFontSize(11); doc.setFont('helvetica','bold');
+    doc.text(companyName + (isContinued ? '  (contd.)' : ''), 14, 31);
+    doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(80,80,80);
+    doc.text('Role(s): ' + (roles||'—'), 14, 37);
+    doc.setTextColor(150,150,150);
+    doc.text('Generated: ' + DATE_STR, 14, 43);
+    return 49; // table starts at Y=49
+  }
 
-  // Sub-title block
+  // ── Draw footer ──
+  function drawFooter(){
+    const pg = doc.internal.getCurrentPageInfo().pageNumber;
+    doc.setFontSize(8); doc.setTextColor(160,160,160); doc.setFont('helvetica','normal');
+    doc.text('Vidyavahini Placement Cell', 14, 289);
+    doc.text('Page ' + pg, 196, 289, {align:'right'});
+  }
+
+  // ── First page: report cover block ──
+  drawCollegeBar();
   doc.setTextColor(60,60,60);
   doc.setFontSize(11); doc.setFont('helvetica','bold');
   doc.text(subtitle, 14, 31);
   doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(150,150,150);
-  doc.text('Generated: ' + new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}), 14, 37);
-  curY = 43;
+  doc.text('Generated: ' + DATE_STR + '   ·   Companies: ' + allSections.length, 14, 37);
+  drawFooter();
 
-  allSections.forEach((sec, si) => {
-    // Section heading: Company + Role
-    if(si > 0) curY += 4;
-    if(curY > 250){ doc.addPage(); addPageHeader(); curY = 28; }
-
-    doc.setFontSize(10); doc.setFont('helvetica','bold'); doc.setTextColor(109,14,106);
-    doc.text(sec.companyName, 14, curY); curY += 5;
-    doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(80,80,80);
-    doc.text('Role(s): ' + (sec.roles||'—'), 14, curY); curY += 2;
+  // ── One page per company ──
+  allSections.forEach((sec) => {
+    doc.addPage();  // always start a fresh page for each company
+    let startY = drawCompanyBlock(sec.companyName, sec.roles, false);
 
     if(!sec.rows.length){
-      doc.setFontSize(9); doc.setTextColor(150,150,150);
-      doc.text('No records', 14, curY + 4);
-      curY += 10; return;
+      doc.setFontSize(9); doc.setTextColor(150,150,150); doc.setFont('helvetica','normal');
+      doc.text('No records for this company.', 14, startY + 6);
+      drawFooter();
+      return;
     }
 
+    // Closure so didDrawPage knows which company it's on
+    const _name  = sec.companyName;
+    const _roles = sec.roles;
+    let   _firstPage = true;
+
     doc.autoTable({
-      startY: curY,
-      head: [['Sl. No.','Full Name','Email ID']],
+      startY,
+      head: [['Sl. No.', 'Full Name', 'Email ID']],
       body: sec.rows,
       theme: 'grid',
-      styles:{ fontSize:9.5, cellPadding:{top:3,bottom:3,left:5,right:5}, lineColor:[200,180,200], lineWidth:0.3, textColor:[30,30,30], font:'helvetica' },
-      headStyles:{ fillColor:[109,14,106], textColor:[255,255,255], fontStyle:'bold', fontSize:9.5, halign:'left' },
-      columnStyles:{ 0:{cellWidth:16,halign:'center'}, 1:{cellWidth:65}, 2:{cellWidth:'auto'} },
-      alternateRowStyles:{ fillColor:[247,240,247] },
-      margin:{ left:14, right:14 },
-      didDrawPage: (data) => {
-        addPageHeader();
-        const pg = doc.internal.getCurrentPageInfo().pageNumber;
-        doc.setFontSize(8); doc.setTextColor(160,160,160); doc.setFont('helvetica','normal');
-        doc.text('Page ' + pg, 196, 289, {align:'right'});
-        doc.text('Vidyavahini Placement Cell', 14, 289);
+      styles:{
+        fontSize: 9.5,
+        cellPadding: {top:3,bottom:3,left:5,right:5},
+        lineColor: [200,180,200], lineWidth: 0.3,
+        textColor: [30,30,30], font: 'helvetica',
+      },
+      headStyles:{
+        fillColor: [109,14,106], textColor: [255,255,255],
+        fontStyle: 'bold', fontSize: 9.5, halign: 'left',
+      },
+      columnStyles:{
+        0: {cellWidth:16, halign:'center'},
+        1: {cellWidth:65},
+        2: {cellWidth:'auto'},
+      },
+      alternateRowStyles: {fillColor:[247,240,247]},
+      margin: {left:14, right:14, bottom:16, top:49},
+      didDrawPage: () => {
+        if(_firstPage){ _firstPage = false; drawFooter(); return; }
+        // Continuation page — redraw company+role header, then footer
+        drawCompanyBlock(_name, _roles, true);
+        drawFooter();
       },
     });
-    curY = doc.lastAutoTable.finalY + 6;
+
+    // Count below table
+    const finalY = doc.lastAutoTable.finalY + 6;
+    if(finalY < 282){
+      doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(109,14,106);
+      doc.text('Total: ' + sec.rows.length + ' student' + (sec.rows.length!==1?'s':''), 14, finalY);
+    }
   });
 
-  // Summary
-  const total = allSections.reduce((s,x)=>s+x.rows.length,0);
-  if(curY < 280){
-    doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(109,14,106);
-    doc.text('Total: ' + total + ' student' + (total!==1?'s':''), 14, curY);
-  }
   return doc;
 }
 
