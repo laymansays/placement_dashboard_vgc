@@ -162,9 +162,9 @@ body{
 .btn-danger{background:var(--red);color:#fff;}.btn-danger:hover{filter:brightness(1.1);}
 .btn-ghost{background:none;border:none;color:var(--text3);padding:5px 9px;cursor:pointer;}.btn-ghost:hover{color:var(--text);background:var(--bg3);}
 .btn-nav-home-pd{
-  display:inline-flex;align-items:center;gap:4px;
-  padding:6px 14px;border:1.5px solid var(--border2);border-radius:8px;
-  background:none;font-size:13px;font-weight:600;color:var(--text3);
+  display:inline-flex;align-items:center;line-height:1;
+  padding:6px 10px;border:1.5px solid var(--border2);border-radius:8px;
+  background:none;font-size:15px;font-weight:600;color:var(--text3);
   text-decoration:none;font-family:inherit;transition:all .15s;
 }
 .btn-nav-home-pd:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-bg);}
@@ -616,9 +616,9 @@ body.admin-mode .modal{border-top:3px solid var(--admin);}
 }
 .pl-logo{
   width:60px;height:60px;border-radius:16px;margin:0 auto 18px;
-  background:linear-gradient(135deg,#570B54,#6D0E6A);
+  background:#fff;
   display:flex;align-items:center;justify-content:center;
-  font-size:26px;font-weight:900;color:#fff;
+  overflow:hidden;
   box-shadow:0 8px 24px rgba(109,14,106,0.40);
 }
 .pl-heading{font-size:24px;font-weight:800;color:#0F172A;letter-spacing:-0.03em;margin-bottom:6px;}
@@ -658,7 +658,7 @@ body.admin-mode .modal{border-top:3px solid var(--admin);}
 <!-- ── PLACEMENT CELL LOGIN GATE ── -->
 <div id="placement-login">
   <div class="pl-card">
-    <div class="pl-logo">🛡️</div>
+    <div class="pl-logo"><img src="logo.jpg" alt="VG" style="width:100%;height:100%;object-fit:contain;display:block;border-radius:16px;"/></div>
     <h1 class="pl-heading">Placement Cell</h1>
     <p class="pl-sub">Enter the 4-digit passkey to access<br>the Placement Dashboard.</p>
     <label class="pl-label" for="placement-pin">PASSKEY</label>
@@ -1233,7 +1233,7 @@ function renderNav(){
     const c=COMPANIES.find(x=>x.id===cId);
     right=`<nav class="nav-crumb"><span class="crumb" id="n-h">Home</span><span class="crumb-sep">/</span><span class="crumb" id="n-d">Companies</span><span class="crumb-sep">/</span><span class="crumb-active">${c?xe(c.name):''}</span></nav>`;
   }
-  nb.innerHTML=`<div class="navbar"><a class="nav-brand" id="n-brand"><div class="nav-logo"><img src="logo.jpg" alt="VG" style="width:100%;height:100%;object-fit:contain;border-radius:10px;display:block;"/></div><div class="nav-name"><span>Vidyavahini</span><span>First Grade Degree College</span></div></a><div class="nav-right"><a href="index.html" class="btn-nav-home-pd">← Home</a><button class="btn-icon" id="n-theme">🌙</button>${right}</div></div>`;
+  nb.innerHTML=`<div class="navbar"><a class="nav-brand" id="n-brand"><div class="nav-logo"><img src="logo.jpg" alt="VG" style="width:100%;height:100%;object-fit:contain;border-radius:10px;display:block;"/></div><div class="nav-name"><span>Vidyavahini</span><span>First Grade Degree College</span></div></a><div class="nav-right"><a href="index.html" class="btn-nav-home-pd" title="Home">←</a><button class="btn-icon" id="n-theme">🌙</button>${right}</div></div>`;
   const g=id=>document.getElementById(id);
   g('n-brand').onclick=()=>{ window.location.href='index.html'; };
   g('n-theme').onclick=toggleTheme;
