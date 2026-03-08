@@ -87,11 +87,8 @@ body{
 }
 
 /* ── NAVBAR ── */
-#navbar{
-  position:sticky;
-  top:0;
-  z-index:9999;
-  width:100%;
+.navbar{
+  position:fixed;top:0;left:0;right:0;z-index:100;
   background:var(--nav-bg);
   backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
   border-bottom:1px solid var(--border);
@@ -208,7 +205,7 @@ body{
 .error-msg{font-size:13.5px;color:var(--text3);max-width:480px;line-height:1.7;}
 
 /* ── APP SHELL ── */
-#app{display:none;}#app.ready{display:block;}
+#app{display:none;}#app.ready{display:block;padding-top:64px;}
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    HOME VIEW
@@ -1236,7 +1233,7 @@ function renderNav(){
     const c=COMPANIES.find(x=>x.id===cId);
     right=`<nav class="nav-crumb"><span class="crumb" id="n-h">Home</span><span class="crumb-sep">/</span><span class="crumb" id="n-d">Companies</span><span class="crumb-sep">/</span><span class="crumb-active">${c?xe(c.name):''}</span></nav>`;
   }
-  nb.innerHTML=`<div class="nav-inner"><a class="nav-brand" id="n-brand"><div class="nav-logo"><img src="logo.jpg" alt="VG" style="width:100%;height:100%;object-fit:contain;border-radius:10px;display:block;"/></div><div class="nav-name"><span>Vidyavahini</span><span>First Grade Degree College</span></div></a><div class="nav-right"><a href="index.html" class="btn-nav-home-pd">← Home</a><button class="btn-icon" id="n-theme">🌙</button>${right}</div></div>`;
+  nb.innerHTML=`<div class="navbar"><a class="nav-brand" id="n-brand"><div class="nav-logo"><img src="logo.jpg" alt="VG" style="width:100%;height:100%;object-fit:contain;border-radius:10px;display:block;"/></div><div class="nav-name"><span>Vidyavahini</span><span>First Grade Degree College</span></div></a><div class="nav-right"><a href="index.html" class="btn-nav-home-pd">← Home</a><button class="btn-icon" id="n-theme">🌙</button>${right}</div></div>`;
   const g=id=>document.getElementById(id);
   g('n-brand').onclick=()=>go('home');
   g('n-theme').onclick=toggleTheme;
