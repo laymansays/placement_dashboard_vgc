@@ -380,6 +380,13 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
   cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;
 }
 .btn-modal-close:hover{border-color:#CBD5E1;color:#0F172A;}
+.btn-modal-dl{
+  padding:10px 20px;border:1.5px solid #6D0E6A;border-radius:10px;
+  background:#fff;color:#6D0E6A;font-size:14px;font-weight:700;font-family:'Inter',sans-serif;
+  cursor:pointer;text-decoration:none;transition:all .2s;
+  display:inline-flex;align-items:center;gap:6px;
+}
+.btn-modal-dl:hover{background:#6D0E6A;color:#fff;}
 .btn-modal-apply{
   padding:10px 24px;border:none;border-radius:10px;
   background:linear-gradient(135deg,#6D0E6A,#6D0E6A);
@@ -964,11 +971,16 @@ function openCoModal(id){
     </div>`;
 
   const applySlot=document.getElementById('modal-apply-slot');
-  if(c.regFormUrl){
-    applySlot.innerHTML=`<button class="btn-modal-apply" onclick="applyNow('${xe(c.regFormUrl)}')">Apply Now →</button>`;
-  } else {
-    applySlot.innerHTML=`<span class="no-form-txt">Registration form not yet available</span>`;
+  let footerHtml = '';
+  if(c.jdUrl){
+    footerHtml += `<a class="btn-modal-dl" href="${xe(c.jdUrl)}" target="_blank" rel="noopener" download>⬇ Download JD</a>`;
   }
+  if(c.regFormUrl){
+    footerHtml += `<button class="btn-modal-apply" onclick="applyNow('${xe(c.regFormUrl)}')">Apply Now →</button>`;
+  } else {
+    footerHtml += `<span class="no-form-txt">Registration form not yet available</span>`;
+  }
+  applySlot.innerHTML = footerHtml;
   document.getElementById('co-modal').classList.add('show');
 }
 
