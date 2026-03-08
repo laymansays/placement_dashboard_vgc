@@ -477,6 +477,7 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
   border-bottom:1.5px solid #E8D5E7;padding-bottom:4px;
 }
 .rw-preview h3{font-size:13px;font-weight:700;color:#1A0519;margin:10px 0 2px;}
+.rw-preview .rw-entry-date{font-size:11px;color:#888;margin:1px 0 4px;}
 .rw-preview p{margin:3px 0;}
 .rw-preview ul{margin:4px 0;padding-left:18px;}
 .rw-preview li{margin:2px 0;}
@@ -1334,54 +1335,75 @@ function parseResumeText(text){
 }
 
 /* ── Template builder ── */
+function clean(line){
+  // Strip leading bullet chars and extra whitespace
+  return line.replace(/^[\s•·●\-–*▪▸►]+/, '').trim();
+}
+
+function isBullet(line){
+  return /^[•·●\-–*▪▸►]/.test(line.trim());
+}
+
 function buildResumeHTML(parsed){
   const {name, email, phone, linkedin, github, sections} = parsed;
   let html = '';
 
-  // Header
+  // ── Header ──
   html += `<h1>${xe(name||'Your Name')}</h1>`;
-  const sumLines = sections.summary || sections.header || [];
-  const sumText = sumLines.filter(l=>!l.match(/[@\d]/)).join(' ').trim();
-  if(sumText) html += `<p class="rw-contact">${xe(sumText)}</p>`;
+  const sumLines = (sections.summary || sections.header || [])
+    .filter(l => !l.match(/[@\d]/) && clean(l).length > 3);
+  if(sumLines.length) html += `<p class="rw-contact">${xe(sumLines.map(clean).join(' '))}</p>`;
   const contacts = [phone, linkedin||github, email].filter(Boolean);
   if(contacts.length) html += `<p class="rw-contact">${contacts.map(xe).join('  ·  ')}</p>`;
 
-  // Experience
+  // ── Experience ──
   const exp = sections.experience||[];
   if(exp.length){ html += `<hr class="rw-divider"><h2>EXPERIENCE</h2>${buildEntries(exp)}`; }
 
-  // Education
+  // ── Education ──
   const edu = sections.education||[];
   if(edu.length){ html += `<hr class="rw-divider"><h2>EDUCATION</h2>${buildEntries(edu)}`; }
 
-  // Projects
+  // ── Projects ──
   const proj = sections.projects||[];
   if(proj.length){ html += `<hr class="rw-divider"><h2>PROJECTS</h2>${buildEntries(proj)}`; }
 
-  // Skills
+  // ── Skills ──
   const skillLines = sections.skills||[];
   if(skillLines.length){
     html += `<hr class="rw-divider"><h2>SKILLS</h2><ul>`;
-    const skills = skillLines.join(', ').split(/[,|•·●\n]+/)
-      .map(s=>s.replace(/^[-–*]\s*/,'').trim()).filter(s=>s.length>1);
-    skills.forEach(s=>{ html += `<li>${xe(s)}</li>`; });
+    // Split on commas, pipes, bullets — deduplicate
+    const skills = skillLines
+      .join(' ')
+      .split(/[,|•·●\n\r]+/)
+      .map(s => clean(s))
+      .filter(s => s.length > 1);
+    const seen = new Set();
+    skills.forEach(s => {
+      if(!seen.has(s.toLowerCase())){ seen.add(s.toLowerCase()); html += `<li>${xe(s)}</li>`; }
+    });
     html += `</ul>`;
   }
 
-  // Awards + Certifications merged under AWARDS
+  // ── Awards + Certifications ──
   const awards = [...(sections.awards||[]), ...(sections.certifications||[])];
   if(awards.length){
     html += `<hr class="rw-divider"><h2>AWARDS</h2><ul>`;
-    awards.forEach(l=>{ html += `<li>${xe(l)}</li>`; });
+    awards.forEach(l => {
+      const t = clean(l);
+      if(t.length > 1) html += `<li>${xe(t)}</li>`;
+    });
     html += `</ul>`;
   }
 
-  // Languages
-  const langs = sections.languages||[];
+  // ── Languages ──
+  const langs = (sections.languages||[]).map(clean).filter(l=>l.length>1);
   if(langs.length){
     html += `<hr class="rw-divider"><h2>LANGUAGES</h2><p>${xe(langs.join(', '))}</p>`;
   }
 
+  // Merge adjacent <ul> blocks that got split
+  html = html.replace(/<\/ul>\s*<ul>/g, '');
   return html;
 }
 
@@ -1389,30 +1411,54 @@ function buildEntries(lines){
   const dateRx = /\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|january|february|march|april|june|july|august|september|october|november|december|\d{4}|present|current|now)\b/i;
   let html = '';
   let i = 0;
+
   while(i < lines.length){
-    const line = lines[i];
-    const looksLikeHeading = line.match(/[—–|]/) || (!dateRx.test(line) && line.length < 80);
-    if(looksLikeHeading){
-      html += `<h3>${xe(line)}</h3>`;
+    const raw = lines[i];
+    const t   = clean(raw);
+    if(!t){ i++; continue; }
+
+    const hasDash     = /[—–|]/.test(t);
+    const isShort     = t.length < 72;
+    const hasBullet   = isBullet(raw);
+    const hasDate     = dateRx.test(t);
+
+    // Treat as a section entry heading if:
+    // - contains an em-dash / pipe (Company — Role pattern)
+    // - OR short, not a bullet, no date (likely a title line)
+    if(hasDash || (!hasBullet && !hasDate && isShort)){
+      html += `<h3>${xe(t)}</h3>`;
       i++;
-      if(i < lines.length && dateRx.test(lines[i])){
-        html += `<p style="font-size:11px;color:#888;margin:2px 0 4px">${xe(lines[i])}</p>`;
+      // Next line: date range?
+      if(i < lines.length && dateRx.test(clean(lines[i]))){
+        html += `<p class="rw-entry-date">${xe(clean(lines[i]))}</p>`;
         i++;
       }
-      const desc = [];
-      while(i < lines.length && !(lines[i].match(/[—–|]/) && lines[i].length < 80 && desc.length > 0)){
-        if(dateRx.test(lines[i]) && desc.length > 1) break;
-        desc.push(lines[i]); i++;
+      // Collect description lines until next heading
+      const bullets = [];
+      while(i < lines.length){
+        const nt = clean(lines[i]);
+        if(!nt){ i++; continue; }
+        const nextIsHeading = ((/[—–|]/.test(nt) || (!isBullet(lines[i]) && !dateRx.test(nt) && nt.length < 72)) && bullets.length > 0);
+        if(nextIsHeading) break;
+        if(nt.length > 1) bullets.push(nt);
+        i++;
       }
-      if(desc.length){
-        html += `<ul>` + desc.map(l=>`<li>${xe(l.replace(/^[-–•●*]\s*/,'').trim())}</li>`).join('') + `</ul>`;
+      if(bullets.length){
+        html += `<ul>${bullets.map(b=>`<li>${xe(b)}</li>`).join('')}</ul>`;
       }
     } else {
-      html += `<p>${xe(line)}</p>`; i++;
+      // Standalone bullet or paragraph
+      if(t.length > 1){
+        html += isBullet(raw)
+          ? `<ul><li>${xe(t)}</li></ul>`
+          : `<p>${xe(t)}</p>`;
+      }
+      i++;
     }
   }
   return html;
 }
+
 
 
 function downloadRewrittenPDF(){
