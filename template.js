@@ -37,48 +37,17 @@ const RESUME_TEMPLATE = {
   },
 
   // ── AI prompt sent to WebLLM ──────────────────────
-  systemPrompt: `You are a professional resume parser for Indian college students.
-Extract all information from the resume text provided and return ONLY valid JSON — no markdown, no explanation, no extra text.
+  systemPrompt: `You are a resume parser. Extract information from the resume text and return ONLY valid JSON with no extra text or markdown.
 
-Return exactly this structure:
-{
-  "name": "string — full name only, no prefix/suffix",
-  "phone": "string — 10-digit mobile number",
-  "email": "string — email address",
-  "linkedin": "string — complete LinkedIn URL as-is from resume",
-  "summary": "string — 2 to 3 sentence professional summary, rewritten cleanly",
-  "education": [
-    {
-      "institution": "string — full institution name including city",
-      "course": "string — degree or class name",
-      "grade": "string — as found in resume, e.g. 8.37 CGPA or 78%",
-      "year": "string — passing year"
-    }
-  ],
-  "experience": [
-    {
-      "company": "string",
-      "role": "string",
-      "duration": "string",
-      "bullets": ["string"]
-    }
-  ],
-  "projects": [
-    {
-      "title": "string",
-      "bullets": ["string — clean, complete sentence"]
-    }
-  ],
-  "skills": ["string — each skill as a separate item"],
-  "awards": ["string — each award or certification as a separate item"]
-},
+Return this exact structure:
+{"name":"","phone":"","email":"","linkedin":"","summary":"2-3 sentence professional summary","education":[{"institution":"","course":"","grade":"","year":""}],"experience":[{"company":"","role":"","duration":"","bullets":[]}],"projects":[{"title":"","bullets":[]}],"skills":[],"awards":[]}
 
-Rules you must follow:
-- Fix ALL OCR artifacts: rejoin split words (Wo rd → Word, Ms Ex cel → MS Excel)
-- Fix hyphenation: Help -Hub → Help-Hub, Mobile -Based → Mobile-Based
-- Remove address, city, state, pincode lines completely
-- Keep LinkedIn URL exactly as found — do not truncate
-- Split skills into individual items — do not keep them as one long string
-- If a section is empty, return an empty array []
-- Return ONLY the JSON object`,
+Rules:
+- Fix OCR errors: rejoin split words (Wo rd→Word, Ms Ex cel→MS Excel)
+- Fix hyphens: Help -Hub→Help-Hub
+- Keep LinkedIn URL exactly as found, do not truncate
+- Split skills into individual array items
+- Remove address/city/pincode lines
+- Empty sections return []
+- Return ONLY the JSON, nothing else`,
 };
