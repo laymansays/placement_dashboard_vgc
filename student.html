@@ -1327,10 +1327,11 @@ function stripEmoji(s){
 }
 
 function isAddressLine(line){
-  // Matches: city/state, pincode, "Karnataka", "Mumbai", directions, area names
-  return /\b(karnataka|maharashtra|telangana|tamilnadu|kerala|andhra|gujarat|delhi|punjab|rajasthan|bengaluru|bangalore|mumbai|hyderabad|chennai|pune|tumkur|hubli|mysore|mangalore|bidar|kalyan|nagar|district|taluk|pincode|pin\s*:)\b/i.test(line)
-    || /^\d{6}$/.test(line.trim())
-    || /^[A-Za-z\s,.-]+,\s*[A-Za-z\s]+$/.test(line) && line.length < 50 && !/[@\d]/.test(line) && /,/.test(line);
+  // Never filter lines that mention an educational institution
+  if(/\b(college|school|university|institute|vidyavahini|degree|polytechnic|academy|iit|nit|iim)\b/i.test(line)) return false;
+  // Standalone city/state/pincode lines
+  return /^\s*(karnataka|maharashtra|telangana|tamilnadu|kerala|andhra|gujarat|delhi|punjab|rajasthan|bengaluru|bangalore|mumbai|hyderabad|chennai|pune|tumkur|hubli|mysore|mangalore|bidar|basavakalyan|gulbarga|kalaburagi|davangere|bellary|bagalkot|belagavi|dharwad|shivamogga)\s*$/i.test(line)
+    || /^\d{6}$/.test(line.trim());
 }
 
 function parseResumeText(text){
@@ -1340,8 +1341,12 @@ function parseResumeText(text){
     .replace(/([A-Z]) ([A-Z]{1,2}) /g, '$1$2 ')
     .replace(/- ([A-Za-z])/g, '-$1')
     .replace(/([A-Za-z]),([A-Za-z])/g, '$1, $2')
+    .replace(/\(\s+/g, '(')                   // ( text ) → (text)
+    .replace(/\s+\)/g, ')')                   // trim space before )
     .replace(/Ø=\S+\s*/g, '')                 // strip garbled icon chars
     .replace(/[^\x20-\x7E\n]/g, (ch) => {     // remove non-ASCII that aren't useful
+      // Preserve bullet chars and Indian script chars
+      if(/[\u2022\u00B7\u2219\u25AA\u25B8\u25BA\u2013\u2014]/.test(ch)) return ch; // keep bullets/dashes
       return /[\u00C0-\u024F\u0900-\u097F]/.test(ch) ? ch : ' ';
     });
 
@@ -1510,9 +1515,12 @@ function buildResumeHTML(parsed){
   const skillLines = sections.skills||[];
   if(skillLines.length){
     html += `<h2 class="rw-section">SKILLS</h2><div class="rw-skills">`;
-    const skills = skillLines.join(' ')
-      .split(/[,|•·●\n\r]+/)
-      .map(s=>clean(s)).filter(s=>s.length>2);
+    // Join lines, then split on bullets, pipes, commas, or 2+ spaces
+    const skillRaw = skillLines.join(' • ');
+    const skills = skillRaw
+      .split(/[•·●|,\n\r]|(?<=\w)  +(?=\w)/)
+      .map(s=>clean(s).replace(/\s{2,}/g,' ').trim())
+      .filter(s=>s.length>2);
     const seen = new Set();
     skills.forEach(s=>{
       if(!seen.has(s.toLowerCase())){
