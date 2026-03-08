@@ -76,7 +76,7 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
 
 /* ── PORTAL NAV ── */
 .sp-nav{
-  position:sticky;top:0;z-index:100;
+  position:fixed;top:0;left:0;right:0;z-index:100;
   background:rgba(255,255,255,.96);backdrop-filter:blur(12px);
   border-bottom:1px solid #E2E8F0;
   display:flex;align-items:center;justify-content:space-between;
@@ -343,7 +343,7 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
 </div>
 
 <!-- ── PORTAL (hidden until login) ── -->
-<div id="portal-page" style="display:none;">
+<div id="portal-page" style="display:none;padding-top:62px;">
 
   <!-- Nav -->
   <nav class="sp-nav">
