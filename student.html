@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Student Portal · Vidyavahini Placement</title>
+<title>Student Portal \u00b7 Vidyavahini Placement</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
@@ -12,15 +12,15 @@
 html{scroll-behavior:smooth;}
 body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-font-smoothing:antialiased;min-height:100vh;}
 
-/* ── LOGIN PAGE ── */
+/* \u2500\u2500 LOGIN PAGE \u2500\u2500 */
 .login-page{
   min-height:100vh;display:flex;align-items:center;justify-content:center;
-  background:linear-gradient(150deg,#0F172A 0%,#1E1525 50%,#6D0E6A 100%);
+  background:linear-gradient(150deg,#0A0010 0%,#1A0022 40%,#3D0050 80%,#6D0E6A 100%);
   padding:24px;position:relative;overflow:hidden;
 }
 .login-page::before{
   content:'';position:absolute;inset:0;pointer-events:none;
-  background:radial-gradient(ellipse at 70% 30%,rgba(99,179,237,.07) 0%,transparent 60%);
+  background:radial-gradient(ellipse at 65% 35%,rgba(109,14,106,.35) 0%,transparent 65%);
 }
 .login-card{
   background:#fff;border-radius:24px;padding:48px 44px 40px;
@@ -33,12 +33,12 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
 }
 .login-back:hover{color:#6D0E6A;}
 .login-logo{
-  width:64px;height:64px;border-radius:18px;margin:0 auto 20px;
-  background:#fff;
+  width:72px;height:72px;border-radius:20px;margin:0 auto 20px;
+  background:#fff;overflow:hidden;
   display:flex;align-items:center;justify-content:center;
-  font-size:28px;font-weight:900;color:#fff;
-  box-shadow:0 8px 24px rgba(109,14,106,.4);
+  box-shadow:0 8px 28px rgba(109,14,106,.45);
 }
+.login-logo img{width:100%;height:100%;object-fit:contain;}
 .login-heading{font-size:26px;font-weight:800;color:#0F172A;letter-spacing:-.03em;margin-bottom:8px;}
 .login-sub{font-size:13.5px;color:#64748B;margin-bottom:32px;line-height:1.5;}
 .form-lbl{display:block;font-size:12px;font-weight:700;color:#374151;margin-bottom:7px;text-align:left;letter-spacing:.03em;}
@@ -47,18 +47,18 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
   font-family:'Inter',sans-serif;font-size:14.5px;color:#0F172A;background:#F8FAFC;
   outline:none;transition:all .15s;
 }
-.form-inp:focus{border-color:#6D0E6A;background:#fff;box-shadow:0 0 0 3px rgba(109,14,106,.12);}
+.form-inp:focus{border-color:#6D0E6A;background:#fff;box-shadow:0 0 0 3px rgba(109,14,106,.15);}
 .form-err{font-size:12.5px;color:#EF4444;font-weight:600;min-height:20px;margin:6px 0 0;text-align:left;}
 .btn-login{
   width:100%;margin-top:14px;padding:13px 20px;border:none;border-radius:10px;
-  background:linear-gradient(135deg,#6D0E6A,#6D0E6A);color:#fff;
+  background:linear-gradient(135deg,#570B54,#6D0E6A);color:#fff;
   font-size:15px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;
-  box-shadow:0 4px 16px rgba(109,14,106,.3);transition:all .2s;
+  box-shadow:0 4px 16px rgba(37,99,235,.3);transition:all .2s;
 }
 .btn-login:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 24px rgba(109,14,106,.4);}
 .btn-login:disabled{opacity:.65;cursor:not-allowed;}
 
-/* ── LOADING OVERLAY ── */
+/* \u2500\u2500 LOADING OVERLAY \u2500\u2500 */
 .sp-loading{
   position:fixed;inset:0;background:rgba(15,23,42,.72);backdrop-filter:blur(4px);
   display:none;align-items:center;justify-content:center;flex-direction:column;
@@ -74,9 +74,9 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
 .sp-loading-detail{font-size:12.5px;color:rgba(255,255,255,.55);}
 @keyframes spin{to{transform:rotate(360deg);}}
 
-/* ── PORTAL NAV ── */
+/* \u2500\u2500 PORTAL NAV \u2500\u2500 */
 .sp-nav{
-  position:fixed;top:0;left:0;right:0;z-index:100;
+  position:sticky;top:0;z-index:100;
   background:rgba(255,255,255,.96);backdrop-filter:blur(12px);
   border-bottom:1px solid #E2E8F0;
   display:flex;align-items:center;justify-content:space-between;
@@ -86,7 +86,7 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
 .sp-nav-brand{display:flex;align-items:center;gap:12px;text-decoration:none;}
 .sp-nav-logo{
   width:36px;height:36px;border-radius:9px;flex-shrink:0;
-  background:#fff;
+  background:linear-gradient(135deg,#570B54,#6D0E6A);
   display:flex;align-items:center;justify-content:center;
   font-size:16px;font-weight:900;color:#fff;
 }
@@ -99,31 +99,13 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
   cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;
 }
 .btn-logout:hover{border-color:#CBD5E1;color:#0F172A;}
-.btn-nav-home{
-  padding:7px 11px;border:1.5px solid #E2E8F0;border-radius:8px;
-  background:none;font-size:15px;font-weight:600;color:#64748B;
-  text-decoration:none;font-family:'Inter',sans-serif;transition:all .15s;
-  display:inline-flex;align-items:center;line-height:1;
-}
-.btn-nav-home:hover{border-color:#6D0E6A;color:#6D0E6A;background:#F7F0F7;}
 
-/* ── PORTAL BODY ── */
+/* \u2500\u2500 PORTAL BODY \u2500\u2500 */
 .sp-body{display:flex;max-width:1280px;margin:0 auto;min-height:calc(100vh - 62px);}
-.sp-sidebar{width:var(--sidebar-w,300px);flex-shrink:0;padding:32px 24px 40px;position:sticky;top:62px;max-height:calc(100vh - 62px);overflow-y:auto;}
-.sp-resizer{
-  width:6px;flex-shrink:0;cursor:col-resize;
-  background:transparent;position:relative;
-  transition:background .15s;
-}
-.sp-resizer::after{
-  content:'';position:absolute;inset:0 2px;
-  background:#E2E8F0;border-radius:3px;transition:background .15s;
-}
-.sp-resizer:hover::after,
-.sp-resizer.dragging::after{background:#6D0E6A;}
-.sp-main{flex:1;min-width:0;padding:32px 40px 64px;border-left:none;}
+.sp-sidebar{width:300px;flex-shrink:0;padding:32px 24px 40px;position:sticky;top:62px;max-height:calc(100vh - 62px);overflow-y:auto;}
+.sp-main{flex:1;min-width:0;padding:32px 40px 64px;border-left:1px solid #E2E8F0;}
 
-/* ── PROFILE CARD ── */
+/* \u2500\u2500 PROFILE CARD \u2500\u2500 */
 .profile-card{
   background:#fff;border:1px solid #E2E8F0;border-radius:20px;
   padding:28px 22px;box-shadow:0 2px 16px rgba(0,0,0,.04);text-align:center;
@@ -135,7 +117,7 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
 .profile-photo{width:100%;height:100%;object-fit:cover;display:block;}
 .profile-ini{
   width:100%;height:100%;display:flex;align-items:center;justify-content:center;
-  background:linear-gradient(135deg,#6D0E6A,#6D0E6A);
+  background:linear-gradient(135deg,#570B54,#6D0E6A);
   font-size:28px;font-weight:800;color:#fff;
 }
 .profile-name{font-size:17px;font-weight:800;color:#0F172A;letter-spacing:-.02em;margin-bottom:4px;}
@@ -151,43 +133,15 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
 .pf-row{display:flex;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px solid #F1F5F9;}
 .pf-row:last-child{border-bottom:none;}
 .pf-k{font-size:11.5px;color:#94A3B8;font-weight:600;white-space:nowrap;flex-shrink:0;}
-.pf-v{
-  font-size:12.5px;color:#1E293B;font-weight:500;text-align:right;
-  overflow:hidden;white-space:nowrap;text-overflow:ellipsis;
-  min-width:0;max-width:160px;position:relative;
-}
-.pf-v .pf-scroll{
-  display:inline-block;
-  white-space:nowrap;
-}
-.pf-v:hover{overflow:hidden;}
-.pf-v:hover .pf-scroll{
-  animation:marquee-scroll 4s linear infinite;
-}
-@keyframes marquee-scroll{
-  0%  { transform:translateX(0); }
-  30% { transform:translateX(0); }
-  70% { transform:translateX(calc(-100% + 160px)); }
-  100%{ transform:translateX(calc(-100% + 160px)); }
-}
+.pf-v{font-size:12.5px;color:#1E293B;font-weight:500;text-align:right;word-break:break-all;}
 .btn-resume{
   display:block;width:100%;padding:11px;border-radius:10px;
-  background:#F7F0F7;color:#6D0E6A;border:1px solid #E8D5E7;
+  background:#EFF6FF;color:#6D0E6A;border:1px solid #BFDBFE;
   text-decoration:none;font-size:13.5px;font-weight:700;text-align:center;transition:all .15s;
 }
-.btn-resume:hover{background:#EDE0EC;}
-.resume-btn-group{display:flex;flex-direction:column;gap:10px;margin-top:16px;}
-.btn-rewrite{
-  display:block;width:100%;padding:11px;border-radius:10px;
-  background:linear-gradient(135deg,#570B54,#6D0E6A);color:#fff;border:none;
-  font-size:13.5px;font-weight:700;text-align:center;cursor:pointer;
-  font-family:'Inter',sans-serif;transition:all .2s;
-  box-shadow:0 3px 12px rgba(109,14,106,.25);
-}
-.btn-rewrite:hover{transform:translateY(-1px);box-shadow:0 5px 16px rgba(109,14,106,.35);}
-.btn-resume:hover{background:#F0E4EF;}
+.btn-resume:hover{background:#DBEAFE;}
 
-/* ── SECTIONS ── */
+/* \u2500\u2500 SECTIONS \u2500\u2500 */
 .sp-section{
   background:#fff;border:1px solid #E2E8F0;border-radius:20px;
   padding:28px;margin-bottom:20px;box-shadow:0 2px 16px rgba(0,0,0,.04);
@@ -197,12 +151,12 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
   margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #F1F5F9;
 }
 .sp-sec-title{font-size:17px;font-weight:800;color:#0F172A;letter-spacing:-.02em;}
-.count-chip{font-size:12px;font-weight:700;padding:3px 12px;border-radius:99px;background:#F7F0F7;color:#6D0E6A;border:1px solid #E8D5E7;}
+.count-chip{font-size:12px;font-weight:700;padding:3px 12px;border-radius:99px;background:#EFF6FF;color:#6D0E6A;border:1px solid #BFDBFE;}
 .empty-state{text-align:center;padding:32px 16px;color:#94A3B8;}
 .empty-icon{font-size:32px;margin-bottom:12px;}
 .empty-state p{font-size:14px;line-height:1.6;}
 
-/* ── INELIGIBLE BANNER ── */
+/* \u2500\u2500 INELIGIBLE BANNER \u2500\u2500 */
 .inelig-banner{
   background:#FFF7ED;border:1px solid #FED7AA;border-left:4px solid #F97316;
   border-radius:12px;padding:20px 22px;margin-bottom:20px;
@@ -212,15 +166,15 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
 .inelig-title{font-size:14px;font-weight:700;color:#7C2D12;margin-bottom:6px;}
 .inelig-list{list-style:none;padding:0;margin:0 0 8px;}
 .inelig-list li{font-size:13px;color:#9A3412;margin-bottom:3px;padding-left:14px;position:relative;}
-.inelig-list li::before{content:'·';position:absolute;left:2px;font-weight:700;}
+.inelig-list li::before{content:'\u00b7';position:absolute;left:2px;font-weight:700;}
 
-/* ── STATUS GROUPS ── */
+/* \u2500\u2500 STATUS GROUPS \u2500\u2500 */
 .status-group{border:1px solid #F1F5F9;border-radius:12px;overflow:hidden;margin-bottom:12px;}
 .status-group:last-child{margin-bottom:0;}
 .status-group-hdr{font-size:12px;font-weight:700;padding:8px 16px;display:flex;align-items:center;gap:8px;letter-spacing:.04em;}
 .shdr-sel{background:#D1FAE5;color:#065F46;border-bottom:1px solid #A7F3D0;}
 .shdr-int{background:#FEF3C7;color:#92400E;border-bottom:1px solid #FDE68A;}
-.shdr-reg{background:#F0E4EF;color:#41083F;border-bottom:1px solid #E8D5E7;}
+.shdr-reg{background:#DBEAFE;color:#1E40AF;border-bottom:1px solid #BFDBFE;}
 .status-group-hdr .cnt{margin-left:auto;background:rgba(0,0,0,.1);padding:1px 8px;border-radius:99px;font-size:11px;}
 .status-row{display:flex;align-items:center;gap:14px;padding:14px 16px;border-bottom:1px solid #F8FAFC;transition:background .12s;}
 .status-row:last-child{border-bottom:none;}
@@ -231,31 +185,21 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
 .status-pill{font-size:11px;font-weight:700;padding:3px 12px;border-radius:99px;white-space:nowrap;flex-shrink:0;}
 .spill-sel{background:#D1FAE5;color:#065F46;}
 .spill-int{background:#FEF3C7;color:#92400E;}
-.spill-reg{background:#F0E4EF;color:#41083F;}
+.spill-reg{background:#DBEAFE;color:#1E40AF;}
 
-/* ── AVATAR ── */
+/* \u2500\u2500 AVATAR \u2500\u2500 */
 .co-av{
   flex-shrink:0;border-radius:10px;overflow:hidden;
   background:#fff;border:1.5px solid #E2E8F0;
   display:flex;align-items:center;justify-content:center;
-  position:relative;cursor:default;
 }
-.co-av img{
-  position:absolute;inset:0;width:100%;height:100%;
-  object-fit:contain;transition:opacity .25s ease;
-}
-.co-av-ini{
-  position:absolute;inset:0;width:100%;height:100%;
-  display:flex;align-items:center;justify-content:center;
-  font-weight:800;color:#fff;
-  opacity:0;transition:opacity .25s ease;z-index:1;
-}
-.co-av:hover img{ opacity:0; }
-.co-av:hover .co-av-ini{ opacity:1; }
 .co-av img{width:100%;height:100%;object-fit:contain;}
+.co-av-ini{
+  width:100%;height:100%;display:flex;align-items:center;justify-content:center;
+  font-weight:800;color:#fff;
+}
 
-
-/* ── COMPANY CARDS ── */
+/* \u2500\u2500 COMPANY CARDS \u2500\u2500 */
 .co-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;}
 .co-card{
   background:#fff;border:1.5px solid #E2E8F0;border-radius:16px;
@@ -265,10 +209,10 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
 }
 .co-card::before{
   content:'';position:absolute;top:0;left:0;right:0;height:3px;
-  background:linear-gradient(90deg,#6D0E6A,#6D0E6A);
+  background:linear-gradient(90deg,#570B54,#6D0E6A);
   transform:scaleX(0);transform-origin:left;transition:transform .22s;
 }
-.co-card:hover{border-color:#6D0E6A;box-shadow:0 8px 32px rgba(109,14,106,.14);transform:translateY(-3px);}
+.co-card:hover{border-color:#6D0E6A;box-shadow:0 8px 32px rgba(37,99,235,.14);transform:translateY(-3px);}
 .co-card:hover::before{transform:scaleX(1);}
 .co-card-head{display:flex;align-items:center;gap:14px;}
 .co-card-name{font-size:15px;font-weight:800;color:#0F172A;line-height:1.2;flex:1;}
@@ -285,63 +229,13 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
 }
 .btn-apply-card{
   width:100%;padding:10px;border-radius:10px;border:none;
-  background:linear-gradient(135deg,#6D0E6A,#6D0E6A);
+  background:linear-gradient(135deg,#570B54,#6D0E6A);
   color:#fff;font-size:13.5px;font-weight:700;font-family:'Inter',sans-serif;
-  cursor:pointer;box-shadow:0 2px 10px rgba(109,14,106,.25);transition:all .2s;
+  cursor:pointer;box-shadow:0 2px 10px rgba(37,99,235,.25);transition:all .2s;
 }
+.btn-apply-card:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(37,99,235,.35);}
 
-/* ── Completed drive card ── */
-.co-card-done{opacity:.92;border-style:dashed;}
-.drive-done-banner{
-  display:flex;align-items:center;gap:12px;
-  background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;
-  padding:10px 14px;margin-bottom:12px;
-}
-.drive-done-icon{font-size:22px;line-height:1;}
-.drive-done-title{font-size:13.5px;font-weight:700;color:#065F46;}
-.drive-done-sub{font-size:12px;color:#16A34A;margin-top:2px;}
-.btn-placed-card{
-  width:100%;padding:10px;border-radius:10px;border:1.5px solid #6D0E6A;
-  background:#fff;color:#6D0E6A;font-size:13.5px;font-weight:700;
-  font-family:'Inter',sans-serif;cursor:pointer;transition:all .2s;
-}
-.btn-placed-card:hover{background:#6D0E6A;color:#fff;}
-
-/* ── Sub-section header ── */
-.sp-sec-sub-head{
-  font-size:12px;font-weight:700;letter-spacing:0.06em;
-  color:#94A3B8;text-transform:uppercase;margin-bottom:12px;
-  display:flex;align-items:center;gap:8px;
-}
-.count-chip-done{background:#D1FAE5;color:#065F46;}
-
-/* ── Placed students list ── */
-.placed-list-head{
-  font-size:13px;font-weight:700;color:#64748B;
-  margin-bottom:12px;text-transform:uppercase;letter-spacing:0.05em;
-}
-.placed-list{display:flex;flex-direction:column;gap:6px;}
-.placed-row{
-  display:flex;align-items:center;gap:12px;
-  padding:10px 14px;background:#F8FAFC;
-  border:1px solid #E2E8F0;border-radius:10px;
-}
-.placed-num{
-  width:24px;height:24px;border-radius:50%;
-  background:#6D0E6A;color:#fff;
-  font-size:11px;font-weight:800;
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
-}
-.placed-name{font-size:14px;font-weight:600;color:#1E293B;}
-.badge-pill{
-  display:inline-flex;align-items:center;
-  font-size:11.5px;font-weight:600;
-  padding:3px 10px;border-radius:999px;
-  background:#F1F5F9;color:#64748B;
-}
-.btn-apply-card:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(109,14,106,.35);}
-
-/* ── COMPANY MODAL ── */
+/* \u2500\u2500 COMPANY MODAL \u2500\u2500 */
 .co-modal{
   position:fixed;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(4px);
   display:none;align-items:center;justify-content:center;padding:24px;z-index:1000;
@@ -361,7 +255,7 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
 .co-modal-name{font-size:20px;font-weight:800;color:#0F172A;letter-spacing:-.02em;margin-bottom:8px;}
 .co-modal-badges{display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
 .badge-pill{font-size:11px;font-weight:600;padding:3px 12px;border-radius:99px;background:#F1F5F9;color:#475569;}
-.badge-date{background:#F7F0F7;color:#41083F;}
+.badge-date{background:#EFF6FF;color:#1E40AF;}
 .badge-link{font-size:11.5px;color:#6D0E6A;text-decoration:none;font-weight:600;}
 .badge-link:hover{text-decoration:underline;}
 .co-modal-close{
@@ -380,38 +274,26 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
 .jd-box-title{font-size:12px;font-weight:700;color:#64748B;margin-bottom:10px;letter-spacing:.04em;}
 .jd-box-text{font-size:13.5px;color:#1E293B;line-height:1.7;}
 .co-modal-footer{
-  display:flex;align-items:center;gap:12px;
+  display:flex;align-items:center;justify-content:flex-end;gap:10px;
   padding:16px 24px;border-top:1px solid #F1F5F9;
   position:sticky;bottom:0;background:#fff;
 }
-.co-modal-footer>*{flex:1;}
-#modal-apply-slot{display:contents;}
 .btn-modal-close{
-  padding:11px 20px;border:1.5px solid #E2E8F0;border-radius:10px;
+  padding:10px 20px;border:1.5px solid #E2E8F0;border-radius:10px;
   background:none;font-size:14px;font-weight:600;color:#64748B;
   cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;
-  width:100%;
 }
-.btn-modal-close:hover{border-color:#6D0E6A;color:#6D0E6A;}
 .btn-modal-close:hover{border-color:#CBD5E1;color:#0F172A;}
-.btn-modal-dl{
-  padding:11px 20px;border:1.5px solid #6D0E6A;border-radius:10px;
-  background:#fff;color:#6D0E6A;font-size:14px;font-weight:700;font-family:'Inter',sans-serif;
-  cursor:pointer;text-decoration:none;transition:all .2s;
-  display:flex;align-items:center;justify-content:center;gap:6px;width:100%;
-}
-.btn-modal-dl:hover{background:#6D0E6A;color:#fff;}
 .btn-modal-apply{
-  padding:11px 20px;border:none;border-radius:10px;
+  padding:10px 24px;border:none;border-radius:10px;
   background:linear-gradient(135deg,#570B54,#6D0E6A);
   color:#fff;font-size:14px;font-weight:700;font-family:'Inter',sans-serif;
-  cursor:pointer;box-shadow:0 3px 12px rgba(109,14,106,.3);transition:all .2s;
-  width:100%;
+  cursor:pointer;box-shadow:0 3px 12px rgba(37,99,235,.3);transition:all .2s;
 }
 .btn-modal-apply:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(109,14,106,.4);}
-.no-form-txt{font-size:13px;color:#94A3B8;text-align:center;width:100%;}
+.no-form-txt{font-size:13px;color:#94A3B8;}
 
-/* ── RESPONSIVE ── */
+/* \u2500\u2500 RESPONSIVE \u2500\u2500 */
 @media(max-width:768px){
   .sp-nav{padding:0 20px;}
   .sp-nav-name{display:none;}
@@ -428,131 +310,77 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
   .login-card{padding:40px 24px 32px;}
   .sp-section{padding:20px 16px;}
 }
-/* ── Rewrite Resume Modal ── */
-.rw-modal{
-  display:none;position:fixed;inset:0;z-index:300;
-  background:rgba(26,5,25,0.55);backdrop-filter:blur(4px);
-  align-items:center;justify-content:center;padding:16px;
-}
-.rw-modal.show{display:flex;}
-.rw-modal-box{
-  background:#fff;border-radius:18px;width:100%;max-width:720px;
-  max-height:88vh;min-height:0;display:flex;flex-direction:column;
-  box-shadow:0 24px 64px rgba(109,14,106,.22);overflow:visible;
-}
-.rw-modal-body{flex:1;overflow-y:auto;padding:24px;min-height:0;}
-.rw-modal-head{
-  display:flex;align-items:flex-start;justify-content:space-between;
-  padding:20px 24px 16px;border-bottom:1px solid #F1F5F9;flex-shrink:0;
-}
-.rw-modal-title{font-size:17px;font-weight:800;color:#1A0519;}
-.rw-modal-sub{font-size:12px;color:#94A3B8;margin-top:2px;}
 
-.rw-modal-footer{
-  display:flex;align-items:center;gap:12px;
-  padding:16px 24px;border-top:1px solid #F1F5F9;flex-shrink:0;
-}
-.rw-modal-footer>*{flex:1;}
-/* Loading state */
-.rw-loading{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:16px;padding:48px 24px;color:#6D0E6A;
-}
-.rw-spinner{
-  width:44px;height:44px;border:4px solid #E8D5E7;
-  border-top-color:#6D0E6A;border-radius:50%;
-  animation:spin .8s linear infinite;
-}
-@keyframes spin{to{transform:rotate(360deg);}}
-.rw-loading-txt{font-size:14px;font-weight:600;color:#570B54;}
-.rw-loading-sub{font-size:12px;color:#94A3B8;text-align:center;}
-/* Preview */
-.rw-preview{
-  font-family:'Inter',sans-serif;font-size:13px;line-height:1.65;color:#1e1e1e;
-  border:1px solid #E8D5E7;border-radius:12px;padding:28px 32px;background:#FDFBFD;
-}
-.rw-preview .rw-name{font-size:24px;font-weight:900;color:#111;text-align:center;margin:0 0 6px;letter-spacing:-.01em;}
-.rw-preview .rw-contact-line{font-size:11.5px;color:#555;text-align:center;margin:0 0 10px;}
-.rw-preview .rw-header-rule{border:none;border-top:1.5px solid #ccc;margin:8px 0 14px;}
-.rw-preview .rw-section{font-size:12px;font-weight:800;color:#111;letter-spacing:.08em;text-transform:uppercase;margin:16px 0 4px;border-bottom:2px solid #111;padding-bottom:3px;}
-.rw-preview .rw-about{font-size:12.5px;color:#444;line-height:1.7;margin:6px 0;}
-.rw-preview .rw-rule{border:none;border-top:1px solid #ddd;margin:12px 0;}
+.btn-rewrite{display:block;width:100%;padding:11px;border-radius:10px;border:none;
+  background:linear-gradient(135deg,#570B54,#6D0E6A);color:#fff;font-size:13px;
+  font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;transition:all .2s;}
+.btn-rewrite:hover{opacity:.9;transform:translateY(-1px);}
+.rw-modal-overlay{position:fixed;inset:0;background:rgba(26,5,25,.55);z-index:9999;
+  display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;}
+.rw-modal-overlay.show{opacity:1;pointer-events:all;}
+.rw-modal-box{background:#fff;border-radius:20px;width:90%;max-width:620px;max-height:88vh;
+  display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 64px rgba(26,5,25,.28);
+  transform:translateY(20px);transition:transform .25s;}
+.rw-modal-overlay.show .rw-modal-box{transform:translateY(0);}
+.rw-modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 20px 14px;border-bottom:1.5px solid #F1E8F1;flex-shrink:0;}
+.rw-modal-title{font-size:16px;font-weight:800;color:#1A0519;}
+.rw-modal-sub{font-size:11.5px;color:#94A3B8;margin-top:2px;}
+.rw-modal-close{width:30px;height:30px;border-radius:50%;border:none;background:#F7F0F7;color:#6D0E6A;font-size:16px;cursor:pointer;}
+.rw-modal-foot{padding:14px 20px;border-top:1.5px solid #F1E8F1;display:flex;gap:10px;flex-shrink:0;}
+.btn-rw-dl{flex:1;padding:11px;border:none;border-radius:10px;background:linear-gradient(135deg,#570B54,#6D0E6A);color:#fff;font-size:14px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;}
+.btn-rw-close-foot{padding:11px 20px;border:1.5px solid #D3B6D2;border-radius:10px;background:#fff;color:#6D0E6A;font-size:14px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;}
+.rw-loading{text-align:center;padding:32px 16px;}
+.rw-spinner{width:44px;height:44px;border:4px solid #E8D5E7;border-top-color:#6D0E6A;border-radius:50%;animation:rwspin .8s linear infinite;margin:0 auto 16px;}
+@keyframes rwspin{to{transform:rotate(360deg);}}
+.rw-loading-txt{font-size:15px;font-weight:700;color:#6D0E6A;margin-bottom:6px;}
+.rw-loading-sub{font-size:12px;color:#94A3B8;line-height:1.6;}
+.rw-error{background:#FEF2F2;border:1.5px solid #FECACA;border-radius:12px;padding:14px 16px;color:#DC2626;font-size:13px;font-weight:600;}
+.rw-retry-wrap{text-align:center;margin-top:16px;}
+.btn-rw-retry{padding:9px 20px;border:1.5px solid #6D0E6A;border-radius:8px;background:#fff;color:#6D0E6A;font-size:12.5px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;}
+.rw-drop-zone{border:2.5px dashed #D3B6D2;border-radius:16px;padding:52px 32px;text-align:center;cursor:pointer;transition:all .2s;background:#FDFBFD;}
+.rw-drop-zone:hover,.rw-drag-over{border-color:#6D0E6A;background:#F7F0F7;}
+.rw-drop-icon{font-size:48px;margin-bottom:14px;}
+.rw-drop-title{font-size:17px;font-weight:800;color:#1A0519;margin-bottom:6px;}
+.rw-drop-hint{font-size:13px;color:#6D0E6A;font-weight:600;margin-bottom:14px;}
+.rw-drop-note{font-size:12px;color:#94A3B8;max-width:340px;margin:0 auto;background:#F1F5F9;border-radius:8px;padding:10px 14px;}
+.rw-preview{font-family:'Inter',sans-serif;font-size:13px;color:#1A0519;line-height:1.6;}
+.rw-preview .rw-name{font-size:24px;font-weight:800;text-align:center;margin-bottom:4px;}
+.rw-preview .rw-contact-line{font-size:11.5px;text-align:center;color:#64748B;margin-bottom:8px;}
+.rw-preview .rw-header-rule{border:none;border-top:2px solid #E2E8F0;margin:8px 0 12px;}
+.rw-preview .rw-section{font-size:12px;font-weight:800;letter-spacing:.06em;color:#111;border-bottom:2px solid #111;padding-bottom:2px;margin:14px 0 6px;}
+.rw-preview .rw-rule{border:none;border-top:1px solid #E2E8F0;margin:8px 0;}
+.rw-preview .rw-about{font-size:12px;color:#444;margin-bottom:4px;}
+.rw-preview .rw-list{margin:0;padding-left:18px;}
+.rw-preview .rw-list li{margin-bottom:3px;font-size:12px;}
+.rw-preview .rw-skills{display:grid;grid-template-columns:repeat(3,1fr);gap:3px 8px;}
+.rw-preview .rw-skill-item{font-size:12px;}
 .rw-preview .rw-entry-company{font-size:11px;color:#888;margin:8px 0 2px;}
 .rw-preview .rw-entry-role{font-size:13px;font-weight:700;color:#111;margin:2px 0 1px;}
-.rw-preview .rw-entry-date{font-size:10.5px;color:#aaa;margin:0 0 4px;}
-.rw-preview .rw-entry-desc{font-size:12px;color:#555;margin:2px 0;}
 .rw-preview .rw-edu-inst{font-size:12px;color:#555;margin:8px 0 1px;}
 .rw-preview .rw-edu-grade{font-size:11.5px;color:#6D0E6A;font-weight:600;margin:1px 0 2px;}
 .rw-preview .rw-edu-gap{height:8px;}
-.rw-preview .rw-list{margin:4px 0 4px 16px;padding:0;}
-.rw-preview .rw-list li{font-size:12px;color:#444;margin:2px 0;}
-.rw-preview .rw-skills{display:grid;grid-template-columns:repeat(3,1fr);gap:4px 8px;margin:4px 0;}
-.rw-preview .rw-skill-item{font-size:12px;color:#444;}
-/* Error */
-.rw-error{
-  background:#FFF5F5;border:1px solid #FED7D7;border-radius:10px;
-  padding:20px 24px;color:#C53030;font-size:13px;font-weight:600;
-}
-.btn-rw-retry{
-  padding:9px 20px;border:1.5px solid #6D0E6A;border-radius:8px;
-  background:#fff;color:#6D0E6A;font-size:12.5px;font-weight:700;
-  font-family:'Inter',sans-serif;cursor:pointer;transition:all .2s;display:inline-block;
-}
-.btn-rw-retry:hover{background:#6D0E6A;color:#fff;}
-/* Drop zone */
-.rw-drop-zone{
-  border:2.5px dashed #D3B6D2;border-radius:16px;
-  padding:52px 32px;text-align:center;cursor:pointer;
-  transition:all .2s;margin:4px 0;background:#FDFBFD;
-}
-.rw-drop-zone:hover,.rw-drag-over{
-  border-color:#6D0E6A;background:#F7F0F7;
-  transform:scale(1.01);
-}
-.rw-drop-icon{font-size:48px;margin-bottom:14px;line-height:1;}
-.rw-drop-title{font-size:17px;font-weight:800;color:#1A0519;margin-bottom:6px;}
-.rw-drop-hint{font-size:13px;color:#6D0E6A;font-weight:600;margin-bottom:14px;}
-.rw-drop-note{
-  font-size:12px;color:#94A3B8;line-height:1.6;
-  max-width:340px;margin:0 auto;
-  background:#F1F5F9;border-radius:8px;padding:10px 14px;
-}
-.rw-retry-wrap{text-align:center;margin-top:16px;}
-
-/* Download btn */
-.btn-rw-dl{
-  padding:11px 20px;border:none;border-radius:10px;
-  background:linear-gradient(135deg,#570B54,#6D0E6A);
-  color:#fff;font-size:14px;font-weight:700;font-family:'Inter',sans-serif;
-  cursor:pointer;box-shadow:0 3px 12px rgba(109,14,106,.3);transition:all .2s;
-  width:100%;
-}
-.btn-rw-dl:hover{transform:translateY(-1px);box-shadow:0 5px 16px rgba(109,14,106,.4);}
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script>window['pdfjs-dist/build/pdf'].GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
-  <!-- Google Identity Services (Drive OAuth) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>if(window['pdfjs-dist/build/pdf']) window['pdfjs-dist/build/pdf'].GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="resume_extractor.js"></script>
   <script src="language_engine.js"></script>
 </head>
 <body>
 
-<!-- ── LOADING OVERLAY ── -->
+<!-- \u2500\u2500 LOADING OVERLAY \u2500\u2500 -->
 <div id="loading-overlay" class="sp-loading">
   <div class="sp-spinner"></div>
-  <div id="loading-msg" class="sp-loading-msg">Loading…</div>
+  <div id="loading-msg" class="sp-loading-msg">Loading\u2026</div>
   <div id="loading-detail" class="sp-loading-detail"></div>
 </div>
 
-<!-- ── LOGIN PAGE ── -->
+<!-- \u2500\u2500 LOGIN PAGE \u2500\u2500 -->
 <div id="login-page" class="login-page">
   <div class="login-card">
     <a href="index.html" class="login-back">← Home</a>
-    <div class="login-logo"><img src="logo.jpg" alt="VG" style="width:100%;height:100%;object-fit:contain;border-radius:18px;display:block;"/></div>
+    <div class="login-logo"><img src="logo.jpg" alt="Vidyavahini"></div>
     <h1 class="login-heading">Student Portal</h1>
     <p class="login-sub">Vidyavahini First Grade Degree College<br>Placement Cell 2025–26</p>
     <label class="form-lbl" for="email-inp">REGISTERED EMAIL ADDRESS</label>
@@ -562,17 +390,16 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
   </div>
 </div>
 
-<!-- ── PORTAL (hidden until login) ── -->
-<div id="portal-page" style="display:none;padding-top:62px;">
+<!-- \u2500\u2500 PORTAL (hidden until login) \u2500\u2500 -->
+<div id="portal-page" style="display:none;">
 
   <!-- Nav -->
   <nav class="sp-nav">
     <a href="index.html" class="sp-nav-brand">
-      <div class="sp-nav-logo"><img src="logo.jpg" alt="VG" style="width:100%;height:100%;object-fit:contain;border-radius:9px;display:block;"/></div>
+      <div class="sp-nav-logo">V</div>
       <span class="sp-nav-title">Placement Portal</span>
     </a>
     <div class="sp-nav-right">
-      <a href="index.html" class="btn-nav-home" title="Home">←</a>
       <span class="sp-nav-name" id="nav-name"></span>
       <button class="btn-logout" id="logout-btn">Logout</button>
     </div>
@@ -580,10 +407,9 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
 
   <!-- Body -->
   <div class="sp-body">
-    <aside class="sp-sidebar" id="sp-sidebar">
+    <aside class="sp-sidebar">
       <div id="profile-wrap"></div>
     </aside>
-    <div class="sp-resizer" id="sp-resizer"></div>
     <main class="sp-main">
       <div id="inelig-wrap"></div>
       <div id="status-wrap"></div>
@@ -592,7 +418,7 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
   </div>
 </div>
 
-<!-- ── COMPANY MODAL ── -->
+<!-- \u2500\u2500 COMPANY MODAL \u2500\u2500 -->
 <div id="co-modal" class="co-modal">
   <div class="co-modal-box">
     <div id="co-modal-inner"></div>
@@ -604,9 +430,9 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
 </div>
 
 <script>
-/* ══════════════════════════════════════════════════════
+/* \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
    SHARED UTILITIES
-══════════════════════════════════════════════════════ */
+\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 */
 const CONFIG_SHEET_ID   = '1Mb9jrzZMSta5NYs28i3STS2tYNqhMtabj3wktvHiYmw';
 const CONFIG_TAB_NAME   = 'CONFIG_TAB';
 const ADMIN_TAB_NAME    = 'ADMIN_MODE';
@@ -614,7 +440,7 @@ const STUDENT_TAB_NAME  = 'STUDENT_MASTER';
 
 function xe(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function ini(n){ return (n||'?').split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]||'').join('').toUpperCase()||'?'; }
-function fmtD(d){ if(!d)return'—'; try{return new Date(d).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});}catch{return d;} }
+function fmtD(d){ if(!d)return'\u2014'; try{return new Date(d).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});}catch{return d;} }
 function extractSid(raw){
   if(!raw)return'';
   raw=String(raw).trim();
@@ -625,16 +451,12 @@ function extractSid(raw){
   return'';
 }
 function drivePhoto(url){
-  if(!url) return '';
-  // Extract file ID from any Google Drive URL format
-  const m = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-  if(m) return `https://drive.google.com/thumbnail?id=${m[1]}&sz=w400`;
-  const m2 = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-  if(m2) return `https://drive.google.com/thumbnail?id=${m2[1]}&sz=w400`;
-  // Already a direct URL or thumbnail URL — return as-is
+  if(!url)return'';
+  const m=url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/); if(m)return`https://drive.google.com/uc?export=view&id=${m[1]}`;
+  const m2=url.match(/[?&]id=([a-zA-Z0-9_-]+)/); if(m2)return`https://drive.google.com/uc?export=view&id=${m2[1]}`;
   return url;
 }
-const GRADS=[['#41083F','#6D0E6A'],['#0369a1','#0e7490'],['#065f46','#0891b2'],['#7c2d12','#b45309'],['#6b21a8','#db2777'],['#991b1b','#ea580c'],['#0f4c3a','#065f46'],['#3730a3','#41083F']];
+const GRADS=[['#6D0E6A','#570B54'],['#0369a1','#0e7490'],['#065f46','#0891b2'],['#7c2d12','#b45309'],['#6b21a8','#db2777'],['#991b1b','#ea580c'],['#0f4c3a','#065f46'],['#3730a3','#1e40af']];
 function grad(i){const p=GRADS[i%GRADS.length];return`linear-gradient(135deg,${p[0]},${p[1]})`;}
 const LOGO_HINTS={'tcs':'tcs.com','infosys':'infosys.com','wipro':'wipro.com','accenture':'accenture.com','cognizant':'cognizant.com','first source':'firstsource.com','firstsource':'firstsource.com','fyers':'fyers.in','rupeek':'rupeek.com','codeyoung':'codeyoung.com','interns elite':'internselite.com','genz':'genzeducatewing.com','cloud unicorn':'cloudunicorn.in','idea infinity':'ideainfinity.in'};
 function logoDomain(name,web){
@@ -647,10 +469,10 @@ function logoHtml(name,web,idx,sz){
   const size=sz||48; const d=logoDomain(name,web);
   const cb=`https://logo.clearbit.com/${d}?size=${size*2}`;
   const gf=`https://www.google.com/s2/favicons?domain=${d}&sz=128`;
-  const g=grad(idx||0); const pad=size>56?8:6; const fsz=Math.round(size*.32);
+  const g=grad(idx||0); const pad=size>56?8:6; const fsz=Math.round(size*.30);
   return `<div class="co-av" style="width:${size}px;height:${size}px;border-radius:${Math.round(size*.21)}px;">
-    <img src="${cb}" style="object-fit:contain;padding:${pad}px;" onerror="this.style.opacity='0';this.nextElementSibling.style.opacity='1';"/>
-    <img src="${gf}" style="object-fit:contain;padding:${pad+2}px;opacity:0;" onerror="this.style.opacity='0';this.nextElementSibling.style.opacity='1';this.nextElementSibling.style.zIndex='2';"/>
+    <img src="${cb}" style="width:100%;height:100%;object-fit:contain;padding:${pad}px;display:block;" onerror="this.style.display='none';this.nextElementSibling.style.display='block';"/>
+    <img src="${gf}" style="width:100%;height:100%;object-fit:contain;padding:${pad+2}px;display:none;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"/>
     <div class="co-av-ini" style="background:${g};font-size:${fsz}px;">${ini(name)}</div>
   </div>`;
 }
@@ -682,33 +504,35 @@ function parseCSV(csv){
     const ch=csv[i];
     if(ch==='"'){if(inQ&&csv[i+1]==='"'){cur+='"';i++;}else inQ=!inQ;}
     else if(ch===','&&!inQ){row.push(cur.trim());cur='';}
-    else if((ch==='\n'||ch==='\r')&&!inQ){if(ch==='\r'&&csv[i+1]==='\n')i++;row.push(cur.trim());rows.push(row);row=[];cur='';}
+    else if((ch==='\
+'||ch==='\r')&&!inQ){if(ch==='\r'&&csv[i+1]==='\
+')i++;row.push(cur.trim());rows.push(row);row=[];cur='';}
     else cur+=ch;
   }
   if(cur||row.length){row.push(cur.trim());rows.push(row);}
   return rows.filter(r=>r.some(c=>c));
 }
 
-/* ══════════════════════════════════════════════════════
+/* \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
    STATE
-══════════════════════════════════════════════════════ */
+\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 */
 let ST     = null;   // student object
 let COMPS  = [];     // company configs
 let STATUS = {};     // {compId: {reg,int,sel}}
 
-/* ══════════════════════════════════════════════════════
+/* \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
    LOADING UI
-══════════════════════════════════════════════════════ */
+\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 */
 function showLoad(msg, detail){
-  document.getElementById('loading-msg').textContent = msg||'Loading…';
+  document.getElementById('loading-msg').textContent = msg||'Loading\u2026';
   document.getElementById('loading-detail').textContent = detail||'';
   document.getElementById('loading-overlay').classList.add('show');
 }
 function hideLoad(){ document.getElementById('loading-overlay').classList.remove('show'); }
 
-/* ══════════════════════════════════════════════════════
+/* \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
    BOOT
-══════════════════════════════════════════════════════ */
+\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 */
 window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('login-btn').addEventListener('click', handleLogin);
   document.getElementById('email-inp').addEventListener('keydown', e=>{ if(e.key==='Enter') handleLogin(); });
@@ -719,9 +543,9 @@ window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('email-inp').focus();
 });
 
-/* ══════════════════════════════════════════════════════
+/* \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
    LOGIN
-══════════════════════════════════════════════════════ */
+\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 */
 function handleLogin(){
   const email = (document.getElementById('email-inp').value||'').trim();
   const errEl = document.getElementById('email-err');
@@ -729,12 +553,12 @@ function handleLogin(){
   if(!email){ errEl.textContent='Please enter your email address.'; return; }
   if(!email.includes('@')){ errEl.textContent='Please enter a valid email.'; return; }
   const btn = document.getElementById('login-btn');
-  btn.disabled = true; btn.textContent = 'Verifying…';
+  btn.disabled = true; btn.textContent = 'Verifying\u2026';
   doLogin(email).finally(()=>{ btn.disabled=false; btn.textContent='Login to Portal →'; });
 }
 
 async function doLogin(email){
-  showLoad('Verifying student ID…', 'Fetching student master data');
+  showLoad('Verifying student ID\u2026', 'Fetching student master data');
   try{
     const j = await apiFetch(CONFIG_SHEET_ID, STUDENT_TAB_NAME, 'json');
     const rows = jsonToRows(j);
@@ -757,13 +581,12 @@ async function doLogin(email){
       resume:    row[11]||'',
     };
 
-    showLoad('Loading company data…','Fetching placement configuration');
+    showLoad('Loading company data\u2026','Fetching placement configuration');
     await loadCompanyData();
-    showLoad('Checking your applications…',`Checking ${COMPS.length} companies`);
+    showLoad('Checking your applications\u2026',`Checking ${COMPS.length} companies`);
     await loadStatus();
     hideLoad();
     renderPortal();
-
   }catch(e){
     hideLoad();
     console.error('[StudentPortal]', e);
@@ -771,9 +594,9 @@ async function doLogin(email){
   }
 }
 
-/* ══════════════════════════════════════════════════════
+/* \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
    LOAD COMPANY DATA
-══════════════════════════════════════════════════════ */
+\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 */
 async function loadCompanyData(){
   const [configJ, adminCsv] = await Promise.all([
     apiFetch(CONFIG_SHEET_ID, CONFIG_TAB_NAME, 'json'),
@@ -838,9 +661,9 @@ async function loadCompanyData(){
   }
 }
 
-/* ══════════════════════════════════════════════════════
+/* \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
    CHECK STATUS IN ALL COMPANIES
-══════════════════════════════════════════════════════ */
+\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 */
 async function loadStatus(){
   const em = ST.email.toLowerCase();
   STATUS = {};
@@ -854,42 +677,20 @@ async function loadStatus(){
     };
     const [rr,ir,sr]=await Promise.all([fetchTab(c.tabReg),fetchTab(c.tabInt),fetchTab(c.tabSel)]);
     const has=rows=>rows.some(r=>(r[2]||'').toLowerCase().trim()===em);
-
-    // Detect name column by header label, fall back to col index 1
-    const nameIdx = (rows)=>{
-      if(!rows.length) return 1;
-      // Check if first row looks like a header (non-numeric values)
-      const hdr = rows[0];
-      const idx = hdr.findIndex(h=>(h||'').toLowerCase().includes('name'));
-      return idx !== -1 ? idx : 1;
-    };
-    const ni = nameIdx(sr);
-
-    // Extract placed student names (skip header row if col contains "name")
-    const isHeaderRow = r => (r[ni]||'').toLowerCase().includes('name') || (r[2]||'').toLowerCase().includes('email');
-    const selData = sr.filter(r => !isHeaderRow(r) && (r[ni]||'').trim());
-    const placedNames = selData.map(r=>(r[ni]||'').trim()).filter(Boolean);
-
-    STATUS[c.id]={
-      reg:    has(rr),
-      int:    has(ir),
-      sel:    has(sr),
-      driveComplete: placedNames.length > 0,   // drive is done if anyone was selected
-      placedNames,                              // full list of placed student names
-    };
+    STATUS[c.id]={reg:has(rr),int:has(ir),sel:has(sr)};
   }));
 }
 
-/* ══════════════════════════════════════════════════════
+/* \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
    ELIGIBILITY
-══════════════════════════════════════════════════════ */
+\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 */
 function isEligible(s){
   return s.tenth>=60 && s.twelfth>=60 && (s.backlogs||'').toLowerCase()==='no';
 }
 
-/* ══════════════════════════════════════════════════════
+/* \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
    RENDER PORTAL
-══════════════════════════════════════════════════════ */
+\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 */
 function renderPortal(){
   document.getElementById('login-page').style.display  = 'none';
   document.getElementById('portal-page').style.display = 'block';
@@ -910,29 +711,27 @@ function renderProfile(elig){
     ?`<img class="profile-photo" src="${xe(s.photoUrl)}" alt="${xe(s.name)}" onerror="this.style.display='none';document.getElementById('ph-ini').style.display='flex';"/><div id="ph-ini" class="profile-ini" style="display:none">${ini(s.name)}</div>`
     :`<div id="ph-ini" class="profile-ini">${ini(s.name)}</div>`;
 
-  const pfRow=(k,v)=>`<div class="pf-row"><span class="pf-k">${k}</span><span class="pf-v"><span class="pf-scroll">${xe(v||'—')}</span></span></div>`;
+  const pfRow=(k,v)=>`<div class="pf-row"><span class="pf-k">${k}</span><span class="pf-v">${xe(v||'\u2014')}</span></div>`;
 
   document.getElementById('profile-wrap').innerHTML=`
     <div class="profile-card">
       <div class="profile-photo-wrap">${photoHtml}</div>
       <div class="profile-name">${xe(s.name)}</div>
       <div class="profile-sub">${xe(s.course)}</div>
-      <div class="profile-sub2">Sem ${xe(s.semester)} · Sec ${xe(s.section)}</div>
-      <span class="elig-badge ${elig?'elig-yes':'elig-no'}">${elig?'✓ Eligible':'✗ Not Eligible'}</span>
+      <div class="profile-sub2">Sem ${xe(s.semester)} \u00b7 Sec ${xe(s.section)}</div>
+      <span class="elig-badge ${elig?'elig-yes':'elig-no'}">${elig?'\u2713 Eligible':'\u2717 Not Eligible'}</span>
       <div class="profile-fields">
-        ${pfRow('📧 Email',s.email)}
-        ${pfRow('📱 Phone',s.phone)}
-        ${pfRow('📚 Course',s.course)}
-        ${pfRow('📅 Semester',s.semester)}
-        ${pfRow('🏛️ Section',s.section)}
-        ${pfRow('📊 10th %',s.tenth+'%')}
-        ${pfRow('📊 12th %',s.twelfth+'%')}
-        ${pfRow('⚠️ Backlogs',s.backlogs)}
+        ${pfRow('\ud83d\udce7 Email',s.email)}
+        ${pfRow('\ud83d\udcf1 Phone',s.phone)}
+        ${pfRow('\ud83d\udcda Course',s.course)}
+        ${pfRow('\ud83d\udcc5 Semester',s.semester)}
+        ${pfRow('\ud83c\udfdb\ufe0f Section',s.section)}
+        ${pfRow('\ud83d\udcca 10th %',s.tenth+'%')}
+        ${pfRow('\ud83d\udcca 12th %',s.twelfth+'%')}
+        ${pfRow('\u26a0\ufe0f Backlogs',s.backlogs)}
       </div>
-      ${s.resume?`<div class="resume-btn-group">
-        <a href="${xe(s.resume)}" target="_blank" rel="noopener" class="btn-resume">📄 View Resume ↗</a>
-        <button class="btn-rewrite" onclick="openRewriteModal()">📋 Format for Placement</button>
-      </div>`:''}
+      ${s.resume?`<a href="${xe(s.resume)}" target="_blank" rel="noopener" class="btn-resume">&#128196; View Resume &#x2197;</a><button class="btn-rewrite" onclick="openRewriteModal()">&#128203; Format for Placement</button>`:''
+      }
     </div>`;
 }
 
@@ -946,7 +745,7 @@ function renderInelig(elig){
   if((s.backlogs||'').toLowerCase()!=='no')reasons.push('Active backlogs are present in your academic record');
   document.getElementById('inelig-wrap').innerHTML=`
     <div class="inelig-banner">
-      <div class="inelig-icon">⚠️</div>
+      <div class="inelig-icon">\u26a0\ufe0f</div>
       <div>
         <div class="inelig-title">Not Eligible for Campus Placements</div>
         <ul class="inelig-list">${reasons.map(r=>`<li>${xe(r)}</li>`).join('')}</ul>
@@ -971,7 +770,7 @@ function renderStatus(){
         ${logoHtml(c.name,c.website,c.id-1,40)}
         <div class="status-info">
           <div class="status-co-name">${xe(c.name)}</div>
-          <div class="status-detail">${c.roles.length?xe(c.roles.slice(0,2).join(', ')+(c.roles.length>2?' +more':'')):''}${c.driveDate?` · Drive: ${fmtD(c.driveDate)}`:''}</div>
+          <div class="status-detail">${c.roles.length?xe(c.roles.slice(0,2).join(', ')+(c.roles.length>2?' +more':'')):''}${c.driveDate?` \u00b7 Drive: ${fmtD(c.driveDate)}`:''}</div>
         </div>
         <span class="status-pill ${pillCls}">${title}</span>
       </div>`).join('')}
@@ -979,13 +778,13 @@ function renderStatus(){
   };
 
   const content=total
-    ?`<div>${makeGroup('🎉','Selected',sel,'shdr-sel','spill-sel')}${makeGroup('⭐','Shortlisted',intv,'shdr-int','spill-int')}${makeGroup('📋','Registered',reg,'shdr-reg','spill-reg')}</div>`
-    :`<div class="empty-state"><div class="empty-icon">📭</div><p>No applications yet.<br>Browse available companies below to apply.</p></div>`;
+    ?`<div>${makeGroup('\ud83c\udf89','Selected',sel,'shdr-sel','spill-sel')}${makeGroup('\u2b50','Shortlisted',intv,'shdr-int','spill-int')}${makeGroup('\ud83d\udccb','Registered',reg,'shdr-reg','spill-reg')}</div>`
+    :`<div class="empty-state"><div class="empty-icon">\ud83d\udced</div><p>No applications yet.<br>Browse available companies below to apply.</p></div>`;
 
   document.getElementById('status-wrap').innerHTML=`
     <div class="sp-section">
       <div class="sp-sec-head">
-        <span class="sp-sec-title">📊 Your Placement Status</span>
+        <span class="sp-sec-title">\ud83d\udcca Your Placement Status</span>
         ${total?`<span class="count-chip">${total} compan${total!==1?'ies':'y'}</span>`:''}
       </div>
       ${content}
@@ -1000,62 +799,35 @@ function renderAvailable(){
   if(!avail.length){
     document.getElementById('avail-wrap').innerHTML=`
       <div class="sp-section">
-        <div class="sp-sec-head"><span class="sp-sec-title">🏢 Available Companies</span></div>
-        <div class="empty-state"><div class="empty-icon">🎊</div><p>You have applied to all available companies!</p></div>
+        <div class="sp-sec-head"><span class="sp-sec-title">\ud83c\udfe2 Available Companies</span></div>
+        <div class="empty-state"><div class="empty-icon">\ud83c\udf8a</div><p>You have applied to all available companies!</p></div>
       </div>`;
     return;
   }
 
-  // Split into open drives and completed drives
-  const open      = avail.filter(c => !STATUS[c.id]?.driveComplete);
-  const completed = avail.filter(c =>  STATUS[c.id]?.driveComplete);
-
-  const openCards = open.map(c => {
+  const cards=avail.map(c=>{
     const chips=[
-      c.roles.length    ?mkChip('💼',c.roles.join(', ')):null,
-      c.salary          ?mkChip('💰',c.salary):null,
-      c.location        ?mkChip('📍',c.location):null,
-      c.driveDate       ?mkChip('📅',fmtD(c.driveDate)):null,
-      c.interviewMode   ?mkChip('🖥️',c.interviewMode):null,
+      c.roles.length    ?mkChip('\ud83d\udcbc',c.roles.join(', ')):null,
+      c.salary          ?mkChip('\ud83d\udcb0',c.salary):null,
+      c.location        ?mkChip('\ud83d\udccd',c.location):null,
+      c.driveDate       ?mkChip('\ud83d\udcc5',fmtD(c.driveDate)):null,
+      c.interviewMode   ?mkChip('\ud83d\udda5\ufe0f',c.interviewMode):null,
     ].filter(Boolean).join('');
     return`<div class="co-card" onclick="openCoModal(${c.id})">
       <div class="co-card-head">${logoHtml(c.name,c.website,c.id-1,52)}<div class="co-card-name">${xe(c.name)}</div></div>
       <div class="co-chips">${chips||'<span class="chip-empty">Details coming soon</span>'}</div>
       ${c.eligSummary?`<div class="elig-sum">${xe(c.eligSummary)}</div>`:''}
-      <button class="btn-apply-card" onclick="event.stopPropagation();openCoModal(${c.id})">View Details &amp; Apply →</button>
+      <button class="btn-apply-card" onclick="event.stopPropagation();openCoModal(${c.id})">View Details &amp; Apply \u2192</button>
     </div>`;
   }).join('');
-
-  const completedCards = completed.map(c => {
-    const count = STATUS[c.id].placedNames.length;
-    return`<div class="co-card co-card-done" onclick="openPlacedModal(${c.id})">
-      <div class="co-card-head">${logoHtml(c.name,c.website,c.id-1,52)}<div class="co-card-name">${xe(c.name)}</div></div>
-      <div class="drive-done-banner">
-        <span class="drive-done-icon">✅</span>
-        <div>
-          <div class="drive-done-title">Drive Completed</div>
-          <div class="drive-done-sub">${count} student${count!==1?'s':''} placed</div>
-        </div>
-      </div>
-      <button class="btn-placed-card" onclick="event.stopPropagation();openPlacedModal(${c.id})">View Placed Students →</button>
-    </div>`;
-  }).join('');
-
-  const openSection = open.length ? `
-    <div class="sp-sec-sub-head">Open for Applications <span class="count-chip">${open.length}</span></div>
-    <div class="co-grid">${openCards}</div>` : '';
-
-  const doneSection = completed.length ? `
-    <div class="sp-sec-sub-head" style="margin-top:${open.length?'28px':'0'}">Drive Completed <span class="count-chip count-chip-done">${completed.length}</span></div>
-    <div class="co-grid">${completedCards}</div>` : '';
 
   document.getElementById('avail-wrap').innerHTML=`
     <div class="sp-section">
       <div class="sp-sec-head">
-        <span class="sp-sec-title">🏢 Available Companies</span>
-        ${open.length?`<span class="count-chip">${open.length} open</span>`:''}
+        <span class="sp-sec-title">\ud83c\udfe2 Available Companies</span>
+        <span class="count-chip">${avail.length} open</span>
       </div>
-      ${openSection}${doneSection}
+      <div class="co-grid">${cards}</div>
     </div>`;
 }
 
@@ -1063,9 +835,9 @@ function mkChip(icon,text){
   return`<div class="chip"><span>${icon}</span><span>${xe(text)}</span></div>`;
 }
 
-/* ══════════════════════════════════════════════════════
+/* \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
    COMPANY MODAL
-══════════════════════════════════════════════════════ */
+\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 */
 function openCoModal(id){
   const c=COMPS.find(x=>x.id===id); if(!c)return;
   const mfRow=(k,v)=>`<div class="mf-row"><span class="mf-k">${xe(k)}</span><span class="mf-v">${xe(v)}</span></div>`;
@@ -1077,7 +849,7 @@ function openCoModal(id){
     c.driveDate             ?mfRow('Drive Date',         fmtD(c.driveDate)):null,
     c.registrationDate      ?mfRow('Reg. Deadline',      fmtD(c.registrationDate)):null,
     c.interviewMode         ?mfRow('Interview Mode',     c.interviewMode):null,
-    mfRow('Eligibility', c.eligSummary||'10th ≥ 60%, 12th ≥ 60%, No Active Backlogs'),
+    mfRow('Eligibility', c.eligSummary||'10th \u2265 60%, 12th \u2265 60%, No Active Backlogs'),
   ].filter(Boolean).join('');
 
   document.getElementById('co-modal-inner').innerHTML=`
@@ -1087,69 +859,32 @@ function openCoModal(id){
         <div class="co-modal-name">${xe(c.name)}</div>
         <div class="co-modal-badges">
           ${c.interviewMode?`<span class="badge-pill">${xe(c.interviewMode)}</span>`:''}
-          ${c.driveDate?`<span class="badge-pill badge-date">📅 ${fmtD(c.driveDate)}</span>`:''}
-          ${c.website?`<a href="${xe(c.website)}" target="_blank" rel="noopener" class="badge-link">🔗 Website ↗</a>`:''}
+          ${c.driveDate?`<span class="badge-pill badge-date">\ud83d\udcc5 ${fmtD(c.driveDate)}</span>`:''}
+          ${c.website?`<a href="${xe(c.website)}" target="_blank" rel="noopener" class="badge-link">\ud83d\udd17 Website \u2197</a>`:''}
         </div>
       </div>
-      <button class="co-modal-close" onclick="closeModal()">✕</button>
+      <button class="co-modal-close" onclick="closeModal()">\u2715</button>
     </div>
     <div class="co-modal-body">
       <div class="mf-grid">${rows}</div>
-      ${c.notes?`<div class="jd-box"><div class="jd-box-title">📋 JOB DESCRIPTION</div><div class="jd-box-text">${xe(c.notes).replace(/\n/g,'<br/>')}</div></div>`:''}
+      ${c.notes?`<div class="jd-box"><div class="jd-box-title">\ud83d\udccb JOB DESCRIPTION</div><div class="jd-box-text">${xe(c.notes).replace(/\n/g,'<br/>')}</div></div>`:''}
     </div>`;
 
   const applySlot=document.getElementById('modal-apply-slot');
-  let footerHtml = '';
-  if(c.jdUrl){
-    footerHtml += `<a class="btn-modal-dl" href="${xe(c.jdUrl)}" target="_blank" rel="noopener" download>⬇ Download JD</a>`;
-  }
   if(c.regFormUrl){
-    footerHtml += `<button class="btn-modal-apply" onclick="applyNow('${xe(c.regFormUrl)}')">Apply Now →</button>`;
+    applySlot.innerHTML=`<button class="btn-modal-apply" onclick="applyNow('${xe(c.regFormUrl)}')">Apply Now \u2192</button>`;
   } else {
-    footerHtml += `<span class="no-form-txt">Registration form not yet available</span>`;
+    applySlot.innerHTML=`<span class="no-form-txt">Registration form not yet available</span>`;
   }
-  applySlot.innerHTML = footerHtml;
   document.getElementById('co-modal').classList.add('show');
 }
 
 function closeModal(){ document.getElementById('co-modal').classList.remove('show'); }
 function applyNow(url){ window.open(url,'_blank','noopener'); }
 
-/* ══════════════════════════════════════════════════════
-   PLACED STUDENTS MODAL
-══════════════════════════════════════════════════════ */
-function openPlacedModal(id){
-  const c    = COMPS.find(x=>x.id===id); if(!c) return;
-  const names = STATUS[c.id]?.placedNames || [];
-
-  const rows = names.map((n,i)=>
-    `<div class="placed-row"><span class="placed-num">${i+1}</span><span class="placed-name">${xe(n)}</span></div>`
-  ).join('');
-
-  document.getElementById('co-modal-inner').innerHTML=`
-    <div class="co-modal-head">
-      ${logoHtml(c.name,c.website,c.id-1,60)}
-      <div style="flex:1;min-width:0;">
-        <div class="co-modal-name">${xe(c.name)}</div>
-        <div class="co-modal-badges">
-          <span class="badge-pill" style="background:#D1FAE5;color:#065F46;">✅ Drive Completed</span>
-          <span class="badge-pill">${names.length} Student${names.length!==1?'s':''} Placed</span>
-        </div>
-      </div>
-      <button class="co-modal-close" onclick="closeModal()">✕</button>
-    </div>
-    <div class="co-modal-body">
-      <div class="placed-list-head">Students selected by ${xe(c.name)}</div>
-      <div class="placed-list">${rows||'<div style="color:#94A3B8;font-size:13px;padding:12px 0;">No names available</div>'}</div>
-    </div>`;
-
-  document.getElementById('modal-apply-slot').innerHTML = '';
-  document.getElementById('co-modal').classList.add('show');
-}
-
-/* ══════════════════════════════════════════════════════
+/* \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
    LOGOUT
-══════════════════════════════════════════════════════ */
+\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 */
 function doLogout(){
   ST=null; COMPS=[]; STATUS={};
   document.getElementById('portal-page').style.display='none';
@@ -1158,47 +893,33 @@ function doLogout(){
   document.getElementById('email-err').textContent='';
   document.getElementById('email-inp').focus();
 }
-/* ── SIDEBAR RESIZER ── */
-(function(){
-  const resizer  = document.getElementById('sp-resizer');
-  const sidebar  = document.getElementById('sp-sidebar');
-  if(!resizer || !sidebar) return;
-  const MIN = 200, MAX = 520;
-  let dragging = false, startX = 0, startW = 0;
-
-  resizer.addEventListener('mousedown', e => {
-    dragging = true;
-    startX   = e.clientX;
-    startW   = sidebar.getBoundingClientRect().width;
-    resizer.classList.add('dragging');
-    document.body.style.cursor    = 'col-resize';
-    document.body.style.userSelect = 'none';
-    e.preventDefault();
-  });
-
-  document.addEventListener('mousemove', e => {
-    if(!dragging) return;
-    const w = Math.min(MAX, Math.max(MIN, startW + (e.clientX - startX)));
-    document.documentElement.style.setProperty('--sidebar-w', w + 'px');
-  });
-
-  document.addEventListener('mouseup', () => {
-    if(!dragging) return;
-    dragging = false;
-    resizer.classList.remove('dragging');
-    document.body.style.cursor     = '';
-    document.body.style.userSelect = '';
-  });
-})();
 </script>
 
+<div class="rw-modal-overlay" id="rw-modal">
+  <div class="rw-modal-box">
+    <div class="rw-modal-head">
+      <div>
+        <div class="rw-modal-title">&#128203; Format for Placement</div>
+        <div class="rw-modal-sub">Reformatting your resume to the placement cell template</div>
+      </div>
+      <button class="rw-modal-close" onclick="closeRwModal()" title="Close">&times;</button>
+    </div>
+    <div id="rw-body" style="flex:1;overflow-y:auto;padding:20px;"></div>
+    <div class="rw-modal-foot">
+      <button class="btn-rw-close-foot" onclick="closeRwModal()">Close</button>
+      <button class="btn-rw-dl" id="rw-dl-btn" style="display:none" onclick="downloadRewrittenPDF()">&#11015; Download PDF</button>
+    </div>
+  </div>
+</div>
 
 <script>
 /* ═══════════════════════════════════════════════
    FORMAT FOR PLACEMENT — Rule-based, no API
+   Fixes: About Me, Education structure,
+          OCR (CSEET, J.P. Morgan), capitalisation
 ═══════════════════════════════════════════════ */
 
-let _rwHtml = '';
+let _rwHtml   = '';
 let _gradeMode = 'percentage';
 
 function openRewriteModal(){
@@ -1223,22 +944,22 @@ function showGradePrompt(){
       </p>
       <div style="display:flex;gap:12px;">
         <button onclick="pickGrade('percentage')"
-          style="flex:1;padding:18px 12px;border-radius:12px;border:2px solid #E2E8F0;
-          background:#fff;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s;"
-          onmouseover="this.style.borderColor='#6D0E6A';this.style.background='#F7F0F7';"
-          onmouseout="this.style.borderColor='#E2E8F0';this.style.background='#fff';">
-          <div style="font-size:22px;margin-bottom:8px;">📊</div>
-          <div style="font-size:14px;font-weight:800;color:#1A0519;">Percentage</div>
-          <div style="font-size:11px;color:#94A3B8;margin-top:4px;">e.g. 82.5%</div>
+          style="flex:1;padding:14px;border-radius:12px;border:2px solid #D3B6D2;
+                 background:#fff;cursor:pointer;font-size:13px;font-weight:700;
+                 color:#6D0E6A;transition:all .2s;"
+          onmouseover="this.style.background='#F7F0F7'"
+          onmouseout="this.style.background='#fff'">
+          📊 Percentage<br>
+          <span style="font-size:11px;color:#94A3B8;font-weight:500;">e.g. 79.5%</span>
         </button>
         <button onclick="pickGrade('cgpa')"
-          style="flex:1;padding:18px 12px;border-radius:12px;border:2px solid #E2E8F0;
-          background:#fff;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s;"
-          onmouseover="this.style.borderColor='#6D0E6A';this.style.background='#F7F0F7';"
-          onmouseout="this.style.borderColor='#E2E8F0';this.style.background='#fff';">
-          <div style="font-size:22px;margin-bottom:8px;">🎓</div>
-          <div style="font-size:14px;font-weight:800;color:#1A0519;">CGPA</div>
-          <div style="font-size:11px;color:#94A3B8;margin-top:4px;">e.g. 8.2 CGPA</div>
+          style="flex:1;padding:14px;border-radius:12px;border:2px solid #D3B6D2;
+                 background:#fff;cursor:pointer;font-size:13px;font-weight:700;
+                 color:#6D0E6A;transition:all .2s;"
+          onmouseover="this.style.background='#F7F0F7'"
+          onmouseout="this.style.background='#fff'">
+          🎓 CGPA<br>
+          <span style="font-size:11px;color:#94A3B8;font-weight:500;">e.g. 8.37 CGPA</span>
         </button>
       </div>
     </div>`);
@@ -1249,587 +970,637 @@ function pickGrade(mode){
   startExtractAndFormat();
 }
 
-async function startExtractAndFormat(){
-  try {
-    // Step 1: Show connecting status
-    setRwBody(`<div class="rw-loading"><div class="rw-spinner"></div>
-      <div class="rw-loading-txt">Connecting to Google Drive…</div>
-      <div class="rw-loading-sub">You may see a Google sign-in popup. Please allow access.</div>
+function setLoading(msg, sub){
+  setRwBody(`
+    <div class="rw-loading">
+      <div class="rw-spinner"></div>
+      <div class="rw-loading-txt">${msg}</div>
+      <div class="rw-loading-sub">${sub||''}</div>
     </div>`);
+}
 
-    // Step 2: OAuth → fetch PDF from Drive
-    const file = await fetchResumeFile(ST.resume, (msg) => {
-      setRwBody(`<div class="rw-loading"><div class="rw-spinner"></div>
-        <div class="rw-loading-txt">${xe(msg)}</div></div>`);
-    });
-
-    // Step 3: Extract text via PDF.js
-    setRwBody(`<div class="rw-loading"><div class="rw-spinner"></div>
-      <div class="rw-loading-txt">Reading resume…</div></div>`);
+async function startExtractAndFormat(){
+  if(!ST || !ST.resume){
+    setRwBody('<div class="rw-error">No resume URL found for this student.</div>');
+    return;
+  }
+  setLoading('Connecting to Google Drive…','Authenticating with your Google account');
+  try{
+    const file = await fetchResumeFile(ST.resume, (msg)=>setLoading('Fetching resume…', msg));
+    setLoading('Reading PDF…','Extracting text from your resume');
     const text = await extractTextFromPDF(file);
-
-    // Step 4: Rule-based parse → language cleanup → render
+    setLoading('Formatting…','Applying placement cell template');
     const parsed = parseResumeText(text);
-    // Run language engine on all sections
-    if (typeof cleanParsedSections === 'function') {
+    if(typeof cleanParsedSections === 'function'){
       cleanParsedSections(parsed.sections, _gradeMode === 'cgpa');
     }
     const html = buildResumeHTML(parsed);
-    if(!html.trim()) throw new Error('Could not extract text. Make sure your resume is a text-based PDF, not a scanned image.');
     _rwHtml = html;
     setRwBody(`<div class="rw-preview">${html}</div>`);
-    document.getElementById('rw-dl-btn').style.display = '';
-
-  } catch(e){
-    setRwBody(`<div class="rw-error">⚠️ ${xe(e.message)}</div>
+    document.getElementById('rw-dl-btn').style.display = 'block';
+  } catch(err){
+    setRwBody(`
+      <div class="rw-error">❌ ${err.message||'Something went wrong.'}</div>
       <div class="rw-retry-wrap">
-        <button class="btn-rw-retry" onclick="startExtractAndFormat()">↩ Try Again</button>
+        <button class="btn-rw-retry" onclick="startExtractAndFormat()">↺ Try Again</button>
       </div>`);
   }
 }
 
-/* ── PDF.js extraction ── */
+/* ═══════════════════════════════════════════════
+   PDF TEXT EXTRACTION (PDF.js)
+═══════════════════════════════════════════════ */
 async function extractTextFromPDF(file){
   const pdfjsLib = window['pdfjs-dist/build/pdf'];
-  if(!pdfjsLib) throw new Error('PDF.js not loaded.');
+  if(!pdfjsLib) throw new Error('PDF.js not loaded');
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
   const buf = await file.arrayBuffer();
-  const pdf = await pdfjsLib.getDocument({data:buf}).promise;
-  let fullText = '';
-  for(let p=1; p<=pdf.numPages; p++){
+  const pdf = await pdfjsLib.getDocument({data: buf}).promise;
+  let lines = [];
+  for(let p = 1; p <= pdf.numPages; p++){
     const page = await pdf.getPage(p);
-    const content = await page.getTextContent();
-    const lineMap = {};
-    for(const item of content.items){
-      if(!item.str.trim()) continue;
-      const y = Math.round(item.transform[5]);
-      if(!lineMap[y]) lineMap[y]=[];
-      lineMap[y].push({x:item.transform[4], t:item.str});
+    const tc   = await page.getTextContent();
+    const vp   = page.getViewport({scale:1});
+    // Group items by Y position into lines
+    const byY  = {};
+    for(const item of tc.items){
+      const y = Math.round(vp.height - item.transform[5]);
+      if(!byY[y]) byY[y] = [];
+      byY[y].push(item.str);
     }
-    const ys = Object.keys(lineMap).map(Number).sort((a,b)=>b-a);
-    fullText += ys.map(y=>lineMap[y].sort((a,b)=>a.x-b.x).map(i=>i.t).join(' ')).join('\n')+'\n';
+    const sorted = Object.keys(byY).sort((a,b)=>+a - +b);
+    for(const y of sorted) lines.push(byY[y].join(' ').trim());
   }
-  if(!fullText.trim()) throw new Error('No text found. This may be a scanned image — only text-based PDFs are supported.');
-  return fullText;
+  return lines.filter(l=>l.trim()).join('\n');
 }
 
-/* ── OCR helpers ── */
-function stripEmoji(s){
-  return s.replace(/[\u{1F300}-\u{1FFFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]|[\uFE00-\uFE0F]|\u200D|Ø=\S+/gu,'').trim();
-}
+/* ═══════════════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════════════ */
+function xe(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function clean(s){ return String(s||'').replace(/\s+/g,' ').trim(); }
+function stripEmoji(s){ return String(s||'').replace(/[\u{1F300}-\u{1FFFF}]/gu,'').replace(/Ø=\d+/g,'').trim(); }
 
-function isAddressLine(line){
-  if(/\b(college|school|university|institute|vidyavahini|degree|polytechnic|academy|iit|nit|iim)\b/i.test(line)) return false;
-  return /^\s*(karnataka|maharashtra|telangana|tamilnadu|kerala|andhra|gujarat|delhi|punjab|rajasthan|bengaluru|bangalore|mumbai|hyderabad|chennai|pune|tumkur|hubli|mysore|mangalore|bidar|basavakalyan|gulbarga|kalaburagi|davangere|bellary|bagalkot|belagavi|dharwad|shivamogga)\s*$/i.test(line)
-    || /^\d{6}$/.test(line.trim());
-}
-
+/* ═══════════════════════════════════════════════
+   OCR CORRECTION MAP
+   Fixes character-split errors from PDF extraction
+═══════════════════════════════════════════════ */
 const OCR_CORRECTIONS = [
-  [/\bMs[\s.]+Wo[\s]*rd\b/gi,           'MS Word'],
-  [/\bMs[\s.]+Ex[\s]*cel\b/gi,          'MS Excel'],
-  [/\bG[\s]+ST\b/gi,                    'GST'],
-  [/\bTally[\s]*Prime\b/gi,             'Tally Prime'],
-  [/\bPower[\s]*Point\b/gi,             'PowerPoint'],
-  [/\bPower[\s]*BI\b/gi,                'Power BI'],
-  [/([a-z])(skill)(s?)\b/gi,            '$1 Skill$3'],
-  [/([a-z])(thinking)\b/gi,             '$1 Thinking'],
-  [/([a-z])(management)\b/gi,           '$1 Management'],
-  [/([a-z])(development)\b/gi,          '$1 Development'],
-  [/([a-z])(analysis)\b/gi,             '$1 Analysis'],
-  [/\- ([A-Za-z])/g,                    '-$1'],   // Fix "Help - Hub" → "Help-Hub"
-  [/\( ([A-Za-z])/g,                    '($1'],   // Fix "( E" → "(E"
-  [/([A-Za-z]) \)/g,                    '$1)'],   // Fix "x )" → "x)"
+  // Compound names split by OCR
+  [/\bC\s+s?EET\b/gi,                  'CSEET'],
+  [/\bCS\s+EET\b/gi,                   'CSEET'],
+  [/\bj\.\s*[Pp]\.\s*Morgan\b/g,       'J.P. Morgan'],
+  [/\bJ\.\s*[Pp]\.\s*Morgan\b/g,       'J.P. Morgan'],
+  [/\bcollege\s*-\s*[Ll]evel\b/gi,     'college-level'],
+  [/\bM\s+S\s+Word\b/gi,               'MS Word'],
+  [/\bM\s+S\s+Excel\b/gi,              'MS Excel'],
+  [/\bM\s+S\s+Office\b/gi,             'MS Office'],
+  [/\bPower\s*Point\b/gi,              'PowerPoint'],
+  [/\bTally\s+Prime\b/gi,              'Tally Prime'],
+  [/\bG\s+S\s+T\b/gi,                  'GST'],
+  [/\bT\s+D\s+S\b/gi,                  'TDS'],
+  [/\b([A-Za-z])\s+-\s*([A-Za-z])\b/g,'$1-$2'],  // "Help - Hub" → "Help-Hub"
+  [/\(\s+([A-Za-z])/g,                 '($1'],     // "( E" → "(E"
+  [/([A-Za-z])\s+\)/g,                 '$1)'],     // "x )" → "x)"
+  // Mobile-Based → mobile-based
+  [/\bMobile\s*-\s*Based\b/gi,         'mobile-based'],
 ];
 
 function applyOCRCorrections(text){
-  for(const [rx,rep] of OCR_CORRECTIONS) text=text.replace(rx,rep);
+  for(const [rx, rep] of OCR_CORRECTIONS) text = text.replace(rx, rep);
   return text;
 }
 
-/* ── Main parser ── */
-function parseResumeText(text){
-  // URL repair — fix spaces inside URLs before anything else
-  const textUrlFixed = text
-    .replace(/(linkedin\.com\/in\/)([^\n]*)/gi, (_,pre,rest)=>
-      pre+rest.replace(/\s+/g,'').match(/[\w\-]*/)[0])
-    .replace(/(github\.com\/)([^\n]*)/gi, (_,pre,rest)=>
-      pre+rest.replace(/\s+/g,'').match(/[\w\-]*/)[0]);
+/* ═══════════════════════════════════════════════
+   ADDRESS / NOISE LINE FILTER
+═══════════════════════════════════════════════ */
+const ADDR_RX = /^(\d{6}|[A-Za-z\s]+,\s*[A-Za-z\s]+,?\s*\d{0,6})$/;
+const INST_RX  = /\b(college|school|university|institute|vidyavahini|polytechnic|academy)\b/i;
 
-  let cleaned = textUrlFixed
-    .replace(/([A-Za-z]) ([a-z])/g,   '$1$2')
-    .replace(/([A-Za-z]) ([a-z])/g,   '$1$2')
-    .replace(/([A-Z]) ([A-Z]{1,2}) /g,'$1$2 ')
-    .replace(/([A-Z]) ([A-Z]{1,2}) /g,'$1$2 ')
-    .replace(/\(\s+/g, '(')
-    .replace(/\s+\)/g, ')')
-    .replace(/Ø=\S+\s*/g, '')
-    .replace(/[^\x20-\x7E\n]/g, ch=>{
-      if(/[\u2022\u00B7\u2219\u25AA\u25B8\u25BA\u2013\u2014]/.test(ch)) return ch;
-      return /[\u00C0-\u024F\u0900-\u097F]/.test(ch) ? ch : ' ';
-    })
-    .replace(/  +/g,' ');
+function isAddressLine(l){
+  if(INST_RX.test(l)) return false;
+  return ADDR_RX.test(l.trim());
+}
 
-  cleaned = applyOCRCorrections(cleaned);
+/* ═══════════════════════════════════════════════
+   SECTION HEADER DETECTION
+═══════════════════════════════════════════════ */
+const SECTION_HEADERS = {
+  summary:        /^(professional\s+(summary|profile|objective)|career\s+(summary|objective|goal|profile)|personal\s+(statement|profile)|about(\s+m(e|yself))?|who\s+(am\s+i|i\s+am)|intro(duction)?|profile|summary|objective|overview|bio(graphy)?|self\s+(introduction|description)|myself)$/i,
+  experience:     /^(work\s+)?(experience|employment|internship|career\s+history|professional\s+experience)s?$/i,
+  education:      /^(academic\s+)?(education|qualification|academic\s+background)s?$/i,
+  projects:       /^(projects?|academic\s+projects?|personal\s+projects?|key\s+projects?)$/i,
+  skills:         /^(technical\s+)?(skills?|core\s+competencies|competencies|expertise|tools?\s+&\s+skills?)$/i,
+  awards:         /^(awards?|achievements?|honors?|accomplishments?|certifications?|awards?\s+&\s+certifications?)$/i,
+  languages:      /^(languages?|language\s+proficiency)$/i,
+};
 
-  const lines = cleaned.split('\n').map(l=>l.trim()).filter(l=>l.length>2);
+/* ═══════════════════════════════════════════════
+   MAIN PARSER
+═══════════════════════════════════════════════ */
+function parseResumeText(rawText){
+  // OCR cleanup passes
+  let text = applyOCRCorrections(rawText);
+  // Join compound words split across characters: "e xperience" → "experience"
+  text = text.replace(/([A-Za-z])\s([a-z])/g, '$1$2');
+  text = text.replace(/([A-Za-z])\s([a-z])/g, '$1$2');
+  // Fix bracket spacing
+  text = text.replace(/\(\s+/g,'(').replace(/\s+\)/g,')');
+  // Strip non-ASCII except common punctuation
+  text = text.replace(/[^\x20-\x7E\n]/g,' ').replace(/\s+/g,' ');
+  // Restore line breaks
+  text = rawText.split('\n').map(l => applyOCRCorrections(l)).join('\n');
 
-  const emailRx    = /[\w.+-]+@[\w.-]+\.[a-zA-Z]{2,}/;
-  const phoneRx    = /(\+91[\s-]?)?[6-9]\d{9}/;
-  const linkedinRx = /(?:https?:\/\/)?(?:www\.)?linkedin\.com\/in\/[\w-]+/i;
-  const linkedinRx2= /(?:www\.)?linkedin\.com[^\s]*/i;
-  const githubRx   = /(?:https?:\/\/)?(?:www\.)?github\.com\/[\w-]+/i;
+  const lines = text.split('\n').map(l=>l.trim()).filter(Boolean);
 
-  const email    = (textUrlFixed.match(emailRx)   ||[])[0]||'';
-  const phone    = (textUrlFixed.match(phoneRx)   ||[])[0]||'';
-  const linkedin = (textUrlFixed.match(linkedinRx)||textUrlFixed.match(linkedinRx2)||[])[0]||'';
-  const github   = (textUrlFixed.match(githubRx)  ||[])[0]||'';
+  // ── Extract contact fields ────────────────────────
+  const emailRx    = /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/;
+  const phoneRx    = /(\+91[\s\-]?)?[6-9]\d{9}/;
+  const linkedinRx = /(?:https?:\/\/)?(?:www\.)?linkedin\.com\/in\/[\w\-]+\/?/i;
+  const githubRx   = /(?:https?:\/\/)?(?:www\.)?github\.com\/[\w\-]+\/?/i;
 
-  const SECS = {
-    summary:       /^(professional\s+)?(summary|profile|objective|career\s+(summary|objective)|about(\s+me)?|overview)$/i,
-    experience:    /^(work\s+|professional\s+|relevant\s+)?(experience|employment(\s+history)?|work\s+history|internship(s)?)$/i,
-    education:     /^(education(al)?(\s+background|\s+qualifications?)?|academic(\s+background)?|qualifications?|schooling)$/i,
-    projects:      /^(projects?(\s+work)?|academic\s+projects?|personal\s+projects?|key\s+projects?)$/i,
-    skills:        /^((technical\s+|core\s+|key\s+|professional\s+|soft\s+)?skills?|competenc(y|ies)|expertise|technologies|technical\s+and\s+soft\s+skills?)$/i,
-    awards:        /^(awards?|achievements?|honors?|recognitions?|accomplishments?|extra.?curricular|leadership(\s+&\s+activities)?)$/i,
-    languages:     /^(languages?(\s+known|\s+proficiency|\s+skills?)?)$/i,
-    certifications:/^(certifications?|courses?(\s+completed)?|training|professional\s+development)$/i,
+  let name='', email='', phone='', linkedin='', github='';
+  const contactLines = new Set();
+
+  for(let i=0;i<Math.min(8,lines.length);i++){
+    const l = lines[i];
+    if(!name && l.length>1 && l.length<60 && /^[A-Z][A-Z\s]+$/.test(l)) { name=l; contactLines.add(i); }
+    const em = l.match(emailRx); if(em && !email){ email=em[0]; contactLines.add(i); }
+    const ph = l.match(phoneRx); if(ph && !phone){ phone=ph[0]; contactLines.add(i); }
+    const li = l.match(linkedinRx); if(li && !linkedin){ linkedin=li[0]; contactLines.add(i); }
+    const gh = l.match(githubRx);   if(gh && !github){ github=gh[0]; contactLines.add(i); }
+  }
+
+  // ── Sectionise ────────────────────────────────────
+  const sections = {
+    summary:[], education:[], experience:[], projects:[],
+    skills:[], awards:[], certifications:[], languages:[]
   };
+  let curSection = '_pre';
+  const _pre = [];
 
-  const EDU_HEADER_RX = /^(course|qualification|degree|program|institution|school|college|university|marks|year|percentage|cgpa|grade|s\.?no)(\s+(course|qualification|degree|program|institution|school|college|university|marks|year|percentage|cgpa|grade|s\.?no))+$/i;
+  for(let i=0; i<lines.length; i++){
+    if(contactLines.has(i)) continue;
+    const l = lines[i];
+    const lc = l.toLowerCase().trim();
 
-  let name='';
-  for(const l of lines){
-    const lc=stripEmoji(l);
-    if(!emailRx.test(lc)&&!phoneRx.test(lc)&&!linkedinRx.test(lc)&&!githubRx.test(lc)
-       &&!isAddressLine(lc)&&lc.length>2&&lc.length<60
-       &&!Object.values(SECS).some(rx=>rx.test(lc))
-       &&!/^\s*Add\s+LinkedIn/i.test(lc)){
-      name=lc; break;
-    }
-  }
-
-  const sections={};
-  let curSec=null;
-
-  for(const rawLine of lines){
-    const l=stripEmoji(rawLine).replace(/\s+/g,' ').trim();
-    if(!l||l.length<3) continue;
-    if(isAddressLine(l)) continue;
-    if(l===name) continue;
-    if((emailRx.test(l)||phoneRx.test(l)||linkedinRx.test(l)||linkedinRx2.test(l))&&l.length<100) continue;
-    if(/^\s*Add\s+LinkedIn/i.test(l)) continue;
-
-    let matched=false;
-    for(const [sec,rx] of Object.entries(SECS)){
-      if(rx.test(l)){ curSec=sec; if(!sections[curSec]) sections[curSec]=[]; matched=true; break; }
-    }
-    if(matched) continue;
-    if(curSec==='education'&&EDU_HEADER_RX.test(l)) continue;
-    if(curSec) sections[curSec].push(l);
-  }
-
-  return {name, email, phone, linkedin, github, sections};
-}
-
-function clean(line){ return line.replace(/^[\s•·●\-–*▪▸►]+/,'').trim(); }
-function isBullet(line){ return /^[•·●\-–*▪▸►]/.test(line.trim()); }
-
-/* ── Education parser ── */
-function parseEduLine(line){
-  const yearRx  = /\b(20\d{2}|19\d{2})\b/;
-  const gradeRx = /(\d{1,3}(?:\.\d{1,2})?\s*%|(?:CGPA\s*[:\-]?\s*)?\d\.\d{1,2}\s*(?:CGPA|\/\s*10)?)/i;
-  const courseRx= /^(\(?\s*(?:b\.?\s*com|bca|b\.?\s*sc|b\.?\s*a\.?|bba|b\.?\s*tech|mba|m\.?\s*com|mca|m\.?\s*sc|m\.?\s*tech|pre[\s\-]?universit\w+|puc|sslc|hsc|ssc|10th|12th|class[\s\-]?x{1,3}|diploma|phd|pg|ug)\s*\)?)/i;
-
-  const yearMatch  = line.match(yearRx);
-  const gradeMatch = line.match(gradeRx);
-  const year  = yearMatch  ? yearMatch[0]  : '';
-  const grade = gradeMatch ? gradeMatch[0].trim() : '';
-
-  let rest = line;
-  if(year)  rest = rest.replace(year,'').trim();
-  if(grade) rest = rest.replace(gradeMatch[0],'').trim();
-  rest = rest.replace(/\s{2,}/g,' ').trim().replace(/[,\s]+$/,'');
-
-  let course='', institution='';
-  const cm = rest.match(courseRx);
-  if(cm){
-    course=cm[0].replace(/[()]/g,'').trim();
-    institution=rest.slice(cm[0].length).trim().replace(/^[,\s]+/,'');
-  } else {
-    institution=rest;
-  }
-  return {course:course.trim(), institution:institution.trim(), grade, year};
-}
-
-function convertGradeValue(gradeStr, wantCGPA){
-  const pctMatch = gradeStr.match(/(\d{1,3}(?:\.\d{1,2})?)\s*%/);
-  if(pctMatch){
-    const pct=parseFloat(pctMatch[1]);
-    return wantCGPA ? `${(pct/9.5).toFixed(2)} CGPA` : `${pct}%`;
-  }
-  const cgpaMatch = gradeStr.match(/(?:CGPA\s*[:\-]?\s*)?(\d\.\d{1,2})\s*(?:CGPA|\/\s*10)?/i);
-  if(cgpaMatch){
-    const cgpa=parseFloat(cgpaMatch[1]);
-    return !wantCGPA ? `${(cgpa*9.5).toFixed(1)}%` : `${cgpa} CGPA`;
-  }
-  return gradeStr;
-}
-
-function buildEduHTML(lines, wantCGPA){
-  const EDU_HEADER_RX = /^(course|qualification|degree|institution|marks|year|percentage|cgpa|grade)(\s+\w+)+$/i;
-  const yearRx   = /\b(20\d{2}|19\d{2})\b/;
-  const gradeRx  = /(\d{1,3}(?:\.\d{1,2})?\s*%|(?:CGPA\s*[:\-]?\s*)?\d\.\d{1,2}\s*(?:CGPA|\/\s*10)?)/i;
-
-  // ── Step 1: Group lines into entries ──────────────────
-  // An entry boundary is: a line that contains an institution keyword OR a year
-  // Consecutive lines without a new institution/year keyword belong to the same entry
-  const entries = [];
-  let cur = [];
-
-  const isEntryStart = l => {
-    // Starts a new entry if it has institution keyword or looks like a standalone institution name
-    return /\b(college|school|university|institute|vidyavahini|polytechnic|academy|iit|nit|iim)\b/i.test(l)
-      && !gradeRx.test(l.replace(yearRx,''));
-  };
-
-  for (const rawLine of lines) {
-    const l = clean(rawLine);
-    if (!l || l.length < 2) continue;
-    if (EDU_HEADER_RX.test(l)) continue;
-
-    if (isEntryStart(l) && cur.length > 0) {
-      entries.push(cur);
-      cur = [];
-    }
-    cur.push(l);
-  }
-  if (cur.length > 0) entries.push(cur);
-
-  // ── Step 2: For each entry group, extract fields ──────
-  let html = '';
-
-  for (const group of entries) {
-    // Join into one string first to find all values
-    const joined = group.join(' ');
-
-    // Find ALL grade values in the group
-    const allPct  = [...joined.matchAll(/(\d{1,3}(?:\.\d{1,2})?)\s*%/g)].map(m => parseFloat(m[1]));
-    const allCgpa = [...joined.matchAll(/(?:CGPA\s*[:\-]?\s*)?(\d\.\d{1,2})\s*(?:CGPA|\/\s*10)?/gi)].map(m => parseFloat(m[1]));
-
-    // Pick correct grade — only ONE based on user's mode choice
-    let grade = '';
-    if (wantCGPA) {
-      if (allCgpa.length)      grade = `${allCgpa[0].toFixed(2)} CGPA`;
-      else if (allPct.length)  grade = `${(allPct[0]/9.5).toFixed(2)} CGPA`;
-    } else {
-      if (allPct.length)       grade = `${allPct[0]}%`;
-      else if (allCgpa.length) grade = `${(allCgpa[0]*9.5).toFixed(1)}%`;
-    }
-
-    // Find year
-    const yearMatch = joined.match(yearRx);
-    const year = yearMatch ? yearMatch[0] : '';
-
-    // Find course
-    const courseRx = /\b(B\.?\s*Com|BCA|B\.?\s*Sc|B\.?\s*A\.?|BBA|B\.?\s*Tech|MBA|M\.?\s*Com|MCA|M\.?\s*Sc|M\.?\s*Tech|PUC?|SSLC|HSC|SSC|10th|12th|Diploma|PhD)\b/i;
-    const courseMatch = joined.match(courseRx);
-    const course = courseMatch ? courseMatch[0].replace(/\s+/g,' ').trim() : '';
-
-    // Institution — the line containing institution keyword
-    let institution = '';
-    for (const l of group) {
-      if (isEntryStart(l)) {
-        // Strip grade and year from the institution line
-        institution = l
-          .replace(/(\d{1,3}(?:\.\d{1,2})?)\s*%/g, '')
-          .replace(/(?:CGPA\s*[:\-]?\s*)?\d\.\d{1,2}\s*(?:CGPA|\/\s*10)?/gi, '')
-          .replace(yearRx, '')
-          .replace(courseRx, '')
-          .replace(/[,:\s]+$/, '')
-          .replace(/\s{2,}/g, ' ')
-          .trim();
-        // Normalise institution name
-        if (typeof normaliseInstitution === 'function') {
-          institution = normaliseInstitution(institution);
-        }
+    // Check section header
+    let matched = false;
+    for(const [sec, rx] of Object.entries(SECTION_HEADERS)){
+      if(rx.test(lc)){
+        curSection = sec;
+        matched = true;
         break;
       }
     }
+    if(matched) continue;
+    if(isAddressLine(l)) continue;
 
-    // Render entry
-    if (institution) html += `<p class="rw-edu-inst">${xe(institution)}</p>`;
+    if(curSection === '_pre') _pre.push(l);
+    else sections[curSection].push(l);
+  }
+
+  // If no summary section found but _pre has text, use it
+  if(!sections.summary.length && _pre.length){
+    sections.summary = _pre.filter(l => l.length > 15 && !/^\d/.test(l));
+  }
+
+  return { name, email, phone, linkedin, github, sections };
+}
+
+/* ═══════════════════════════════════════════════
+   EDUCATION BUILDER
+   Structure: Institution → Course, Year → Grade
+═══════════════════════════════════════════════ */
+function buildEduHTML(lines, wantCGPA){
+  const EDU_HDR_RX  = /^(course|qualification|degree|institution|marks|year|percentage|cgpa|grade|s\.?no)(\s+\w+){1,5}$/i;
+  const yearRx      = /\b(20\d{2}|19\d{2})\b/;
+  const pctRxG      = /(\d{1,3}(?:\.\d{1,2})?)\s*%/g;
+  const cgpaRxG     = /(\d\.\d{1,2})\s*(?:CGPA|\/\s*10)?/gi;
+  const courseRx    = /\b(B\.?\s*Com|BCA|B\.?\s*Sc|B\.?\s*A\.?|BBA|B\.?\s*Tech|MBA|M\.?\s*Com|MCA|M\.?\s*Sc|M\.?\s*Tech|PU\s*C?|SSLC|HSC|SSC|10th|12th|Diploma|PhD)\b/i;
+
+  // Group lines into entries by institution line
+  const entries = [];
+  let cur = { instLines:[], otherLines:[] };
+
+  for(const raw of lines){
+    const l = clean(raw);
+    if(!l || l.length < 2) continue;
+    if(EDU_HDR_RX.test(l)) continue;
+
+    if(INST_RX.test(l)){
+      if(cur.instLines.length || cur.otherLines.length) entries.push(cur);
+      cur = { instLines:[l], otherLines:[] };
+    } else {
+      // Might be a standalone grade/year line — add to current entry
+      cur.otherLines.push(l);
+    }
+  }
+  if(cur.instLines.length || cur.otherLines.length) entries.push(cur);
+
+  // If no institution-keyed entries found, treat all lines as one blob
+  if(!entries.length && lines.length){
+    entries.push({ instLines:[], otherLines: lines.map(clean).filter(Boolean) });
+  }
+
+  let html = '';
+
+  for(const entry of entries){
+    const allLines = [...entry.instLines, ...entry.otherLines];
+    const joined   = allLines.join(' ');
+
+    // ── Extract grade (one only) ──
+    const pctMatches  = [...joined.matchAll(pctRxG)].map(m=>parseFloat(m[1]));
+    const cgpaMatches = [...joined.matchAll(cgpaRxG)].map(m=>parseFloat(m[1]));
+
+    let grade = '';
+    if(wantCGPA){
+      if(cgpaMatches.length)     grade = cgpaMatches[0].toFixed(2) + ' CGPA';
+      else if(pctMatches.length) grade = (pctMatches[0]/9.5).toFixed(2) + ' CGPA';
+    } else {
+      if(pctMatches.length)       grade = pctMatches[0] + '%';
+      else if(cgpaMatches.length) grade = (cgpaMatches[0]*9.5).toFixed(1) + '%';
+    }
+
+    // ── Extract year ──
+    const yearMatch = joined.match(yearRx);
+    const year = yearMatch ? yearMatch[0] : '';
+
+    // ── Extract course ──
+    const courseMatch = joined.match(courseRx);
+    let course = courseMatch ? courseMatch[0].trim() : '';
+    // Normalise PU/PUC
+    if(/^PU\s*C?$/i.test(course)) course = 'Pre-University (PUC)';
+
+    // ── Build institution name ──
+    let institution = '';
+    if(entry.instLines.length){
+      institution = entry.instLines[0]
+        .replace(pctRxG, '').replace(cgpaRxG, '')
+        .replace(yearRx, '').replace(courseRx, '')
+        .replace(/CGPA\s*[:\-]?\s*[\d.]+/gi,'')
+        .replace(/\s{2,}/g,' ').replace(/[,:\s]+$/,'').trim();
+    }
+
+    // ── Render in correct order ──
+    if(institution) html += `<p class="rw-edu-inst">${xe(institution)}</p>`;
     const cy = [course, year].filter(Boolean).join(', ');
-    if (cy)     html += `<h3 class="rw-entry-role">${xe(cy)}</h3>`;
-    if (grade)  html += `<p class="rw-edu-grade">${xe(grade)}</p>`;
+    if(cy)    html += `<h3 class="rw-entry-role">${xe(cy)}</h3>`;
+    if(grade) html += `<p class="rw-edu-grade">${xe(grade)}</p>`;
     html += '<div class="rw-edu-gap"></div>';
   }
-
   return html;
 }
 
-/* ── Main HTML builder ── */
-function buildResumeHTML(parsed){
-  const {name, email, phone, linkedin, github, sections}=parsed;
-  let html='';
+/* ═══════════════════════════════════════════════
+   KNOWN PROPER NOUNS — always stay caps
+═══════════════════════════════════════════════ */
+const ALWAYS_UPPER = new Set([
+  'GST','TDS','PAN','UPI','NEFT','RTGS','NSS','NCC','CGPA','GPA',
+  'MBA','BCA','BBA','BCom','MCom','MCA','BSc','MSc','BTech','MTech',
+  'PhD','PUC','SSLC','HSC','SSC','AI','ML','SQL','HTML','CSS','PHP',
+  'API','CRM','ERP','SAP','UI','UX','IT','HR','PR','MIS','KPI','ROI',
+  'SOP','MOU','NGO','CSR','IPO','NSE','BSE','SEBI','ICSI','NISM',
+  'ICAI','ICWA','CA','CS','CMA','LLB','BA','MA','MS','CSEET','BAJAJ',
+  'GST','TDS','NSS',
+]);
 
-  html+=`<h1 class="rw-name">${xe(name||'Your Name')}</h1>`;
-  const contacts=[phone?`📞 ${phone}`:'', email?`✉ ${email}`:'',
-    linkedin?`🔗 ${linkedin}`:(github?`🔗 ${github}`:'')].filter(Boolean);
-  if(contacts.length) html+=`<p class="rw-contact-line">${contacts.map(xe).join('  |  ')}</p>`;
-  html+=`<hr class="rw-header-rule">`;
+const PROPER_NAMES = new Set([
+  'Excel','Word','PowerPoint','Tally','Python','Java','Linux','Windows',
+  'Android','iOS','Google','Microsoft','Amazon','Facebook','Instagram',
+  'LinkedIn','GitHub','Zoom','Slack','Canva','Figma','MySQL','MongoDB',
+  'Firebase','Bajaj','Morgan',
+]);
 
-  // About Me
-  const sumLines=(sections.summary||[]).filter(l=>!l.match(/[@\d]/)&&clean(l).length>3);
-  if(sumLines.length){
-    html+=`<h2 class="rw-section">ABOUT ME</h2>`;
-    html+=`<p class="rw-about">${xe(sumLines.map(clean).join(' '))}</p>`;
-    html+=`<hr class="rw-rule">`;
-  }
+// Words that should stay lowercase mid-sentence
+const SMALL_WORDS = new Set([
+  'a','an','the','and','but','or','nor','for','so','yet',
+  'in','on','at','to','by','of','up','as','is','are','was','were',
+  'with','from','into','onto','over','than','that','this','&',
+]);
 
-  // Education
-  const edu=sections.education||[];
-  if(edu.length){
-    html+=`<h2 class="rw-section">EDUCATION</h2>`;
-    html+=buildEduHTML(edu, _gradeMode==='cgpa');
-    html+=`<hr class="rw-rule">`;
-  }
-
-  // Projects
-  const proj=sections.projects||[];
-  if(proj.length){
-    html+=`<h2 class="rw-section">PROJECTS</h2><ul class="rw-list">`;
-    proj.forEach(l=>{ const t=clean(l); if(t.length>2) html+=`<li>${xe(t)}</li>`; });
-    html+=`</ul><hr class="rw-rule">`;
-  }
-
-  // Work Experience
-  const exp=sections.experience||[];
-  if(exp.length){
-    html+=`<h2 class="rw-section">WORK EXPERIENCE</h2>`;
-    html+=buildEntries(exp);
-    html+=`<hr class="rw-rule">`;
-  }
-
-  // Skills
-  const skillLines=sections.skills||[];
-  if(skillLines.length){
-    html+=`<h2 class="rw-section">SKILLS</h2><div class="rw-skills">`;
-    const raw=skillLines.join(' • ');
-    const skills=raw.split(/[•·●|,\n\r]+/)
-      .map(s=>applyOCRCorrections(clean(s)).replace(/\s{2,}/g,' ').trim())
-      .filter(s=>s.length>2);
-    const seen=new Set();
-    skills.forEach(s=>{
-      if(!seen.has(s.toLowerCase())){ seen.add(s.toLowerCase()); html+=`<div class="rw-skill-item">• ${xe(s)}</div>`; }
-    });
-    html+=`</div>`;
-  }
-
-  // Awards + Certifications
-  const awards=[...(sections.awards||[]),...(sections.certifications||[])];
-  if(awards.length){
-    html+=`<hr class="rw-rule"><h2 class="rw-section">AWARDS &amp; CERTIFICATIONS</h2><ul class="rw-list">`;
-    awards.forEach(l=>{ const t=clean(l); if(t.length>2) html+=`<li>${xe(t)}</li>`; });
-    html+=`</ul>`;
-  }
-
-  html=html.replace(/<\/ul>\s*<ul class="rw-list">/g,'');
-  return html;
+function toSentenceCase(str){
+  if(!str) return str;
+  const words = str.trim().split(/\s+/);
+  return words.map((word, i) => {
+    // Dotted abbreviations: J.P., U.S. — keep as-is if already properly cased
+    if(/^[A-Z](\.[A-Z])+\.?$/.test(word)) return word;
+    const bare  = word.replace(/[^a-zA-Z]/g,'');
+    const UPPER = bare.toUpperCase();
+    // Always-uppercase acronyms
+    if(ALWAYS_UPPER.has(UPPER)) return word.replace(bare, UPPER);
+    // Proper name list
+    if(PROPER_NAMES.has(bare)) return word.replace(bare, bare.charAt(0).toUpperCase()+bare.slice(1).toLowerCase());
+    // First word — always capitalise
+    if(i === 0) return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    // Small connector words — always lowercase mid-sentence
+    if(SMALL_WORDS.has(bare.toLowerCase())) return word.toLowerCase();
+    // Everything else → lowercase
+    return word.charAt(0).toLowerCase() + word.slice(1);
+  }).join(' ');
 }
 
+/* ═══════════════════════════════════════════════
+   BULLET CONTINUATION REJOINER
+   Merges PDF-split bullet lines
+═══════════════════════════════════════════════ */
+function rejoinBullets(lines){
+  const BULLET_RX = /^[•·●\-–*▪▸►]/;
+  const result = [];
+  for(let i=0; i<lines.length; i++){
+    const cur  = clean(lines[i]);
+    const next = lines[i+1] ? clean(lines[i+1]) : null;
+    if(!cur) continue;
+
+    const curEnds   = /[.!?:)]$/.test(cur);
+    const nextIsBul = next && BULLET_RX.test(next);
+
+    // If current doesn't end cleanly AND next is not a new bullet → merge
+    if(!curEnds && next && !nextIsBul){
+      lines[i+1] = cur + ' ' + next.replace(BULLET_RX,'').trim();
+      continue; // skip current; merged version processed as next
+    }
+    result.push(cur);
+  }
+  return result;
+}
+
+/* ═══════════════════════════════════════════════
+   WEAK VERB REPLACEMENTS
+═══════════════════════════════════════════════ */
+const WEAK_VERBS = [
+  [/\bwas responsible for\b/gi,  'managed'],
+  [/\bresponsible for\b/gi,      'managed'],
+  [/\bworked on\b/gi,            'developed'],
+  [/\bworked with\b/gi,          'collaborated with'],
+  [/\bwas part of\b/gi,          'contributed to'],
+  [/\bhelped (?:to |in )?/gi,    'assisted in '],
+  [/\bdid the\b/gi,              'executed the'],
+  [/\bmade a\b/gi,               'developed a'],
+  [/\bmade the\b/gi,             'developed the'],
+];
+
+function processBullet(raw){
+  let t = clean(raw).replace(/^[•·●\-–*▪▸►\s]+/,'');
+  // Apply weak verb replacements
+  for(const [rx,rep] of WEAK_VERBS) t = t.replace(rx,rep);
+  // Sentence case
+  t = toSentenceCase(t);
+  // Remove trailing full stop from bullets
+  t = t.replace(/\.\s*$/,'');
+  return t;
+}
+
+/* ═══════════════════════════════════════════════
+   LANGUAGE ENGINE — clean all sections
+═══════════════════════════════════════════════ */
+function cleanParsedSections(sections, wantCGPA){
+  // Summary — clean as prose
+  if(sections.summary && sections.summary.length){
+    let text = sections.summary.map(clean).join(' ');
+    text = text.replace(/([.!?]\s+)([a-z])/g, (_,p,l) => p+l.toUpperCase());
+    text = text.charAt(0).toUpperCase() + text.slice(1);
+    if(!/[.!?]$/.test(text)) text += '.';
+    sections.summary = [text];
+  }
+
+  // Projects / Experience / Awards — rejoin then process
+  for(const sec of ['projects','experience','awards','certifications']){
+    if(!sections[sec] || !sections[sec].length) continue;
+    const rejoined = rejoinBullets(sections[sec]);
+    sections[sec] = rejoined.map(processBullet).filter(Boolean);
+  }
+
+  // Skills — just apply OCR fixes, no sentence casing
+  if(sections.skills && sections.skills.length){
+    sections.skills = sections.skills
+      .map(l => applyOCRCorrections(clean(l).replace(/^[•·●\-–*▪▸►\s]+/,'')))
+      .filter(Boolean);
+  }
+
+  return sections;
+}
+
+/* ═══════════════════════════════════════════════
+   HTML BUILDER — sections in order
+═══════════════════════════════════════════════ */
 function buildEntries(lines){
-  const dateRx=/\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|january|february|march|april|june|july|august|september|october|november|december|\d{4}|present|current|now)\b/i;
-  let html=''; let i=0;
-  while(i<lines.length){
-    const raw=lines[i]; const t=clean(raw);
-    if(!t||t.length<3){i++;continue;}
-    const hasDash=/[—–|]/.test(t),isShort=t.length<72;
-    const hasBullet=isBullet(raw),hasDate=dateRx.test(t);
-    if(hasDash||(!hasBullet&&!hasDate&&isShort)){
-      if(hasDash||t.match(/\|/)) html+=`<p class="rw-entry-company">${xe(t)}</p>`;
-      else html+=`<h3 class="rw-entry-role">${xe(t)}</h3>`;
-      i++;
-      if(i<lines.length&&dateRx.test(clean(lines[i]))){
-        html+=`<p class="rw-entry-date">${xe(clean(lines[i]))}</p>`; i++;
-      }
-      const bullets=[];
-      while(i<lines.length){
-        const nt=clean(lines[i]);
-        if(!nt||nt.length<3){i++;continue;}
-        if((/[—–|]/.test(nt)||(!isBullet(lines[i])&&!dateRx.test(nt)&&nt.length<72))&&bullets.length>0) break;
-        bullets.push(nt); i++;
-      }
-      if(bullets.length) html+=`<ul class="rw-list">${bullets.map(b=>`<li>${xe(b)}</li>`).join('')}</ul>`;
-    } else {
-      if(t.length>2) html+=isBullet(raw)?`<ul class="rw-list"><li>${xe(t)}</li></ul>`:`<p class="rw-entry-desc">${xe(t)}</p>`;
-      i++;
-    }
+  const BULLET_RX = /^[•·●\-–*▪▸►]/;
+  const rejoined  = rejoinBullets(lines);
+  return rejoined.map(l=>{
+    const t = processBullet(l);
+    if(!t) return '';
+    return `<li>${xe(t)}</li>`;
+  }).filter(Boolean).join('');
+}
+
+function buildResumeHTML(parsed){
+  const { name, email, phone, linkedin, github, sections } = parsed;
+  let html = '';
+
+  // ── Name ──
+  if(name) html += `<h1 class="rw-name">${xe(stripEmoji(name))}</h1>`;
+
+  // ── Contact line ──
+  const contacts = [];
+  if(phone)    contacts.push(stripEmoji(phone));
+  if(email)    contacts.push(email);
+  if(linkedin) contacts.push(linkedin.replace(/^https?:\/\/(www\.)?/i,''));
+  if(github)   contacts.push(github.replace(/^https?:\/\/(www\.)?/i,''));
+  if(contacts.length) html += `<p class="rw-contact-line">${contacts.map(xe).join(' &nbsp;·&nbsp; ')}</p>`;
+  html += `<hr class="rw-header-rule">`;
+
+  // ── About Me ──
+  const sumLines = (sections.summary||[]).filter(l=>clean(l).length>4);
+  if(sumLines.length){
+    html += `<h2 class="rw-section">ABOUT ME</h2>`;
+    html += `<p class="rw-about">${xe(sumLines.join(' '))}</p>`;
+    html += `<hr class="rw-rule">`;
   }
+
+  // ── Education ──
+  const edu = sections.education || [];
+  if(edu.length){
+    html += `<h2 class="rw-section">EDUCATION</h2>`;
+    html += buildEduHTML(edu, _gradeMode === 'cgpa');
+    html += `<hr class="rw-rule">`;
+  }
+
+  // ── Projects ──
+  const proj = sections.projects || [];
+  if(proj.length){
+    html += `<h2 class="rw-section">PROJECTS</h2><ul class="rw-list">`;
+    html += buildEntries(proj);
+    html += `</ul><hr class="rw-rule">`;
+  }
+
+  // ── Work Experience ──
+  const exp = sections.experience || [];
+  if(exp.length){
+    html += `<h2 class="rw-section">WORK EXPERIENCE</h2><ul class="rw-list">`;
+    html += buildEntries(exp);
+    html += `</ul><hr class="rw-rule">`;
+  }
+
+  // ── Skills ──
+  const skills = sections.skills || [];
+  if(skills.length){
+    html += `<h2 class="rw-section">SKILLS</h2><div class="rw-skills">`;
+    for(const sk of skills){
+      const t = clean(sk).replace(/^[•·●\-–*▪▸►\s]+/,'');
+      if(t) html += `<div class="rw-skill-item">${xe(t)}</div>`;
+    }
+    html += `</div><hr class="rw-rule">`;
+  }
+
+  // ── Awards & Certifications ──
+  const awards = [...(sections.awards||[]), ...(sections.certifications||[])];
+  if(awards.length){
+    html += `<h2 class="rw-section">AWARDS &amp; CERTIFICATIONS</h2><ul class="rw-list">`;
+    html += buildEntries(awards);
+    html += `</ul>`;
+  }
+
   return html;
 }
 
-/* ── PDF download ── */
-async function downloadRewrittenPDF(){
+/* ═══════════════════════════════════════════════
+   PDF DOWNLOAD (jsPDF)
+═══════════════════════════════════════════════ */
+function downloadRewrittenPDF(){
   if(!_rwHtml) return;
-  try {
-    document.getElementById('rw-dl-btn').textContent='⏳ Generating PDF…';
-    document.getElementById('rw-dl-btn').disabled=true;
+  try{
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
+    const PW=210, PH=297, ML=18, MR=18, MT=18, MB=22, TW=210-18-18;
+    let y = MT;
 
-    const {jsPDF}=window.jspdf;
-    let logoB64=null;
+    function checkY(need){ if(y+need > PH-MB){ doc.addPage(); y=MT; } }
+
+    function txt(s, opts={}){
+      const fs  = opts.fs||11;
+      const col = opts.col||[30,30,30];
+      const bold= opts.bold||false;
+      doc.setFontSize(fs);
+      doc.setFont('helvetica', bold?'bold':'normal');
+      doc.setTextColor(col[0],col[1],col[2]);
+      const wrapped = doc.splitTextToSize(String(s), opts.w||TW);
+      const lh = fs*0.38;
+      checkY(wrapped.length*lh+2);
+      doc.text(wrapped, opts.x||ML, y, opts.align?{align:opts.align}:{});
+      y += wrapped.length*lh + (opts.after!==undefined ? opts.after : 2.5);
+    }
+
+    function rule(col=[200,185,200], w=0.3){
+      checkY(4);
+      doc.setDrawColor(col[0],col[1],col[2]);
+      doc.setLineWidth(w);
+      doc.line(ML,y,PW-MR,y);
+      y += 4;
+    }
+
+    function section(title){
+      checkY(10);
+      doc.setFontSize(10);
+      doc.setFont('helvetica','bold');
+      doc.setTextColor(109,14,106);
+      doc.text(title, ML, y);
+      y += 1;
+      doc.setDrawColor(109,14,106);
+      doc.setLineWidth(0.5);
+      doc.line(ML,y,PW-MR,y);
+      y += 5;
+    }
+
+    // Watermark
     try{
-      const navImg=document.querySelector('.sp-nav-logo img');
-      if(navImg&&navImg.complete&&navImg.naturalWidth>0){
-        const cvs=document.createElement('canvas');
-        cvs.width=navImg.naturalWidth; cvs.height=navImg.naturalHeight;
-        cvs.getContext('2d').drawImage(navImg,0,0);
-        logoB64=cvs.toDataURL('image/jpeg',0.85);
+      const img = document.querySelector('img[src="logo.jpg"]') ||
+                  (() => { const i=new Image(); i.src='logo.jpg'; return i; })();
+      doc.addImage(img, 'JPEG', PW/2-25, PH/2-25, 50, 50, '', 'NONE');
+      doc.saveGraphicsState && doc.setGState && doc.setGState(new doc.GState({opacity:0.07}));
+    } catch(e){}
+
+    // Parse HTML
+    const wrap = document.createElement('div');
+    wrap.innerHTML = _rwHtml;
+
+    for(const node of wrap.children){
+      const tag = node.tagName.toLowerCase();
+      const t   = node.textContent.trim();
+      if(!t) continue;
+
+      if(tag==='h1'){
+        txt(t,{fs:22,bold:true,col:[20,20,20],after:1,align:'center',x:PW/2});
+      } else if(tag==='p' && node.classList.contains('rw-contact-line')){
+        const parts = t.split('·').map(s=>s.trim()).filter(Boolean);
+        txt(parts.join('  ·  '),{fs:9,col:[80,80,80],after:1,align:'center',x:PW/2});
+      } else if(tag==='hr' && node.classList.contains('rw-header-rule')){
+        rule([180,160,180],0.4);
+      } else if(tag==='hr'){
+        rule([220,205,220],0.25);
+      } else if(tag==='h2' && node.classList.contains('rw-section')){
+        section(t);
+      } else if(tag==='p' && node.classList.contains('rw-about')){
+        txt(t,{fs:10,col:[50,50,50],after:3});
+      } else if(tag==='p' && node.classList.contains('rw-edu-inst')){
+        txt(t,{fs:9.5,col:[100,100,100],after:1});
+      } else if(tag==='h3' && node.classList.contains('rw-entry-role')){
+        txt(t,{fs:10.5,bold:true,col:[20,20,20],after:1});
+      } else if(tag==='p' && node.classList.contains('rw-edu-grade')){
+        txt(t,{fs:9.5,col:[109,14,106],after:1});
+      } else if(tag==='div' && node.classList.contains('rw-edu-gap')){
+        y += 4;
+      } else if(tag==='ul'){
+        for(const li of node.querySelectorAll('li')){
+          const lt = li.textContent.trim();
+          if(!lt) continue;
+          const lines = doc.splitTextToSize(lt, TW-6);
+          const lh    = 10*0.38;
+          checkY(lines.length*lh+1.5);
+          doc.setFontSize(10);
+          doc.setFont('helvetica','normal');
+          doc.setTextColor(30,30,30);
+          doc.text('•', ML, y);
+          doc.text(lines, ML+5, y);
+          y += lines.length*lh + 1.5;
+        }
+        y += 1;
+      } else if(tag==='div' && node.classList.contains('rw-skills')){
+        const items = [...node.querySelectorAll('.rw-skill-item')].map(el=>el.textContent.trim()).filter(Boolean);
+        const cols  = 3;
+        const colW  = TW/cols;
+        for(let i=0;i<items.length;i+=cols){
+          checkY(6);
+          doc.setFontSize(9.5);
+          doc.setFont('helvetica','normal');
+          doc.setTextColor(30,30,30);
+          for(let j=0;j<cols;j++){
+            if(items[i+j]) doc.text('• '+items[i+j], ML+j*colW, y, {maxWidth:colW-2});
+          }
+          y += 5.5;
+        }
+        y += 2;
       }
-    }catch(e){
-      try{
-        const base=window.location.href.replace(/\/[^\/]*$/,'/');
-        const r2=await fetch(base+'logo.jpg');
-        const blob=await r2.blob();
-        logoB64=await new Promise(res=>{const rd=new FileReader();rd.onload=()=>res(rd.result);rd.readAsDataURL(blob);});
-      }catch(e2){}
     }
 
-    const scales=[1.0,0.87,0.75,0.65];
-    let finalDoc=null;
+    // Footer
+    const footH = 8;
+    doc.setFillColor(40,40,40);
+    doc.rect(0, PH-footH, PW, footH, 'F');
+    doc.setFontSize(7.5);
+    doc.setFont('helvetica','normal');
+    doc.setTextColor(200,200,200);
+    doc.text('Vidyavahini First Grade Degree College — Placement Cell', ML, PH-2.5);
+    doc.text('Page 1 of 1', PW-MR, PH-2.5, {align:'right'});
 
-    for(const scale of scales){
-      const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-      const PW=210,PH=297,ML=18,MR=18,MT=22,TW=174;
-      let y=MT, overflow=false;
-      const LIMIT=PH-22-12;
-
-      if(logoB64){
-        try{ doc.saveGraphicsState(); doc.setGState(new doc.GState({opacity:0.07}));
-          doc.addImage(logoB64,'JPEG',PW/2,PH/2-45,80,80); doc.restoreGraphicsState(); }catch(e){}
-      }
-
-      const checkY=need=>{ if(y+need>LIMIT) overflow=true; };
-      const txt=(t,opts={})=>{
-        const fs=(opts.fs||10)*scale,bold=opts.bold||false,col=opts.col||[30,30,30];
-        const ind=opts.ind||0,after=opts.after!==undefined?opts.after*scale:2*scale;
-        doc.setFontSize(fs); doc.setFont('helvetica',bold?'bold':'normal'); doc.setTextColor(col[0],col[1],col[2]);
-        const ls=doc.splitTextToSize(t,TW-ind),lh=fs*0.42;
-        checkY(ls.length*lh+2);
-        if(!overflow) doc.text(ls,opts.cx?PW/2:ML+ind,y,opts.cx?{align:'center'}:{});
-        y+=ls.length*lh+after;
-      };
-      const rule=()=>{ y+=1; if(!overflow){doc.setDrawColor(180,180,180);doc.setLineWidth(0.3);doc.line(ML,y,PW-MR,y);} y+=4*scale; };
-      const section=title=>{
-        checkY(10*scale);
-        if(!overflow){doc.setFontSize(11*scale);doc.setFont('helvetica','bold');doc.setTextColor(30,30,30);
-          doc.text(title,ML,y);y+=1;doc.setDrawColor(30,30,30);doc.setLineWidth(0.5);doc.line(ML,y,PW-MR,y);}
-        y+=5*scale;
-      };
-
-      const wrap=document.createElement('div'); wrap.innerHTML=_rwHtml;
-      let nameText='',contactText=''; const bodyNodes=[];
-      for(const node of wrap.childNodes){
-        if(node.nodeType!==1) continue;
-        const tag=node.tagName.toLowerCase(),t=node.textContent.trim();
-        if(!t) continue;
-        if(tag==='h1'){nameText=t;continue;}
-        if(tag==='p'&&node.classList.contains('rw-contact-line')){contactText=t;continue;}
-        if(tag==='hr'&&node.classList.contains('rw-header-rule')) continue;
-        bodyNodes.push(node);
-      }
-
-      if(logoB64){ try{ doc.saveGraphicsState(); doc.setGState(new doc.GState({opacity:0.07}));
-        doc.addImage(logoB64,'JPEG',PW/2,PH/2-45,80,80); doc.restoreGraphicsState(); }catch(e){} }
-
-      const nfs=26*scale; doc.setFontSize(nfs); doc.setFont('helvetica','bold'); doc.setTextColor(20,20,20);
-      doc.text(nameText||'Your Name',PW/2,y,{align:'center'}); y+=nfs*0.42+4*scale;
-
-      if(contactText){
-        const stripped=contactText.replace(/📞|✉|🔗/g,'').replace(/\s*\|\s*/g,' · ').replace(/&nbsp;/g,' ').trim();
-        const cfs=9*scale; doc.setFontSize(cfs); doc.setFont('helvetica','normal'); doc.setTextColor(80,80,80);
-        const cl=doc.splitTextToSize(stripped,TW);
-        doc.text(cl,PW/2,y,{align:'center'}); y+=cl.length*(cfs*0.42)+2*scale;
-      }
-      doc.setDrawColor(180,180,180); doc.setLineWidth(0.4); doc.line(ML,y,PW-MR,y); y+=6*scale;
-
-      for(const node of bodyNodes){
-        const tag=node.tagName.toLowerCase(),t=node.textContent.trim();
-        if(!t) continue;
-        if(tag==='h2'&&node.classList.contains('rw-section')) section(t);
-        else if(tag==='p'&&node.classList.contains('rw-about')) txt(t,{fs:10,col:[60,60,60],after:3});
-        else if(tag==='hr'&&node.classList.contains('rw-rule')) rule();
-        else if(tag==='p'&&node.classList.contains('rw-edu-inst')) txt(t,{fs:9.5,col:[100,100,100],after:0.5});
-        else if(tag==='h3'&&node.classList.contains('rw-entry-role')) txt(t,{fs:10.5,bold:true,col:[20,20,20],after:0.5});
-        else if(tag==='p'&&node.classList.contains('rw-edu-grade')) txt(t,{fs:9.5,col:[80,80,80],after:1});
-        else if(tag==='div'&&node.classList.contains('rw-edu-gap')) y+=3*scale;
-        else if(tag==='p'&&node.classList.contains('rw-entry-company')) txt(t,{fs:9.5,col:[100,100,100],after:1});
-        else if(tag==='p'&&node.classList.contains('rw-entry-date')) txt(t,{fs:9,col:[130,130,130],after:1});
-        else if(tag==='p'&&node.classList.contains('rw-entry-desc')) txt(t,{fs:10,col:[60,60,60],after:2});
-        else if(tag==='ul'){
-          for(const li of node.querySelectorAll('li')){
-            const lt=li.textContent.trim(); if(!lt) continue;
-            const lfs=10*scale,ls=doc.splitTextToSize('• '+lt,TW-5),lh=lfs*0.42;
-            checkY(ls.length*lh+1.5);
-            if(!overflow){doc.setFontSize(lfs);doc.setFont('helvetica','normal');doc.setTextColor(50,50,50);doc.text(ls,ML+3,y);}
-            y+=ls.length*lh+1.5*scale;
-          }
-          y+=1*scale;
-        }
-        else if(tag==='div'&&node.classList.contains('rw-skills')){
-          const items=[...node.querySelectorAll('.rw-skill-item')].map(el=>el.textContent.trim()).filter(Boolean);
-          const cols=3,cw=TW/cols;
-          for(let rr=0;rr<Math.ceil(items.length/cols);rr++){
-            checkY(6*scale);
-            if(!overflow) for(let cc=0;cc<cols;cc++){
-              const item=items[rr*cols+cc]; if(!item) continue;
-              doc.setFontSize(10*scale);doc.setFont('helvetica','normal');doc.setTextColor(50,50,50);
-              doc.text(item,ML+cc*cw,y);
-            }
-            y+=5.5*scale;
-          }
-          y+=2*scale;
-        }
-      }
-
-      if(!overflow){finalDoc=doc;break;}
-    }
-
-    if(!finalDoc) finalDoc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-
-    const PH=297,ML2=18,MR2=18;
-    finalDoc.setFillColor(40,40,40); finalDoc.rect(0,PH-12,210,12,'F');
-    finalDoc.setFontSize(7); finalDoc.setFont('helvetica','normal'); finalDoc.setTextColor(200,200,200);
-    finalDoc.text('Vidyavahini First Grade Degree College — Placement Cell',ML2,PH-4.5);
-    finalDoc.text('Page 1 of 1',210-MR2,PH-4.5,{align:'right'});
-
-    finalDoc.save((ST.name||'Student').replace(/\s+/g,'_')+'_Formatted_Resume.pdf');
+    const sname = (ST && ST.name ? ST.name.replace(/\s+/g,'_') : 'Resume');
+    doc.save(`${sname}_Placement.pdf`);
   } catch(err){
-    alert('PDF error: '+err.message);
-  } finally {
-    document.getElementById('rw-dl-btn').textContent='⬇ Download PDF';
-    document.getElementById('rw-dl-btn').disabled=false;
+    alert('PDF generation failed: '+err.message);
   }
 }
 </script>
-
-<!-- ── REWRITE RESUME MODAL ── -->
-<div id="rw-modal" class="rw-modal">
-  <div class="rw-modal-box">
-    <div class="rw-modal-head">
-      <div>
-        <div class="rw-modal-title">📋 Format for Placement</div>
-        <div class="rw-modal-sub">Reformatting your resume to the placement cell template</div>
-      </div>
-      <button class="co-modal-close" onclick="closeRwModal()">✕</button>
-    </div>
-    <div class="rw-modal-body" id="rw-body">
-      <!-- states: loading / preview / error -->
-    </div>
-    <div class="rw-modal-footer">
-      <button class="btn-modal-close" onclick="closeRwModal()">Close</button>
-      <button class="btn-rw-dl" id="rw-dl-btn" style="display:none" onclick="downloadRewrittenPDF()">⬇ Download PDF</button>
-    </div>
-  </div>
-</div>
 
 </body>
 </html>
