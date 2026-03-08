@@ -1414,6 +1414,13 @@ function parseResumeText(text){
 }
 
 
+function clean(line){
+  return line.replace(/^[\s•·●\-–*▪▸►]+/, '').trim();
+}
+function isBullet(line){
+  return /^[•·●\-–*▪▸►]/.test(line.trim());
+}
+
 function buildResumeHTML(parsed){
   const {name, email, phone, linkedin, github, sections} = parsed;
   let html = '';
@@ -1441,13 +1448,41 @@ function buildResumeHTML(parsed){
   const edu = sections.education||[];
   if(edu.length){
     html += `<h2 class="rw-section">EDUCATION</h2>`;
-    // Normalise grade label based on user choice
-    const gradeLabel = (typeof _gradeMode !== 'undefined' && _gradeMode === 'cgpa') ? 'CGPA' : 'Percentage';
+
+    // Conversion formula: CGPA = Percentage / 9.5  |  Percentage = CGPA * 9.5
+    // Detect numeric grade values and convert; also normalise label text
+    const wantCGPA = (typeof _gradeMode !== 'undefined' && _gradeMode === 'cgpa');
+    const gradeLabel = wantCGPA ? 'CGPA' : 'Percentage';
+
     const eduNorm = edu.map(l => {
-      // Replace "CGPA/Percentage", "Percentage/CGPA", "cgpa", "percentage" etc with chosen label
-      return l.replace(/(cgpa\s*\/\s*percentage|percentage\s*\/\s*cgpa|cgpa|percentage|%|marks)/gi, gradeLabel)
-               .replace(/Grade/gi, gradeLabel);
+      // ── Numeric conversion ──
+      // Pattern 1: "85%" or "85.4 %" → convert to CGPA if needed
+      l = l.replace(/(\d{1,3}(?:\.\d{1,2})?)\s*%/g, (_, num) => {
+        const pct = parseFloat(num);
+        if(wantCGPA){
+          const cgpa = (pct / 9.5).toFixed(2);
+          return `${cgpa} CGPA`;
+        }
+        return `${pct}%`;
+      });
+      // Pattern 2: "8.5 CGPA", "8.5/10", "CGPA: 8.5" → convert to % if needed
+      l = l.replace(/(?:CGPA\s*[:\/]?\s*)?(\d\.\d{1,2})\s*(?:\/\s*10|\s+CGPA)/gi, (_, num) => {
+        const cgpa = parseFloat(num);
+        if(!wantCGPA){
+          const pct = (cgpa * 9.5).toFixed(1);
+          return `${pct}%`;
+        }
+        return `${cgpa} CGPA`;
+      });
+      // ── Label normalisation (for entries that just say "CGPA/Percentage" as placeholder) ──
+      l = l.replace(/\b(cgpa\s*\/\s*percentage|percentage\s*\/\s*cgpa)\b/gi, gradeLabel);
+      l = l.replace(/\bCGPA\b/g, wantCGPA ? 'CGPA' : 'Percentage');
+      l = l.replace(/\bPercentage\b/gi, wantCGPA ? 'CGPA' : 'Percentage');
+      l = l.replace(/\bMarks\b/gi, gradeLabel);
+      l = l.replace(/\bGrade\b/gi, gradeLabel);
+      return l;
     });
+
     html += buildEntries(eduNorm);
     html += `<hr class="rw-rule">`;
   }
