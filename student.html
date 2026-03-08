@@ -370,31 +370,36 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
 .jd-box-title{font-size:12px;font-weight:700;color:#64748B;margin-bottom:10px;letter-spacing:.04em;}
 .jd-box-text{font-size:13.5px;color:#1E293B;line-height:1.7;}
 .co-modal-footer{
-  display:flex;align-items:center;justify-content:flex-end;gap:10px;
+  display:flex;align-items:center;gap:12px;
   padding:16px 24px;border-top:1px solid #F1F5F9;
   position:sticky;bottom:0;background:#fff;
 }
+.co-modal-footer>*{flex:1;}
+#modal-apply-slot{display:contents;}
 .btn-modal-close{
-  padding:10px 20px;border:1.5px solid #E2E8F0;border-radius:10px;
+  padding:11px 20px;border:1.5px solid #E2E8F0;border-radius:10px;
   background:none;font-size:14px;font-weight:600;color:#64748B;
   cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;
+  width:100%;
 }
+.btn-modal-close:hover{border-color:#6D0E6A;color:#6D0E6A;}
 .btn-modal-close:hover{border-color:#CBD5E1;color:#0F172A;}
 .btn-modal-dl{
-  padding:10px 20px;border:1.5px solid #6D0E6A;border-radius:10px;
+  padding:11px 20px;border:1.5px solid #6D0E6A;border-radius:10px;
   background:#fff;color:#6D0E6A;font-size:14px;font-weight:700;font-family:'Inter',sans-serif;
   cursor:pointer;text-decoration:none;transition:all .2s;
-  display:inline-flex;align-items:center;gap:6px;
+  display:flex;align-items:center;justify-content:center;gap:6px;width:100%;
 }
 .btn-modal-dl:hover{background:#6D0E6A;color:#fff;}
 .btn-modal-apply{
-  padding:10px 24px;border:none;border-radius:10px;
-  background:linear-gradient(135deg,#6D0E6A,#6D0E6A);
+  padding:11px 20px;border:none;border-radius:10px;
+  background:linear-gradient(135deg,#570B54,#6D0E6A);
   color:#fff;font-size:14px;font-weight:700;font-family:'Inter',sans-serif;
   cursor:pointer;box-shadow:0 3px 12px rgba(109,14,106,.3);transition:all .2s;
+  width:100%;
 }
 .btn-modal-apply:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(109,14,106,.4);}
-.no-form-txt{font-size:13px;color:#94A3B8;}
+.no-form-txt{font-size:13px;color:#94A3B8;text-align:center;width:100%;}
 
 /* ── RESPONSIVE ── */
 @media(max-width:768px){
