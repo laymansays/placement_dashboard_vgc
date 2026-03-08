@@ -471,19 +471,20 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
   font-family:'Inter',sans-serif;font-size:13px;line-height:1.65;color:#1e1e1e;
   border:1px solid #E8D5E7;border-radius:12px;padding:28px 32px;background:#FDFBFD;
 }
-.rw-preview h1{font-size:20px;font-weight:800;color:#1A0519;margin:0 0 4px;}
-.rw-preview h2{
-  font-size:12px;font-weight:700;color:#6D0E6A;letter-spacing:.08em;
-  text-transform:uppercase;margin:20px 0 6px;
-  border-bottom:1.5px solid #E8D5E7;padding-bottom:4px;
-}
-.rw-preview h3{font-size:13px;font-weight:700;color:#1A0519;margin:10px 0 2px;}
-.rw-preview .rw-entry-date{font-size:11px;color:#888;margin:1px 0 4px;}
-.rw-preview p{margin:3px 0;}
-.rw-preview ul{margin:4px 0;padding-left:18px;}
-.rw-preview li{margin:2px 0;}
-.rw-preview .rw-contact{font-size:12px;color:#64748B;margin-bottom:8px;}
-.rw-preview .rw-divider{border:none;border-top:1px solid #E8D5E7;margin:14px 0;}
+.rw-preview .rw-name{font-size:24px;font-weight:900;color:#111;text-align:center;margin:0 0 6px;letter-spacing:-.01em;}
+.rw-preview .rw-contact-line{font-size:11.5px;color:#555;text-align:center;margin:0 0 10px;}
+.rw-preview .rw-header-rule{border:none;border-top:1.5px solid #ccc;margin:8px 0 14px;}
+.rw-preview .rw-section{font-size:12px;font-weight:800;color:#111;letter-spacing:.08em;text-transform:uppercase;margin:16px 0 4px;border-bottom:2px solid #111;padding-bottom:3px;}
+.rw-preview .rw-about{font-size:12.5px;color:#444;line-height:1.7;margin:6px 0;}
+.rw-preview .rw-rule{border:none;border-top:1px solid #ddd;margin:12px 0;}
+.rw-preview .rw-entry-company{font-size:11px;color:#888;margin:8px 0 2px;}
+.rw-preview .rw-entry-role{font-size:13px;font-weight:700;color:#111;margin:2px 0 1px;}
+.rw-preview .rw-entry-date{font-size:10.5px;color:#aaa;margin:0 0 4px;}
+.rw-preview .rw-entry-desc{font-size:12px;color:#555;margin:2px 0;}
+.rw-preview .rw-list{margin:4px 0 4px 16px;padding:0;}
+.rw-preview .rw-list li{font-size:12px;color:#444;margin:2px 0;}
+.rw-preview .rw-skills{display:grid;grid-template-columns:repeat(3,1fr);gap:4px 8px;margin:4px 0;}
+.rw-preview .rw-skill-item{font-size:12px;color:#444;}
 /* Error */
 .rw-error{
   background:#FFF5F5;border:1px solid #FED7D7;border-radius:10px;
@@ -1283,7 +1284,13 @@ async function extractTextFromPDF(file){
 
 /* ── Text parser ── */
 function parseResumeText(text){
-  const lines = text.split('\n').map(l=>l.trim()).filter(l=>l.length > 2);
+  // OCR artifact cleanup: rejoin words split by spaces (e.g. "L eadership", "N SS", "Basa va kalyan")
+  const cleaned = text
+    .replace(/([A-Za-z]) ([a-z])/g, '$1$2')          // "L eadership" → "Leadership"
+    .replace(/([A-Z]) ([A-Z]{1,2}) /g, '$1$2 ')       // "N SS " → "NSS "
+    .replace(/- ([A-Za-z])/g, '-$1')                   // "- Based" → "-Based"
+    .replace(/([A-Za-z]),([A-Za-z])/g, '$1, $2');      // fix missing spaces after commas
+  const lines = cleaned.split('\n').map(l=>l.trim()).filter(l=>l.length > 2);
 
   const emailRx    = /[\w.+-]+@[\w.-]+\.[a-zA-Z]{2,}/;
   const phoneRx    = /(\+91[\s-]?)?[6-9]\d{9}/;
@@ -1337,10 +1344,8 @@ function parseResumeText(text){
 
 /* ── Template builder ── */
 function clean(line){
-  // Strip leading bullet chars and extra whitespace
   return line.replace(/^[\s•·●\-–*▪▸►]+/, '').trim();
 }
-
 function isBullet(line){
   return /^[•·●\-–*▪▸►]/.test(line.trim());
 }
@@ -1350,236 +1355,311 @@ function buildResumeHTML(parsed){
   let html = '';
 
   // ── Header ──
-  html += `<h1>${xe(name||'Your Name')}</h1>`;
+  html += `<h1 class="rw-name">${xe(name||'Your Name')}</h1>`;
+  const contacts = [
+    phone   ? `📞 ${phone}`   : '',
+    email   ? `✉ ${email}`   : '',
+    linkedin? `🔗 ${linkedin}`: github ? `🔗 ${github}` : '',
+  ].filter(Boolean);
+  if(contacts.length) html += `<p class="rw-contact-line">${contacts.map(xe).join('  &nbsp;|&nbsp;  ')}</p>`;
+  html += `<hr class="rw-header-rule">`;
+
+  // ── About Me ──
   const sumLines = (sections.summary || sections.header || [])
     .filter(l => !l.match(/[@\d]/) && clean(l).length > 3);
-  if(sumLines.length) html += `<p class="rw-contact">${xe(sumLines.map(clean).join(' '))}</p>`;
-  const contacts = [phone, linkedin||github, email].filter(Boolean);
-  if(contacts.length) html += `<p class="rw-contact">${contacts.map(xe).join('  ·  ')}</p>`;
-
-  // ── Experience ──
-  const exp = sections.experience||[];
-  if(exp.length){ html += `<hr class="rw-divider"><h2>EXPERIENCE</h2>${buildEntries(exp)}`; }
+  if(sumLines.length){
+    html += `<h2 class="rw-section">ABOUT ME</h2>`;
+    html += `<p class="rw-about">${xe(sumLines.map(clean).join(' '))}</p>`;
+    html += `<hr class="rw-rule">`;
+  }
 
   // ── Education ──
   const edu = sections.education||[];
-  if(edu.length){ html += `<hr class="rw-divider"><h2>EDUCATION</h2>${buildEntries(edu)}`; }
+  if(edu.length){
+    html += `<h2 class="rw-section">EDUCATION</h2>`;
+    html += buildEntries(edu);
+    html += `<hr class="rw-rule">`;
+  }
 
   // ── Projects ──
   const proj = sections.projects||[];
-  if(proj.length){ html += `<hr class="rw-divider"><h2>PROJECTS</h2>${buildEntries(proj)}`; }
-
-  // ── Skills ──
-  const skillLines = sections.skills||[];
-  if(skillLines.length){
-    html += `<hr class="rw-divider"><h2>SKILLS</h2><ul>`;
-    // Split on commas, pipes, bullets — deduplicate
-    const skills = skillLines
-      .join(' ')
-      .split(/[,|•·●\n\r]+/)
-      .map(s => clean(s))
-      .filter(s => s.length > 2);
-    const seen = new Set();
-    skills.forEach(s => {
-      if(!seen.has(s.toLowerCase())){ seen.add(s.toLowerCase()); html += `<li>${xe(s)}</li>`; }
-    });
-    html += `</ul>`;
-  }
-
-  // ── Awards + Certifications ──
-  const awards = [...(sections.awards||[]), ...(sections.certifications||[])];
-  if(awards.length){
-    html += `<hr class="rw-divider"><h2>AWARDS</h2><ul>`;
-    awards.forEach(l => {
+  if(proj.length){
+    html += `<h2 class="rw-section">PROJECTS</h2><ul class="rw-list">`;
+    proj.forEach(l => {
       const t = clean(l);
       if(t.length > 2) html += `<li>${xe(t)}</li>`;
     });
+    html += `</ul><hr class="rw-rule">`;
+  }
+
+  // ── Work Experience ──
+  const exp = sections.experience||[];
+  if(exp.length){
+    html += `<h2 class="rw-section">WORK EXPERIENCE</h2>`;
+    html += buildEntries(exp);
+    html += `<hr class="rw-rule">`;
+  }
+
+  // ── Skills (3-column) ──
+  const skillLines = sections.skills||[];
+  if(skillLines.length){
+    html += `<h2 class="rw-section">SKILLS</h2><div class="rw-skills">`;
+    const skills = skillLines.join(' ')
+      .split(/[,|•·●\n\r]+/)
+      .map(s=>clean(s)).filter(s=>s.length>2);
+    const seen = new Set();
+    skills.forEach(s=>{
+      if(!seen.has(s.toLowerCase())){
+        seen.add(s.toLowerCase());
+        html += `<div class="rw-skill-item">• ${xe(s)}</div>`;
+      }
+    });
+    html += `</div>`;
+  }
+
+  // ── Awards / Certifications ──
+  const awards = [...(sections.awards||[]), ...(sections.certifications||[])];
+  if(awards.length){
+    html += `<hr class="rw-rule"><h2 class="rw-section">AWARDS &amp; CERTIFICATIONS</h2><ul class="rw-list">`;
+    awards.forEach(l=>{ const t=clean(l); if(t.length>2) html+=`<li>${xe(t)}</li>`; });
     html += `</ul>`;
   }
 
-  // ── Languages ──
-  const langs = (sections.languages||[]).map(clean).filter(l=>l.length>1);
-  if(langs.length){
-    html += `<hr class="rw-divider"><h2>LANGUAGES</h2><p>${xe(langs.join(', '))}</p>`;
-  }
-
-  // Merge adjacent <ul> blocks that got split
-  html = html.replace(/<\/ul>\s*<ul>/g, '');
+  // Merge adjacent lists
+  html = html.replace(/<\/ul>\s*<ul class="rw-list">/g,'');
   return html;
 }
 
 function buildEntries(lines){
   const dateRx = /\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|january|february|march|april|june|july|august|september|october|november|december|\d{4}|present|current|now)\b/i;
-  let html = '';
-  let i = 0;
-
-  while(i < lines.length){
-    const raw = lines[i];
-    const t   = clean(raw);
-    if(!t){ i++; continue; }
-
-    const hasDash     = /[—–|]/.test(t);
-    const isShort     = t.length < 72;
-    const hasBullet   = isBullet(raw);
-    const hasDate     = dateRx.test(t);
-
-    // Treat as a section entry heading if:
-    // - contains an em-dash / pipe (Company — Role pattern)
-    // - OR short, not a bullet, no date (likely a title line)
-    if(hasDash || (!hasBullet && !hasDate && isShort)){
-      html += `<h3>${xe(t)}</h3>`;
+  let html=''; let i=0;
+  while(i<lines.length){
+    const raw=lines[i]; const t=clean(raw);
+    if(!t||t.length<3){i++;continue;}
+    const hasDash=/[—–|]/.test(t);
+    const isShort=t.length<72;
+    const hasBullet=isBullet(raw);
+    const hasDate=dateRx.test(t);
+    if(hasDash||(!hasBullet&&!hasDate&&isShort)){
+      // Entry heading
+      if(hasDash||t.match(/\|/)){
+        // Company | Date line
+        html+=`<p class="rw-entry-company">${xe(t)}</p>`;
+      } else {
+        html+=`<h3 class="rw-entry-role">${xe(t)}</h3>`;
+      }
       i++;
-      // Next line: date range?
-      if(i < lines.length && dateRx.test(clean(lines[i]))){
-        html += `<p class="rw-entry-date">${xe(clean(lines[i]))}</p>`;
+      if(i<lines.length&&dateRx.test(clean(lines[i]))){
+        html+=`<p class="rw-entry-date">${xe(clean(lines[i]))}</p>`;
         i++;
       }
-      // Collect description lines until next heading
-      const bullets = [];
-      while(i < lines.length){
-        const nt = clean(lines[i]);
-        if(!nt){ i++; continue; }
-        const nextIsHeading = ((/[—–|]/.test(nt) || (!isBullet(lines[i]) && !dateRx.test(nt) && nt.length < 72)) && bullets.length > 0);
+      const bullets=[];
+      while(i<lines.length){
+        const nt=clean(lines[i]);
+        if(!nt||nt.length<3){i++;continue;}
+        const nextIsHeading=(/[—–|]/.test(nt)||(!isBullet(lines[i])&&!dateRx.test(nt)&&nt.length<72))&&bullets.length>0;
         if(nextIsHeading) break;
-        if(nt.length > 2) bullets.push(nt);
-        i++;
+        bullets.push(nt); i++;
       }
-      if(bullets.length){
-        html += `<ul>${bullets.map(b=>`<li>${xe(b)}</li>`).join('')}</ul>`;
-      }
+      if(bullets.length) html+=`<ul class="rw-list">${bullets.map(b=>`<li>${xe(b)}</li>`).join('')}</ul>`;
     } else {
-      // Standalone bullet or paragraph
-      if(t.length > 2){
-        html += isBullet(raw)
-          ? `<ul><li>${xe(t)}</li></ul>`
-          : `<p>${xe(t)}</p>`;
-      }
+      if(t.length>2) html+=isBullet(raw)?`<ul class="rw-list"><li>${xe(t)}</li></ul>`:`<p class="rw-entry-desc">${xe(t)}</p>`;
       i++;
     }
   }
   return html;
 }
 
-
-
-function downloadRewrittenPDF(){
+async function downloadRewrittenPDF(){
   if(!_rwHtml) return;
   try {
     const { jsPDF } = window.jspdf;
     const doc  = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
-    const PW   = 210, PH = 297;
-    const ML   = 18, MR = 18, MT = 18, MB = 18;
-    const TW   = PW - ML - MR;
-    let   y    = MT;
+    const PW=210, PH=297, ML=18, MR=18, MT=22, MB=22;
+    const TW=PW-ML-MR;
+    let y=MT;
 
-    // ── helpers ──
-    function newPage(){
-      doc.addPage();
-      y = MT;
+    // ── Load logo for watermark from already-loaded nav img ──
+    let logoB64=null;
+    try{
+      const navImg=document.querySelector('.sp-nav-logo img');
+      if(navImg && navImg.complete && navImg.naturalWidth>0){
+        const cvs=document.createElement('canvas');
+        cvs.width=navImg.naturalWidth; cvs.height=navImg.naturalHeight;
+        cvs.getContext('2d').drawImage(navImg,0,0);
+        logoB64=cvs.toDataURL('image/jpeg',0.85);
+      }
+    }catch(e){
+      try{
+        const base=window.location.href.replace(/\/[^\/]*$/,'/');
+        const r=await fetch(base+'logo.jpg');
+        const blob=await r.blob();
+        logoB64=await new Promise(res=>{const rd=new FileReader();rd.onload=()=>res(rd.result);rd.readAsDataURL(blob);});
+      }catch(e2){}
+    }
+
+    function addWatermark(){
+      if(!logoB64) return;
+      try{
+        doc.saveGraphicsState();
+        doc.setGState(new doc.GState({opacity:0.07}));
+        // Center right like the template
+        doc.addImage(logoB64,'JPEG',PW/2-5,PH/2-55,90,90);
+        doc.restoreGraphicsState();
+      }catch(e){}
+    }
+
+    function addDarkFooter(){
+      doc.setFillColor(40,40,40);
+      doc.rect(0,PH-12,PW,12,'F');
+      doc.setFontSize(8); doc.setFont('helvetica','normal');
+      doc.setTextColor(200,200,200);
+      doc.text('Vidyavahini First Grade Degree College — Placement Cell',ML,PH-4.5);
+      const pg=doc.internal.getCurrentPageInfo().pageNumber;
+      doc.text('Page '+pg,PW-MR,PH-4.5,{align:'right'});
     }
 
     function checkY(need){
-      if(y + need > PH - MB) newPage();
-    }
-
-    function addText(txt, opts){
-      const fs   = opts.fontSize || 11;
-      const bold = opts.bold || false;
-      const col  = opts.color || [30,30,30];
-      doc.setFontSize(fs);
-      doc.setFont('helvetica', bold ? 'bold' : 'normal');
-      doc.setTextColor(col[0], col[1], col[2]);
-      const lines = doc.splitTextToSize(txt, opts.width || TW);
-      const lh    = fs * 0.4;
-      checkY(lines.length * lh + 2);
-      doc.text(lines, ML, y);
-      y += lines.length * lh + (opts.after || 2);
-    }
-
-    function addDivider(){
-      checkY(4);
-      doc.setDrawColor(210,185,210);
-      doc.setLineWidth(0.3);
-      doc.line(ML, y, PW - MR, y);
-      y += 4;
-    }
-
-    function addSection(title){
-      checkY(10);
-      doc.setFontSize(10);
-      doc.setFont('helvetica','bold');
-      doc.setTextColor(109,14,106);
-      doc.text(title, ML, y);
-      y += 1;
-      doc.setDrawColor(109,14,106);
-      doc.setLineWidth(0.4);
-      doc.line(ML, y, PW - MR, y);
-      y += 5;
-    }
-
-    // ── Parse _rwHtml into a plain DOM ──
-    const wrap = document.createElement('div');
-    wrap.innerHTML = _rwHtml;
-
-    for(const node of wrap.childNodes){
-      if(node.nodeType !== 1) continue;
-      const tag = node.tagName.toLowerCase();
-      const txt = node.textContent.trim();
-      if(!txt) continue;
-
-      if(tag === 'h1'){
-        addText(txt, {fontSize:18, bold:true, color:[26,5,25], after:3});
-
-      } else if(tag === 'p'){
-        if(node.classList.contains('rw-contact')){
-          addText(txt, {fontSize:9, color:[100,116,139], after:2});
-        } else {
-          addText(txt, {fontSize:10, after:2});
-        }
-
-      } else if(tag === 'hr'){
-        addDivider();
-
-      } else if(tag === 'h2'){
-        addSection(txt);
-
-      } else if(tag === 'h3'){
-        checkY(6);
-        addText(txt, {fontSize:11, bold:true, color:[26,5,25], after:1});
-
-      } else if(tag === 'ul'){
-        for(const li of node.querySelectorAll('li')){
-          const lt = li.textContent.trim();
-          if(!lt) continue;
-          const lines = doc.splitTextToSize('• ' + lt, TW - 4);
-          const lh    = 10 * 0.4;
-          checkY(lines.length * lh + 1);
-          doc.setFontSize(10);
-          doc.setFont('helvetica','normal');
-          doc.setTextColor(30,30,30);
-          doc.text(lines, ML + 2, y);
-          y += lines.length * lh + 1.5;
-        }
-        y += 1;
+      if(y+need>PH-MB-12){ // 12 for footer
+        addDarkFooter();
+        doc.addPage();
+        addWatermark();
+        y=MT;
       }
     }
 
-    // ── Footer on every page ──
-    const totalPages = doc.internal.getNumberOfPages();
-    for(let p = 1; p <= totalPages; p++){
-      doc.setPage(p);
-      doc.setFontSize(8);
-      doc.setFont('helvetica','normal');
-      doc.setTextColor(180,180,180);
-      doc.text('Vidyavahini Placement Cell', ML, PH - 8);
-      doc.text('Page ' + p + ' of ' + totalPages, PW - MR, PH - 8, {align:'right'});
+    function txt(t,opts){
+      const fs=opts.fs||10; const bold=opts.bold||false;
+      const col=opts.col||[30,30,30]; const align=opts.align||'left';
+      const w=opts.w||TW; const indent=opts.indent||0;
+      doc.setFontSize(fs); doc.setFont('helvetica',bold?'bold':'normal');
+      doc.setTextColor(col[0],col[1],col[2]);
+      const lines=doc.splitTextToSize(t,w-indent);
+      const lh=fs*0.42;
+      checkY(lines.length*lh+2);
+      doc.text(lines, align==='center'?PW/2:ML+indent, y, align==='center'?{align:'center'}:{});
+      y+=lines.length*lh+(opts.after||2);
     }
 
-    const fname = (ST.name||'Student').replace(/\s+/g,'_') + '_Formatted_Resume.pdf';
-    doc.save(fname);
+    function rule(col){
+      checkY(3);
+      doc.setDrawColor(col||180,col?180:180,col?180:180);
+      doc.setLineWidth(0.3);
+      doc.line(ML,y,PW-MR,y);
+      y+=4;
+    }
 
+    function section(title){
+      checkY(10);
+      doc.setFontSize(11); doc.setFont('helvetica','bold');
+      doc.setTextColor(30,30,30);
+      doc.text(title,ML,y);
+      y+=1;
+      doc.setDrawColor(30,30,30); doc.setLineWidth(0.5);
+      doc.line(ML,y,PW-MR,y);
+      y+=5;
+    }
+
+    // ── Parse HTML nodes ──
+    const wrap=document.createElement('div');
+    wrap.innerHTML=_rwHtml;
+
+    // First pass — collect name and contact for header
+    let nameText='', contactText='', aboutText='';
+    const bodyNodes=[];
+    let collectingAbout=false, skipNext=false;
+
+    for(const node of wrap.childNodes){
+      if(node.nodeType!==1) continue;
+      const tag=node.tagName.toLowerCase();
+      const t=node.textContent.trim();
+      if(!t) continue;
+      if(tag==='h1'){ nameText=t; continue;}
+      if(tag==='p'&&node.classList.contains('rw-contact-line')){ contactText=t; continue;}
+      if(tag==='hr'&&node.classList.contains('rw-header-rule')) continue;
+      bodyNodes.push(node);
+    }
+
+    // ── Page 1 ──
+    addWatermark();
+
+    // Name — large centred bold
+    doc.setFontSize(26); doc.setFont('helvetica','bold');
+    doc.setTextColor(20,20,20);
+    doc.text(nameText||'Your Name', PW/2, y, {align:'center'});
+    y+=10;
+
+    // Contact line
+    if(contactText){
+      doc.setFontSize(9); doc.setFont('helvetica','normal');
+      doc.setTextColor(80,80,80);
+      const cl=doc.splitTextToSize(contactText.replace(/&nbsp;/g,' '),TW);
+      doc.text(cl,PW/2,y,{align:'center'});
+      y+=cl.length*4+2;
+    }
+
+    // Header rule
+    doc.setDrawColor(180,180,180); doc.setLineWidth(0.4);
+    doc.line(ML,y,PW-MR,y); y+=6;
+
+    // Body nodes
+    for(const node of bodyNodes){
+      const tag=node.tagName.toLowerCase();
+      const t=node.textContent.trim();
+      if(!t) continue;
+
+      if(tag==='h2'&&node.classList.contains('rw-section')){
+        section(t);
+      } else if(tag==='p'&&node.classList.contains('rw-about')){
+        txt(t,{fs:10,col:[60,60,60],after:3});
+      } else if(tag==='hr'&&node.classList.contains('rw-rule')){
+        y+=2; rule(); y-=2;
+      } else if(tag==='p'&&node.classList.contains('rw-entry-company')){
+        txt(t,{fs:9.5,col:[100,100,100],after:1});
+      } else if(tag==='h3'&&node.classList.contains('rw-entry-role')){
+        txt(t,{fs:10.5,bold:true,col:[20,20,20],after:1});
+      } else if(tag==='p'&&node.classList.contains('rw-entry-date')){
+        txt(t,{fs:9,col:[130,130,130],after:1});
+      } else if(tag==='p'&&node.classList.contains('rw-entry-desc')){
+        txt(t,{fs:10,col:[60,60,60],after:2});
+      } else if(tag==='ul'){
+        for(const li of node.querySelectorAll('li')){
+          const lt=li.textContent.trim(); if(!lt) continue;
+          const lines=doc.splitTextToSize('• '+lt,TW-5);
+          const lh=10*0.42;
+          checkY(lines.length*lh+1.5);
+          doc.setFontSize(10); doc.setFont('helvetica','normal');
+          doc.setTextColor(50,50,50);
+          doc.text(lines,ML+3,y);
+          y+=lines.length*lh+1.5;
+        }
+        y+=1;
+      } else if(tag==='div'&&node.classList.contains('rw-skills')){
+        // 3-column skills
+        const items=[...node.querySelectorAll('.rw-skill-item')].map(el=>el.textContent.trim()).filter(Boolean);
+        const cols=3; const cw=TW/cols;
+        for(let r=0;r<Math.ceil(items.length/cols);r++){
+          checkY(6);
+          for(let col2=0;col2<cols;col2++){
+            const item=items[r*cols+col2]; if(!item) continue;
+            doc.setFontSize(10); doc.setFont('helvetica','normal');
+            doc.setTextColor(50,50,50);
+            doc.text(item,ML+col2*cw,y);
+          }
+          y+=5.5;
+        }
+        y+=2;
+      }
+    }
+
+    // Dark footer on last page
+    addDarkFooter();
+
+    const fname=(ST.name||'Student').replace(/\s+/g,'_')+'_Formatted_Resume.pdf';
+    doc.save(fname);
   } catch(err){
-    alert('PDF generation failed: ' + err.message);
+    console.error(err);
+    alert('PDF error: '+err.message);
   }
 }
 </script>
