@@ -437,16 +437,17 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
 .rw-modal.show{display:flex;}
 .rw-modal-box{
   background:#fff;border-radius:18px;width:100%;max-width:720px;
-  max-height:90vh;display:flex;flex-direction:column;
-  box-shadow:0 24px 64px rgba(109,14,106,.22);overflow:hidden;
+  max-height:88vh;min-height:0;display:flex;flex-direction:column;
+  box-shadow:0 24px 64px rgba(109,14,106,.22);overflow:visible;
 }
+.rw-modal-body{flex:1;overflow-y:auto;padding:24px;min-height:0;}
 .rw-modal-head{
   display:flex;align-items:flex-start;justify-content:space-between;
   padding:20px 24px 16px;border-bottom:1px solid #F1F5F9;flex-shrink:0;
 }
 .rw-modal-title{font-size:17px;font-weight:800;color:#1A0519;}
 .rw-modal-sub{font-size:12px;color:#94A3B8;margin-top:2px;}
-.rw-modal-body{flex:1;overflow-y:auto;padding:24px;}
+
 .rw-modal-footer{
   display:flex;align-items:center;gap:12px;
   padding:16px 24px;border-top:1px solid #F1F5F9;flex-shrink:0;
@@ -1282,7 +1283,7 @@ async function extractTextFromPDF(file){
 
 /* ── Text parser ── */
 function parseResumeText(text){
-  const lines = text.split('\n').map(l=>l.trim()).filter(l=>l.length > 0);
+  const lines = text.split('\n').map(l=>l.trim()).filter(l=>l.length > 2);
 
   const emailRx    = /[\w.+-]+@[\w.-]+\.[a-zA-Z]{2,}/;
   const phoneRx    = /(\+91[\s-]?)?[6-9]\d{9}/;
@@ -1377,7 +1378,7 @@ function buildResumeHTML(parsed){
       .join(' ')
       .split(/[,|•·●\n\r]+/)
       .map(s => clean(s))
-      .filter(s => s.length > 1);
+      .filter(s => s.length > 2);
     const seen = new Set();
     skills.forEach(s => {
       if(!seen.has(s.toLowerCase())){ seen.add(s.toLowerCase()); html += `<li>${xe(s)}</li>`; }
@@ -1391,7 +1392,7 @@ function buildResumeHTML(parsed){
     html += `<hr class="rw-divider"><h2>AWARDS</h2><ul>`;
     awards.forEach(l => {
       const t = clean(l);
-      if(t.length > 1) html += `<li>${xe(t)}</li>`;
+      if(t.length > 2) html += `<li>${xe(t)}</li>`;
     });
     html += `</ul>`;
   }
@@ -1440,7 +1441,7 @@ function buildEntries(lines){
         if(!nt){ i++; continue; }
         const nextIsHeading = ((/[—–|]/.test(nt) || (!isBullet(lines[i]) && !dateRx.test(nt) && nt.length < 72)) && bullets.length > 0);
         if(nextIsHeading) break;
-        if(nt.length > 1) bullets.push(nt);
+        if(nt.length > 2) bullets.push(nt);
         i++;
       }
       if(bullets.length){
@@ -1448,7 +1449,7 @@ function buildEntries(lines){
       }
     } else {
       // Standalone bullet or paragraph
-      if(t.length > 1){
+      if(t.length > 2){
         html += isBullet(raw)
           ? `<ul><li>${xe(t)}</li></ul>`
           : `<p>${xe(t)}</p>`;
