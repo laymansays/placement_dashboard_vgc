@@ -136,10 +136,11 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
 .pf-row{display:flex;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px solid #F1F5F9;}
 .pf-row:last-child{border-bottom:none;}
 .pf-k{font-size:11.5px;color:#94A3B8;font-weight:600;white-space:nowrap;flex-shrink:0;}
-.pf-v{font-size:12.5px;color:#1E293B;font-weight:500;text-align:right;overflow:hidden;white-space:nowrap;min-width:0;max-width:160px;position:relative;}
-.pf-v .pf-scroll{display:inline-block;white-space:nowrap;}
-.pf-v:hover .pf-scroll{animation:marquee-scroll 4s linear infinite;}
-@keyframes marquee-scroll{0%{transform:translateX(0);}30%{transform:translateX(0);}70%{transform:translateX(calc(-100% + 160px));}100%{transform:translateX(calc(-100% + 160px));}}
+.pf-v{font-size:12.5px;color:#1E293B;font-weight:500;text-align:right;min-width:0;max-width:180px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.pf-v.pf-email{overflow:hidden;text-overflow:clip;cursor:default;}
+.pf-v.pf-email .pf-scroll{display:inline-block;white-space:nowrap;padding-right:20px;}
+.pf-v.pf-email .pf-scroll.marquee-on{animation:marquee-scroll 6s linear infinite;}
+@keyframes marquee-scroll{0%{transform:translateX(0);}15%{transform:translateX(0);}85%{transform:translateX(var(--marquee-dist,-60px));}100%{transform:translateX(var(--marquee-dist,-60px));}}
 .btn-resume{
   display:block;width:100%;padding:11px;border-radius:10px;
   background:#EFF6FF;color:#6D0E6A;border:1px solid #BFDBFE;
@@ -197,12 +198,13 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
 .co-av{
   flex-shrink:0;border-radius:10px;overflow:hidden;
   background:#fff;border:1.5px solid #E2E8F0;
-  display:flex;align-items:center;justify-content:center;
+  position:relative;  /* stack logo / favicon / initials */
 }
-.co-av img{width:100%;height:100%;object-fit:contain;}
+.co-av img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;}
 .co-av-ini{
-  width:100%;height:100%;display:flex;align-items:center;justify-content:center;
-  font-weight:800;color:#fff;
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:800;color:#fff;z-index:0;
 }
 
 /* \u2500\u2500 COMPANY CARDS \u2500\u2500 */
@@ -289,11 +291,19 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
   cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;
 }
 .btn-modal-close:hover{border-color:#CBD5E1;color:#0F172A;}
+.btn-modal-dl{
+  padding:10px 20px;border:1.5px solid #6D0E6A;border-radius:10px;
+  background:#fff;color:#6D0E6A;font-size:13.5px;font-weight:700;
+  font-family:'Inter',sans-serif;cursor:pointer;text-decoration:none;
+  display:inline-flex;align-items:center;gap:6px;white-space:nowrap;
+  transition:all .15s;flex-shrink:0;
+}
+.btn-modal-dl:hover{background:#F7F0F7;}
 .btn-modal-apply{
-  padding:10px 24px;border:none;border-radius:10px;
+  flex:1;padding:10px 20px;border:none;border-radius:10px;
   background:linear-gradient(135deg,#570B54,#6D0E6A);
   color:#fff;font-size:14px;font-weight:700;font-family:'Inter',sans-serif;
-  cursor:pointer;box-shadow:0 3px 12px rgba(37,99,235,.3);transition:all .2s;
+  cursor:pointer;box-shadow:0 3px 12px rgba(109,14,106,.25);transition:all .2s;
 }
 .btn-modal-apply:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(109,14,106,.4);}
 .no-form-txt{font-size:13px;color:#94A3B8;}
@@ -366,12 +376,12 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
 .rw-preview .rw-edu-gap{height:8px;}
 
 /* ── Congratulations Banner ── */
-.congrats-banner{margin-bottom:16px;}
+.congrats-banner{margin-bottom:16px;position:relative;border-radius:14px;overflow:hidden;}
 .congrats-inner{
   display:flex;align-items:flex-start;gap:14px;
   background:linear-gradient(135deg,#FFF7ED,#FEF3C7);
   border:1.5px solid #FDE68A;border-left:5px solid #F59E0B;
-  border-radius:14px;padding:18px 20px;position:relative;
+  border-radius:14px;padding:18px 20px;position:relative;z-index:1;
 }
 .congrats-icon{font-size:32px;line-height:1;flex-shrink:0;}
 .congrats-title{font-size:15px;font-weight:800;color:#92400E;margin-bottom:3px;}
@@ -419,6 +429,12 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
   font-family:'Inter',sans-serif;transition:all .15s;
 }
 .btn-resume:hover{background:#EDE0EC;}
+
+/* ── Confetti ── */
+.confetti-canvas{
+  position:absolute;inset:0;width:100%;height:100%;
+  pointer-events:none;z-index:3;border-radius:14px;
+}
 </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -486,7 +502,7 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
     <div id="co-modal-inner"></div>
     <div class="co-modal-footer">
       <button class="btn-modal-close" id="modal-close-btn" onclick="closeModal()">Close</button>
-      <span id="modal-apply-slot"></span>
+      <div id="modal-apply-slot" style="display:contents;"></div>
     </div>
   </div>
 </div>
@@ -535,9 +551,9 @@ function logoHtml(name,web,idx,sz){
   // Images visible by default (opacity:1), initials hidden (opacity:0)
   // On image error: fade to next fallback; final fallback: show initials on hover
   return `<div class="co-av" style="width:${size}px;height:${size}px;border-radius:${Math.round(size*.21)}px;">
-    <img src="${cb}" style="object-fit:contain;padding:${pad}px;" onerror="this.style.opacity='0';this.nextElementSibling.style.opacity='1';"/>
-    <img src="${gf}" style="object-fit:contain;padding:${pad+2}px;opacity:0;" onerror="this.style.opacity='0';this.nextElementSibling.style.opacity='1';this.nextElementSibling.style.zIndex='2';"/>
-    <div class="co-av-ini" style="background:${g};font-size:${fsz}px;">${ini(name)}</div>
+    <div class="co-av-ini" style="background:${g};font-size:${fsz}px;z-index:0;">${ini(name)}</div>
+    <img src="${gf}" style="padding:${pad+2}px;z-index:1;opacity:0;" onerror="this.style.opacity='0';"/>
+    <img src="${cb}" style="padding:${pad}px;z-index:2;" onerror="this.style.opacity='0';this.previousElementSibling.style.opacity='1';"/>
   </div>`;
 }
 
@@ -768,11 +784,18 @@ function renderPortal(){
     if(banner){
       banner.innerHTML = `<div class="congrats-inner">
         <span class="congrats-icon">\ud83c\udf89</span>
-        <div><div class="congrats-title">Congratulations, ${xe(ST.name.split(' ')[0])}!</div>
-        <div class="congrats-sub">You have been selected by ${xe(companies.join(', '))}. Wishing you a great career ahead!</div></div>
+        <div style="flex:1;min-width:0;">
+          <div class="congrats-title">Congratulations, ${xe(ST.name.split(' ')[0])}!</div>
+          <div class="congrats-sub">You have been selected by <strong>${xe(companies.join(', '))}</strong>. Wishing you a great career ahead!</div>
+        </div>
         <button class="congrats-close" onclick="this.closest('.congrats-banner').style.display='none'">\u2715</button>
       </div>`;
       banner.style.display = 'block';
+      // Insert canvas as first child of banner (behind congrats-inner)
+      const cvs = document.createElement('canvas');
+      cvs.className='confetti-canvas'; cvs.id='confetti-cvs';
+      banner.insertBefore(cvs, banner.firstChild);
+      setTimeout(()=>launchConfetti(cvs), 80);
     }
   }
 
@@ -791,7 +814,10 @@ function renderProfile(elig){
     ?`<img class="profile-photo" src="${xe(s.photoUrl)}" alt="${xe(s.name)}" onerror="this.style.display='none';document.getElementById('ph-ini').style.display='flex';"/><div id="ph-ini" class="profile-ini" style="display:none">${ini(s.name)}</div>`
     :`<div id="ph-ini" class="profile-ini">${ini(s.name)}</div>`;
 
-  const pfRow=(k,v)=>`<div class="pf-row"><span class="pf-k">${k}</span><span class="pf-v"><span class="pf-scroll">${xe(v||'\u2014')}</span></span></div>`;
+  const pfRow=(k,v,isEmail)=>{
+  if(isEmail) return `<div class="pf-row" id="email-pf-row"><span class="pf-k">${k}</span><span class="pf-v pf-email" id="email-pf-v"><span class="pf-scroll" id="email-pf-scroll">${xe(v||'\u2014')}</span></span></div>`;
+  return `<div class="pf-row"><span class="pf-k">${k}</span><span class="pf-v">${xe(v||'\u2014')}</span></div>`;
+};
 
   document.getElementById('profile-wrap').innerHTML=`
     <div class="profile-card">
@@ -801,7 +827,7 @@ function renderProfile(elig){
       <div class="profile-sub2">Sem ${xe(s.semester)} \u00b7 Sec ${xe(s.section)}</div>
       <span class="elig-badge ${elig?'elig-yes':'elig-no'}">${elig?'\u2713 Eligible':'\u2717 Not Eligible'}</span>
       <div class="profile-fields">
-        ${pfRow('\ud83d\udce7 Email',s.email)}
+        ${pfRow('\ud83d\udce7 Email',s.email,true)}
         ${pfRow('\ud83d\udcf1 Phone',s.phone)}
         ${pfRow('\ud83d\udcda Course',s.course)}
         ${pfRow('\ud83d\udcc5 Semester',s.semester)}
@@ -973,11 +999,11 @@ function openCoModal(id){
     </div>`;
 
   const applySlot=document.getElementById('modal-apply-slot');
-  let footerHtml='';
-  if(c.jdUrl) footerHtml+=`<a href="${xe(c.jdUrl)}" target="_blank" rel="noopener" class="btn-modal-dl">\u2b07 Download JD</a>`;
-  if(c.regFormUrl) footerHtml+=`<button class="btn-modal-apply" onclick="applyNow('${xe(c.regFormUrl)}')">Apply Now \u2192</button>`;
-  if(!c.regFormUrl) footerHtml+=`<span class="no-form-txt">Registration form not yet available</span>`;
-  applySlot.innerHTML=footerHtml;
+  let footerParts=[];
+  if(c.jdUrl) footerParts.push(`<a href="${xe(c.jdUrl)}" target="_blank" rel="noopener" class="btn-modal-dl">\u2b07 Download JD</a>`);
+  if(c.regFormUrl) footerParts.push(`<button class="btn-modal-apply" onclick="applyNow('${xe(c.regFormUrl)}')">Apply Now \u2192</button>`);
+  else footerParts.push(`<span class="no-form-txt">Registration form not yet available</span>`);
+  applySlot.innerHTML=footerParts.join('');
   document.getElementById('co-modal').classList.add('show');
 }
 
@@ -994,6 +1020,60 @@ function doLogout(){
   document.getElementById('email-inp').value='';
   document.getElementById('email-err').textContent='';
   document.getElementById('email-inp').focus();
+}
+
+
+/* ── Canvas Confetti ── */
+function launchConfetti(canvas){
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  canvas.width  = canvas.offsetWidth;
+  canvas.height = canvas.offsetHeight;
+  const W = canvas.width, H = canvas.height;
+  const COLORS = ['#6D0E6A','#F59E0B','#10B981','#3B82F6','#EF4444','#8B5CF6','#EC4899','#F97316'];
+  const COUNT  = 90;
+
+  const pieces = Array.from({length:COUNT}, ()=>({
+    x:     Math.random()*W,
+    y:     -10 - Math.random()*H*0.4,
+    r:     3 + Math.random()*4,
+    d:     1.5 + Math.random()*2,
+    color: COLORS[Math.floor(Math.random()*COLORS.length)],
+    tilt:  Math.random()*10 - 5,
+    tiltSpd: 0.07 + Math.random()*0.06,
+    tiltAngle: 0,
+    shape: Math.random() > 0.5 ? 'rect' : 'circle',
+    opacity: 0.9 + Math.random()*0.1,
+  }));
+
+  let frame, done = false;
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    let settled = 0;
+    for(const p of pieces){
+      p.tiltAngle += p.tiltSpd;
+      p.y += p.d;
+      p.tilt = 12 * Math.sin(p.tiltAngle);
+      if(p.y > H) { p.y=-10; p.x=Math.random()*W; settled++; }
+      ctx.save();
+      ctx.globalAlpha = p.opacity;
+      ctx.fillStyle   = p.color;
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.tilt * Math.PI/180);
+      if(p.shape==='rect'){
+        ctx.fillRect(-p.r, -p.r/2, p.r*2, p.r);
+      } else {
+        ctx.beginPath();
+        ctx.arc(0,0,p.r,0,2*Math.PI);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+    if(!done) frame = requestAnimationFrame(draw);
+  }
+  draw();
+  // Stop after 5 seconds
+  setTimeout(()=>{ done=true; cancelAnimationFrame(frame); ctx.clearRect(0,0,W,H); }, 5000);
 }
 
 /* ── SIDEBAR RESIZER ── */
@@ -1023,21 +1103,42 @@ function doLogout(){
     document.body.style.cursor=''; document.body.style.userSelect='';
   });
 
-  // ── Auto-size sidebar so email is fully visible ──
+  // ── Auto-size sidebar + start email marquee ──
   function autoSizeForEmail(){
-    const emailEl = sidebar.querySelector('.pf-scroll');
-    if(!emailEl) return;
-    const emailW  = emailEl.scrollWidth;
-    const padded  = emailW + 48 + 24; // padding + label width
-    const current = sidebar.getBoundingClientRect().width;
-    if(padded > current){
-      const target = Math.min(MAX, padded);
-      document.documentElement.style.setProperty('--sidebar-w', target+'px');
+    const emailV   = document.getElementById('email-pf-v');
+    const emailScr = document.getElementById('email-pf-scroll');
+    if(!emailV || !emailScr) return;
+
+    const containerW = emailV.getBoundingClientRect().width;
+    const textW      = emailScr.scrollWidth;
+    const overflow   = textW - containerW;
+
+    if(overflow > 4){
+      // Start marquee
+      emailScr.style.setProperty('--marquee-dist', -overflow + 'px');
+      emailScr.classList.add('marquee-on');
+
+      // Expand sidebar so email barely fits (no overflow)
+      const sidebarW  = sidebar.getBoundingClientRect().width;
+      const labelW    = (document.querySelector('.pf-k') || {offsetWidth:60}).offsetWidth || 60;
+      const needed    = sidebarW + overflow + 24; // add padding
+      const target    = Math.min(MAX, Math.max(sidebarW, needed));
+      if(target > sidebarW){
+        document.documentElement.style.setProperty('--sidebar-w', target+'px');
+        // Re-check after resize
+        requestAnimationFrame(()=>{
+          const newW = emailV.getBoundingClientRect().width;
+          const dist = -(emailScr.scrollWidth - newW + 4);
+          emailScr.style.setProperty('--marquee-dist', dist+'px');
+          if(dist >= -2) emailScr.classList.remove('marquee-on');
+        });
+      }
+    } else {
+      emailScr.classList.remove('marquee-on');
     }
   }
-  // Run after portal loads
+  setTimeout(autoSizeForEmail, 400);
   document.addEventListener('portalReady', autoSizeForEmail);
-  setTimeout(autoSizeForEmail, 600);
 })();
 
 </script>
