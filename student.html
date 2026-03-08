@@ -481,6 +481,9 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
 .rw-preview .rw-entry-role{font-size:13px;font-weight:700;color:#111;margin:2px 0 1px;}
 .rw-preview .rw-entry-date{font-size:10.5px;color:#aaa;margin:0 0 4px;}
 .rw-preview .rw-entry-desc{font-size:12px;color:#555;margin:2px 0;}
+.rw-preview .rw-edu-inst{font-size:12px;color:#555;margin:8px 0 1px;}
+.rw-preview .rw-edu-grade{font-size:11.5px;color:#6D0E6A;font-weight:600;margin:1px 0 2px;}
+.rw-preview .rw-edu-gap{height:8px;}
 .rw-preview .rw-list{margin:4px 0 4px 16px;padding:0;}
 .rw-preview .rw-list li{font-size:12px;color:#444;margin:2px 0;}
 .rw-preview .rw-skills{display:grid;grid-template-columns:repeat(3,1fr);gap:4px 8px;margin:4px 0;}
@@ -1187,24 +1190,19 @@ function doLogout(){
 
 <script>
 /* ═══════════════════════════════════════════════
-   REWRITE RESUME — AI-powered
+   FORMAT FOR PLACEMENT — Rule-based, no API
 ═══════════════════════════════════════════════ */
 
 let _rwHtml = '';
-
-/* ─────────────────────────────────────────────
-   REWRITE RESUME — Rule-based, no API needed
-───────────────────────────────────────────── */
-
 let _gradeMode = 'percentage'; // 'percentage' | 'cgpa'
 
+// ── Modal flow ──────────────────────────────────
 function openRewriteModal(){
   document.getElementById('rw-modal').classList.add('show');
   document.getElementById('rw-dl-btn').style.display = 'none';
   _rwHtml = '';
   showGradePrompt();
 }
-
 function showGradePrompt(){
   setRwBody(`
     <div style="padding:8px 0 4px;">
@@ -1215,7 +1213,7 @@ function showGradePrompt(){
         This will be applied consistently across all education entries.
       </p>
       <div style="display:flex;gap:12px;">
-        <button class="rw-grade-btn" onclick="pickGrade('percentage')"
+        <button onclick="pickGrade('percentage')"
           style="flex:1;padding:18px 12px;border-radius:12px;border:2px solid #E2E8F0;
           background:#fff;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s;"
           onmouseover="this.style.borderColor='#6D0E6A';this.style.background='#F7F0F7';"
@@ -1224,7 +1222,7 @@ function showGradePrompt(){
           <div style="font-size:14px;font-weight:800;color:#1A0519;">Percentage</div>
           <div style="font-size:11px;color:#94A3B8;margin-top:4px;">e.g. 82.5%</div>
         </button>
-        <button class="rw-grade-btn" onclick="pickGrade('cgpa')"
+        <button onclick="pickGrade('cgpa')"
           style="flex:1;padding:18px 12px;border-radius:12px;border:2px solid #E2E8F0;
           background:#fff;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s;"
           onmouseover="this.style.borderColor='#6D0E6A';this.style.background='#F7F0F7';"
@@ -1236,17 +1234,9 @@ function showGradePrompt(){
       </div>
     </div>`);
 }
-
-function pickGrade(mode){
-  _gradeMode = mode;
-  showUploadPrompt();
-}
-
-function closeRwModal(){
-  document.getElementById('rw-modal').classList.remove('show');
-}
-
-function setRwBody(html){ document.getElementById('rw-body').innerHTML = html; }
+function pickGrade(mode){ _gradeMode=mode; showUploadPrompt(); }
+function closeRwModal(){ document.getElementById('rw-modal').classList.remove('show'); }
+function setRwBody(html){ document.getElementById('rw-body').innerHTML=html; }
 
 function showUploadPrompt(){
   setRwBody(`
@@ -1263,154 +1253,185 @@ function showUploadPrompt(){
              onchange="handleResumeFile(this.files[0])"/>
     </div>`);
 }
-
 function handleResumeFile(file){
   if(!file) return;
   if(!file.name.toLowerCase().endsWith('.pdf')){
-    setRwBody(`
-      <div class="rw-error">⚠️ Please select a PDF file.</div>
+    setRwBody(`<div class="rw-error">⚠️ Please select a PDF file.</div>
       <div class="rw-retry-wrap"><button class="btn-rw-retry" onclick="showUploadPrompt()">↩ Try Again</button></div>`);
     return;
   }
-  setRwBody(`<div class="rw-loading">
-    <div class="rw-spinner"></div>
+  setRwBody(`<div class="rw-loading"><div class="rw-spinner"></div>
     <div class="rw-loading-txt">Reading your resume…</div>
-    <div class="rw-loading-sub">Extracting and reformatting to the placement template.</div>
-  </div>`);
+    <div class="rw-loading-sub">Extracting and reformatting to the placement template.</div></div>`);
   processResumePDF(file);
 }
 
-
+// ── PDF extraction ──────────────────────────────
 async function processResumePDF(file){
   try {
     const text = await extractTextFromPDF(file);
     const parsed = parseResumeText(text);
     const html = buildResumeHTML(parsed);
-    if(!html.trim()){ throw new Error('Could not extract text from this PDF. Try a text-based PDF (not a scanned image).'); }
+    if(!html.trim()) throw new Error('Could not extract text. Try a text-based PDF (not a scanned image).');
     _rwHtml = html;
     setRwBody(`<div class="rw-preview">${html}</div>`);
     document.getElementById('rw-dl-btn').style.display = '';
   } catch(e){
-    setRwBody(`
-      <div class="rw-error">⚠️ ${xe(e.message)}</div>
-      <div style="text-align:center;margin-top:16px;">
-        <button class="btn-rw-retry" onclick="startFetchAndFormat()">↩ Try Again</button>
-      </div>`);
+    setRwBody(`<div class="rw-error">⚠️ ${xe(e.message)}</div>
+      <div class="rw-retry-wrap"><button class="btn-rw-retry" onclick="showUploadPrompt()">↩ Try Again</button></div>`);
   }
 }
 
-/* ── PDF.js text extraction ── */
 async function extractTextFromPDF(file){
   const pdfjsLib = window['pdfjs-dist/build/pdf'];
   const buf = await file.arrayBuffer();
-  const pdf = await pdfjsLib.getDocument({data: buf}).promise;
+  const pdf = await pdfjsLib.getDocument({data:buf}).promise;
   let fullText = '';
-  for(let p = 1; p <= pdf.numPages; p++){
+  for(let p=1; p<=pdf.numPages; p++){
     const page = await pdf.getPage(p);
     const content = await page.getTextContent();
     const lineMap = {};
     for(const item of content.items){
       if(!item.str.trim()) continue;
       const y = Math.round(item.transform[5]);
-      if(!lineMap[y]) lineMap[y] = [];
-      lineMap[y].push({x: item.transform[4], t: item.str});
+      if(!lineMap[y]) lineMap[y]=[];
+      lineMap[y].push({x:item.transform[4], t:item.str});
     }
     const ys = Object.keys(lineMap).map(Number).sort((a,b)=>b-a);
-    fullText += ys.map(y=>lineMap[y].sort((a,b)=>a.x-b.x).map(i=>i.t).join(' ')).join('\n') + '\n';
+    fullText += ys.map(y=>lineMap[y].sort((a,b)=>a.x-b.x).map(i=>i.t).join(' ')).join('\n')+'\n';
   }
   return fullText;
 }
 
-/* ── Text parser ── */
+// ── OCR helpers ─────────────────────────────────
 function stripEmoji(s){
-  return s.replace(/[\u{1F300}-\u{1FFFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]|[\uFE00-\uFE0F]|[\u200D]|Ø=\S+/gu,'').trim();
+  return s.replace(/[\u{1F300}-\u{1FFFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]|[\uFE00-\uFE0F]|\u200D|Ø=\S+/gu,'').trim();
 }
 
 function isAddressLine(line){
-  // Never filter lines that mention an educational institution
+  // Never filter institution lines
   if(/\b(college|school|university|institute|vidyavahini|degree|polytechnic|academy|iit|nit|iim)\b/i.test(line)) return false;
-  // Standalone city/state/pincode lines
+  // Only strip truly standalone city/state lines (full-line match)
   return /^\s*(karnataka|maharashtra|telangana|tamilnadu|kerala|andhra|gujarat|delhi|punjab|rajasthan|bengaluru|bangalore|mumbai|hyderabad|chennai|pune|tumkur|hubli|mysore|mangalore|bidar|basavakalyan|gulbarga|kalaburagi|davangere|bellary|bagalkot|belagavi|dharwad|shivamogga)\s*$/i.test(line)
     || /^\d{6}$/.test(line.trim());
 }
 
+// Common OCR word corrections (applied after general cleanup)
+const OCR_CORRECTIONS = [
+  [/\bMs[\s.]+Wo[\s]*rd\b/gi,          'MS Word'],
+  [/\bMs[\s.]+Ex[\s]*cel\b/gi,         'MS Excel'],
+  [/\bMs[\s.]+Word\b/gi,               'MS Word'],
+  [/\bMs[\s.]+Excel\b/gi,              'MS Excel'],
+  [/\bTally[\s]*Prime\b/gi,            'Tally Prime'],
+  [/\bGoo[\s]*gle[\s]*Sheet[\s]*s?\b/gi,'Google Sheets'],
+  [/\bPower[\s]*Point\b/gi,            'PowerPoint'],
+  [/\bPower[\s]*BI\b/gi,               'Power BI'],
+  // Fix joined compound skill words by splitting before known suffixes
+  [/([a-z])(skill)(s?)\b/gi,           '$1 Skill$3'],
+  [/([a-z])(thinking)\b/gi,            '$1 Thinking'],
+  [/([a-z])(management)\b/gi,          '$1 Management'],
+  [/([a-z])(development)\b/gi,         '$1 Development'],
+  [/([a-z])(analysis)\b/gi,            '$1 Analysis'],
+  // "Add LinkedIn" type prefix lines
+  [/^Add\s+LinkedIn\s*[:\-]+\s*/i,     ''],
+];
+
+function applyOCRCorrections(text){
+  for(const [rx, rep] of OCR_CORRECTIONS) text = text.replace(rx, rep);
+  return text;
+}
+
+// ── Main text parser ─────────────────────────────
 function parseResumeText(text){
-  // OCR artifact cleanup
-  const cleaned = text
-    .replace(/([A-Za-z]) ([a-z])/g, '$1$2')
-    .replace(/([A-Z]) ([A-Z]{1,2}) /g, '$1$2 ')
-    .replace(/- ([A-Za-z])/g, '-$1')
-    .replace(/([A-Za-z]),([A-Za-z])/g, '$1, $2')
-    .replace(/\(\s+/g, '(')                   // ( text ) → (text)
-    .replace(/\s+\)/g, ')')                   // trim space before )
-    .replace(/Ø=\S+\s*/g, '')                 // strip garbled icon chars
-    .replace(/[^\x20-\x7E\n]/g, (ch) => {     // remove non-ASCII that aren't useful
-      // Preserve bullet chars and Indian script chars
-      if(/[\u2022\u00B7\u2219\u25AA\u25B8\u25BA\u2013\u2014]/.test(ch)) return ch; // keep bullets/dashes
+  // ── Step 1: URL repair — remove spaces inside URLs before any other cleanup
+  const textUrlFixed = text
+    .replace(/(linkedin\.com\/in\/)([^\n]*)/gi, (_,pre,rest)=>
+      pre + rest.replace(/\s+/g,'').match(/[\w\-]*/)[0])
+    .replace(/(github\.com\/)([^\n]*)/gi, (_,pre,rest)=>
+      pre + rest.replace(/\s+/g,'').match(/[\w\-]*/)[0]);
+
+  // ── Step 2: General OCR cleanup
+  let cleaned = textUrlFixed
+    .replace(/([A-Za-z]) ([a-z])/g, '$1$2')        // "Wo rd" → "Word"
+    .replace(/([A-Za-z]) ([a-z])/g, '$1$2')        // second pass for multi-gap cases
+    .replace(/([A-Z]) ([A-Z]{1,2}) /g,  '$1$2 ')   // "N SS " → "NSS "
+    .replace(/([A-Z]) ([A-Z]{1,2}) /g,  '$1$2 ')   // second pass
+    .replace(/\-\s+([A-Za-z])/g, '-$1')            // "- Based" → "-Based"
+    .replace(/([A-Za-z]),([A-Za-z])/g, '$1, $2')   // comma spacing
+    .replace(/\(\s+/g, '(')                         // ( text ) → (text)
+    .replace(/\s+\)/g, ')')
+    .replace(/Ø=\S+\s*/g, '')                       // garbled icon chars
+    .replace(/[^\x20-\x7E\n]/g, ch=>{
+      if(/[\u2022\u00B7\u2219\u25AA\u25B8\u25BA\u2013\u2014]/.test(ch)) return ch;
       return /[\u00C0-\u024F\u0900-\u097F]/.test(ch) ? ch : ' ';
-    });
+    })
+    .replace(/  +/g, ' ');                           // collapse multiple spaces
 
-  const lines = cleaned.split('\n').map(l=>l.trim()).filter(l=>l.length > 2);
+  // ── Step 3: Known word corrections
+  cleaned = applyOCRCorrections(cleaned);
 
-  const emailRx    = /[\w.+-]+@[\w.-]+\.[a-zA-Z]{2,}/;
-  const phoneRx    = /(\+91[\s-]?)?[6-9]\d{9}/;
-  const linkedinRx = /(?:https?:\/\/)?(?:www\.)?linkedin\.com\/in\/[\w-]+/i;
-  const githubRx   = /(?:https?:\/\/)?(?:www\.)?github\.com\/[\w-]+/i;
-  // Also catch bare "www.linkedin..." or just "linkedin.com/in/..."
+  const lines = cleaned.split('\n').map(l=>l.trim()).filter(l=>l.length>2);
+
+  // ── Regex patterns ──
+  const emailRx     = /[\w.+-]+@[\w.-]+\.[a-zA-Z]{2,}/;
+  const phoneRx     = /(\+91[\s-]?)?[6-9]\d{9}/;
+  const linkedinRx  = /(?:https?:\/\/)?(?:www\.)?linkedin\.com\/in\/[\w-]+/i;
   const linkedinRx2 = /(?:www\.)?linkedin\.com[^\s]*/i;
+  const githubRx    = /(?:https?:\/\/)?(?:www\.)?github\.com\/[\w-]+/i;
 
-  const email    = (text.match(emailRx)||[])[0]||'';
-  const phone    = (text.match(phoneRx)||[])[0]||'';
-  const linkedin = (text.match(linkedinRx)||text.match(linkedinRx2)||[])[0]||'';
-  const github   = (text.match(githubRx)||[])[0]||'';
+  const email    = (textUrlFixed.match(emailRx)   ||[])[0]||'';
+  const phone    = (textUrlFixed.match(phoneRx)   ||[])[0]||'';
+  const linkedin = (textUrlFixed.match(linkedinRx)||textUrlFixed.match(linkedinRx2)||[])[0]||'';
+  const github   = (textUrlFixed.match(githubRx)  ||[])[0]||'';
 
   const SECS = {
-    summary:      /^(professional\s+)?(summary|profile|objective|career\s+objective|about(\s+me)?|overview)$/i,
-    experience:   /^(work\s+|professional\s+|relevant\s+)?(experience|employment(\s+history)?|work\s+history|internship(s)?)$/i,
-    education:    /^(education(al)?(\s+background)?|academic(\s+background)?|qualifications?|schooling|educational\s+qualifications?)$/i,
-    projects:     /^(projects?(\s+work)?|academic\s+projects?|personal\s+projects?|key\s+projects?)$/i,
-    skills:       /^((technical\s+|core\s+|key\s+|professional\s+|soft\s+)?skills?|competenc(y|ies)|expertise|technologies|tools(\s+&\s+technologies)?|technical\s+and\s+soft\s+skills?)$/i,
-    awards:       /^(awards?|achievements?|honors?|recognitions?|accomplishments?|extra.?curricular|leadership(\s+&\s+activities)?)$/i,
-    languages:    /^(languages?(\s+known|\s+proficiency|\s+skills?)?)$/i,
+    summary:       /^(professional\s+)?(summary|profile|objective|career\s+(summary|objective)|about(\s+me)?|overview)$/i,
+    experience:    /^(work\s+|professional\s+|relevant\s+)?(experience|employment(\s+history)?|work\s+history|internship(s)?)$/i,
+    education:     /^(education(al)?(\s+background|\s+qualifications?)?|academic(\s+background)?|qualifications?|schooling)$/i,
+    projects:      /^(projects?(\s+work)?|academic\s+projects?|personal\s+projects?|key\s+projects?)$/i,
+    skills:        /^((technical\s+|core\s+|key\s+|professional\s+|soft\s+)?skills?|competenc(y|ies)|expertise|technologies|tools(\s+&\s+technologies)?|technical\s+and\s+soft\s+skills?)$/i,
+    awards:        /^(awards?|achievements?|honors?|recognitions?|accomplishments?|extra.?curricular|leadership(\s+&\s+activities)?)$/i,
+    languages:     /^(languages?(\s+known|\s+proficiency|\s+skills?)?)$/i,
     certifications:/^(certifications?|courses?(\s+completed)?|training|professional\s+development)$/i,
   };
 
-  // Name: first non-contact, non-address, non-icon short line
+  // Education table header detector
+  const EDU_HEADER_RX = /^(course|qualification|degree|program|institution|school|college|university|marks|year|percentage|cgpa|grade|s\.?no)(\s+(course|qualification|degree|program|institution|school|college|university|marks|year|percentage|cgpa|grade|s\.?no))+$/i;
+
+  // Name: first non-contact, non-address short line
   let name = '';
   for(const l of lines){
     const lc = stripEmoji(l);
     if(!emailRx.test(lc) && !phoneRx.test(lc) && !linkedinRx.test(lc) && !githubRx.test(lc)
-       && !isAddressLine(lc) && lc.length > 2 && lc.length < 60
-       && !Object.values(SECS).some(rx=>rx.test(lc))){
+       && !isAddressLine(lc) && lc.length>2 && lc.length<60
+       && !Object.values(SECS).some(rx=>rx.test(lc))
+       && !/^\s*Add\s+LinkedIn/i.test(lc)){
       name = lc; break;
     }
   }
 
-  // Section parsing
   const sections = {};
   let curSec = null;
 
   for(const rawLine of lines){
-    const l = stripEmoji(rawLine);
-    if(!l || l.length < 3) continue;
-
-    // Skip address lines entirely
-    if(isAddressLine(l) && !emailRx.test(l) && !phoneRx.test(l)) continue;
-    // Skip the name line
-    if(l === name) continue;
-    // Skip bare contact info lines (already captured above)
-    if((emailRx.test(l) || phoneRx.test(l) || linkedinRx.test(l) || linkedinRx2.test(l)) && l.length < 80) continue;
+    const l = stripEmoji(rawLine).replace(/\s+/g,' ').trim();
+    if(!l || l.length<3) continue;
+    if(isAddressLine(l)) continue;
+    if(l===name) continue;
+    // Skip contact lines
+    if((emailRx.test(l)||phoneRx.test(l)||linkedinRx.test(l)||linkedinRx2.test(l)) && l.length<100) continue;
+    // Skip "Add LinkedIn :- ..." prefix lines
+    if(/^\s*Add\s+LinkedIn/i.test(l)) continue;
 
     // Section header detection
-    let matched = false;
-    for(const [sec, rx] of Object.entries(SECS)){
-      if(rx.test(l)){
-        curSec = sec;
-        if(!sections[curSec]) sections[curSec] = [];
-        matched = true; break;
-      }
+    let matched=false;
+    for(const [sec,rx] of Object.entries(SECS)){
+      if(rx.test(l)){ curSec=sec; if(!sections[curSec]) sections[curSec]=[]; matched=true; break; }
     }
     if(matched) continue;
+
+    // Skip education table header rows
+    if(curSec==='education' && EDU_HEADER_RX.test(l)) continue;
 
     if(curSec) sections[curSec].push(l);
   }
@@ -1418,92 +1439,137 @@ function parseResumeText(text){
   return {name, email, phone, linkedin, github, sections};
 }
 
+// ── Clean / isBullet helpers ─────────────────────
+function clean(line){ return line.replace(/^[\s•·●\-–*▪▸►]+/,'').trim(); }
+function isBullet(line){ return /^[•·●\-–*▪▸►]/.test(line.trim()); }
 
-function clean(line){
-  return line.replace(/^[\s•·●\-–*▪▸►]+/, '').trim();
-}
-function isBullet(line){
-  return /^[•·●\-–*▪▸►]/.test(line.trim());
+// ── Education-specific parser ────────────────────
+function parseEduLine(line){
+  const yearRx  = /\b(20\d{2}|19\d{2})\b/;
+  const gradeRx = /(\d{1,3}(?:\.\d{1,2})?\s*%|(?:CGPA\s*[:\-]?\s*)?\d\.\d{1,2}\s*(?:CGPA|\/\s*10)?)/i;
+  const courseRx= /^(\(?\s*(?:b\.?\s*com|bca|b\.?\s*sc|b\.?\s*a\.?|bba|b\.?\s*tech|mba|m\.?\s*com|mca|m\.?\s*sc|m\.?\s*tech|pre[\s\-]?universit\w+|puc|sslc|hsc|ssc|10th|12th|class[\s\-]?x{1,3}|diploma|phd|pg|ug)\s*\)?)/i;
+
+  const yearMatch  = line.match(yearRx);
+  const gradeMatch = line.match(gradeRx);
+  const year  = yearMatch  ? yearMatch[0]  : '';
+  const grade = gradeMatch ? gradeMatch[0].trim() : '';
+
+  let rest = line;
+  if(year)  rest = rest.replace(year,'').trim();
+  if(grade) rest = rest.replace(gradeMatch[0],'').trim();
+  rest = rest.replace(/\s{2,}/g,' ').trim().replace(/[,\s]+$/,'');
+
+  let course='', institution='';
+  const cm = rest.match(courseRx);
+  if(cm){
+    course = cm[0].replace(/[()]/g,'').trim();
+    institution = rest.slice(cm[0].length).trim().replace(/^[,\s]+/,'');
+  } else {
+    // Heuristic: if starts with short word(s) before a long institution name
+    const words = rest.split(/\s+/);
+    const shortPrefix = [];
+    let i=0;
+    while(i<words.length && shortPrefix.join(' ').length<25 && words[i].length<15){
+      shortPrefix.push(words[i]); i++;
+    }
+    if(i<words.length && words.slice(i).join(' ').length>15){
+      course = shortPrefix.join(' ');
+      institution = words.slice(i).join(' ');
+    } else {
+      institution = rest;
+    }
+  }
+
+  return {course:course.trim(), institution:institution.trim(), grade, year};
 }
 
+function convertGradeValue(gradeStr, wantCGPA){
+  // Percentage → CGPA
+  const pctMatch = gradeStr.match(/(\d{1,3}(?:\.\d{1,2})?)\s*%/);
+  if(pctMatch){
+    const pct = parseFloat(pctMatch[1]);
+    if(wantCGPA) return `${(pct/9.5).toFixed(2)} CGPA`;
+    return `${pct}%`;
+  }
+  // CGPA → Percentage
+  const cgpaMatch = gradeStr.match(/(?:CGPA\s*[:\-]?\s*)?(\d\.\d{1,2})\s*(?:CGPA|\/\s*10)?/i);
+  if(cgpaMatch){
+    const cgpa = parseFloat(cgpaMatch[1]);
+    if(!wantCGPA) return `${(cgpa*9.5).toFixed(1)}%`;
+    return `${cgpa} CGPA`;
+  }
+  return gradeStr;
+}
+
+function buildEduHTML(lines, wantCGPA){
+  const EDU_HEADER_RX = /^(course|qualification|degree|institution|marks|year|percentage|cgpa|grade)(\s+\w+)+$/i;
+  let html = '';
+
+  for(const rawLine of lines){
+    const l = clean(rawLine);
+    if(!l || l.length<3) continue;
+    if(EDU_HEADER_RX.test(l)) continue;
+
+    const {course, institution, grade, year} = parseEduLine(l);
+
+    if(institution){
+      html += `<p class="rw-edu-inst">${xe(institution)}</p>`;
+    }
+    const courseYear = [course, year].filter(Boolean).join(', ');
+    if(courseYear){
+      html += `<h3 class="rw-entry-role">${xe(courseYear)}</h3>`;
+    }
+    if(grade){
+      const converted = convertGradeValue(grade, wantCGPA);
+      html += `<p class="rw-edu-grade">${xe(converted)}</p>`;
+    }
+    html += '<div class="rw-edu-gap"></div>';
+  }
+  return html;
+}
+
+// ── Main HTML builder ────────────────────────────
 function buildResumeHTML(parsed){
   const {name, email, phone, linkedin, github, sections} = parsed;
   let html = '';
 
-  // ── Header ──
+  // Header
   html += `<h1 class="rw-name">${xe(name||'Your Name')}</h1>`;
   const contacts = [
-    phone   ? `📞 ${phone}`   : '',
-    email   ? `✉ ${email}`   : '',
-    linkedin? `🔗 ${linkedin}`: github ? `🔗 ${github}` : '',
+    phone    ? `📞 ${phone}`    : '',
+    email    ? `✉ ${email}`    : '',
+    linkedin ? `🔗 ${linkedin}` : (github ? `🔗 ${github}` : ''),
   ].filter(Boolean);
-  if(contacts.length) html += `<p class="rw-contact-line">${contacts.map(xe).join('  &nbsp;|&nbsp;  ')}</p>`;
+  if(contacts.length) html += `<p class="rw-contact-line">${contacts.map(xe).join('  |  ')}</p>`;
   html += `<hr class="rw-header-rule">`;
 
-  // ── About Me ──
-  const sumLines = (sections.summary || sections.header || [])
-    .filter(l => !l.match(/[@\d]/) && clean(l).length > 3);
+  // About Me
+  const sumLines = (sections.summary||sections.header||[])
+    .filter(l=>!l.match(/[@\d]/)&&clean(l).length>3);
   if(sumLines.length){
     html += `<h2 class="rw-section">ABOUT ME</h2>`;
     html += `<p class="rw-about">${xe(sumLines.map(clean).join(' '))}</p>`;
     html += `<hr class="rw-rule">`;
   }
 
-  // ── Education ──
+  // Education
   const edu = sections.education||[];
   if(edu.length){
     html += `<h2 class="rw-section">EDUCATION</h2>`;
-
-    // Conversion formula: CGPA = Percentage / 9.5  |  Percentage = CGPA * 9.5
-    // Detect numeric grade values and convert; also normalise label text
-    const wantCGPA = (typeof _gradeMode !== 'undefined' && _gradeMode === 'cgpa');
-    const gradeLabel = wantCGPA ? 'CGPA' : 'Percentage';
-
-    const eduNorm = edu.map(l => {
-      // ── Numeric conversion ──
-      // Pattern 1: "85%" or "85.4 %" → convert to CGPA if needed
-      l = l.replace(/(\d{1,3}(?:\.\d{1,2})?)\s*%/g, (_, num) => {
-        const pct = parseFloat(num);
-        if(wantCGPA){
-          const cgpa = (pct / 9.5).toFixed(2);
-          return `${cgpa} CGPA`;
-        }
-        return `${pct}%`;
-      });
-      // Pattern 2: "8.5 CGPA", "8.5/10", "CGPA: 8.5" → convert to % if needed
-      l = l.replace(/(?:CGPA\s*[:\/]?\s*)?(\d\.\d{1,2})\s*(?:\/\s*10|\s+CGPA)/gi, (_, num) => {
-        const cgpa = parseFloat(num);
-        if(!wantCGPA){
-          const pct = (cgpa * 9.5).toFixed(1);
-          return `${pct}%`;
-        }
-        return `${cgpa} CGPA`;
-      });
-      // ── Label normalisation (for entries that just say "CGPA/Percentage" as placeholder) ──
-      l = l.replace(/\b(cgpa\s*\/\s*percentage|percentage\s*\/\s*cgpa)\b/gi, gradeLabel);
-      l = l.replace(/\bCGPA\b/g, wantCGPA ? 'CGPA' : 'Percentage');
-      l = l.replace(/\bPercentage\b/gi, wantCGPA ? 'CGPA' : 'Percentage');
-      l = l.replace(/\bMarks\b/gi, gradeLabel);
-      l = l.replace(/\bGrade\b/gi, gradeLabel);
-      return l;
-    });
-
-    html += buildEntries(eduNorm);
+    const wantCGPA = (typeof _gradeMode!=='undefined' && _gradeMode==='cgpa');
+    html += buildEduHTML(edu, wantCGPA);
     html += `<hr class="rw-rule">`;
   }
 
-  // ── Projects ──
+  // Projects
   const proj = sections.projects||[];
   if(proj.length){
     html += `<h2 class="rw-section">PROJECTS</h2><ul class="rw-list">`;
-    proj.forEach(l => {
-      const t = clean(l);
-      if(t.length > 2) html += `<li>${xe(t)}</li>`;
-    });
+    proj.forEach(l=>{ const t=clean(l); if(t.length>2) html+=`<li>${xe(t)}</li>`; });
     html += `</ul><hr class="rw-rule">`;
   }
 
-  // ── Work Experience ──
+  // Work Experience
   const exp = sections.experience||[];
   if(exp.length){
     html += `<h2 class="rw-section">WORK EXPERIENCE</h2>`;
@@ -1511,27 +1577,22 @@ function buildResumeHTML(parsed){
     html += `<hr class="rw-rule">`;
   }
 
-  // ── Skills (3-column) ──
+  // Skills — split on bullets, pipes, commas, or 2+ spaces
   const skillLines = sections.skills||[];
   if(skillLines.length){
     html += `<h2 class="rw-section">SKILLS</h2><div class="rw-skills">`;
-    // Join lines, then split on bullets, pipes, commas, or 2+ spaces
-    const skillRaw = skillLines.join(' • ');
-    const skills = skillRaw
-      .split(/[•·●|,\n\r]|(?<=\w)  +(?=\w)/)
-      .map(s=>clean(s).replace(/\s{2,}/g,' ').trim())
+    const raw = skillLines.join(' • ');
+    const skills = raw.split(/[•·●|,\n\r]+/)
+      .map(s=>applyOCRCorrections(clean(s)).replace(/\s{2,}/g,' ').trim())
       .filter(s=>s.length>2);
     const seen = new Set();
     skills.forEach(s=>{
-      if(!seen.has(s.toLowerCase())){
-        seen.add(s.toLowerCase());
-        html += `<div class="rw-skill-item">• ${xe(s)}</div>`;
-      }
+      if(!seen.has(s.toLowerCase())){ seen.add(s.toLowerCase()); html+=`<div class="rw-skill-item">• ${xe(s)}</div>`; }
     });
     html += `</div>`;
   }
 
-  // ── Awards / Certifications ──
+  // Awards + Certifications
   const awards = [...(sections.awards||[]), ...(sections.certifications||[])];
   if(awards.length){
     html += `<hr class="rw-rule"><h2 class="rw-section">AWARDS &amp; CERTIFICATIONS</h2><ul class="rw-list">`;
@@ -1539,40 +1600,31 @@ function buildResumeHTML(parsed){
     html += `</ul>`;
   }
 
-  // Merge adjacent lists
   html = html.replace(/<\/ul>\s*<ul class="rw-list">/g,'');
   return html;
 }
 
+// ── Experience / generic entry builder ──────────
 function buildEntries(lines){
-  const dateRx = /\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|january|february|march|april|june|july|august|september|october|november|december|\d{4}|present|current|now)\b/i;
+  const dateRx=/\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|january|february|march|april|june|july|august|september|october|november|december|\d{4}|present|current|now)\b/i;
   let html=''; let i=0;
   while(i<lines.length){
     const raw=lines[i]; const t=clean(raw);
     if(!t||t.length<3){i++;continue;}
-    const hasDash=/[—–|]/.test(t);
-    const isShort=t.length<72;
-    const hasBullet=isBullet(raw);
-    const hasDate=dateRx.test(t);
+    const hasDash=/[—–|]/.test(t), isShort=t.length<72;
+    const hasBullet=isBullet(raw), hasDate=dateRx.test(t);
     if(hasDash||(!hasBullet&&!hasDate&&isShort)){
-      // Entry heading
-      if(hasDash||t.match(/\|/)){
-        // Company | Date line
-        html+=`<p class="rw-entry-company">${xe(t)}</p>`;
-      } else {
-        html+=`<h3 class="rw-entry-role">${xe(t)}</h3>`;
-      }
+      if(hasDash||t.match(/\|/)) html+=`<p class="rw-entry-company">${xe(t)}</p>`;
+      else html+=`<h3 class="rw-entry-role">${xe(t)}</h3>`;
       i++;
       if(i<lines.length&&dateRx.test(clean(lines[i]))){
-        html+=`<p class="rw-entry-date">${xe(clean(lines[i]))}</p>`;
-        i++;
+        html+=`<p class="rw-entry-date">${xe(clean(lines[i]))}</p>`; i++;
       }
       const bullets=[];
       while(i<lines.length){
         const nt=clean(lines[i]);
         if(!nt||nt.length<3){i++;continue;}
-        const nextIsHeading=(/[—–|]/.test(nt)||(!isBullet(lines[i])&&!dateRx.test(nt)&&nt.length<72))&&bullets.length>0;
-        if(nextIsHeading) break;
+        if((/[—–|]/.test(nt)||(!isBullet(lines[i])&&!dateRx.test(nt)&&nt.length<72))&&bullets.length>0) break;
         bullets.push(nt); i++;
       }
       if(bullets.length) html+=`<ul class="rw-list">${bullets.map(b=>`<li>${xe(b)}</li>`).join('')}</ul>`;
@@ -1584,18 +1636,18 @@ function buildEntries(lines){
   return html;
 }
 
+// ── PDF Generator ────────────────────────────────
 async function downloadRewrittenPDF(){
   if(!_rwHtml) return;
   try {
     const { jsPDF } = window.jspdf;
 
-    // ── Logo watermark ──
     let logoB64=null;
     try{
       const navImg=document.querySelector('.sp-nav-logo img');
       if(navImg&&navImg.complete&&navImg.naturalWidth>0){
         const cvs=document.createElement('canvas');
-        cvs.width=navImg.naturalWidth;cvs.height=navImg.naturalHeight;
+        cvs.width=navImg.naturalWidth; cvs.height=navImg.naturalHeight;
         cvs.getContext('2d').drawImage(navImg,0,0);
         logoB64=cvs.toDataURL('image/jpeg',0.85);
       }
@@ -1608,159 +1660,102 @@ async function downloadRewrittenPDF(){
       }catch(e2){}
     }
 
-    // ── Render with 1-page enforcement ──
-    // Try scale=1.0, if overflow try 0.82, then 0.68
-    const scales=[1.0,0.82,0.68];
+    const scales=[1.0,0.85,0.72,0.62];
     let finalDoc=null;
 
     for(const scale of scales){
       const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-      const PW=210,PH=297,ML=18,MR=18,MT=22,MB=22;
-      const TW=PW-ML-MR;
-      let y=MT;
-      let overflow=false;
-
-      function addWatermark(){
-        if(!logoB64)return;
-        try{
-          doc.saveGraphicsState();
-          doc.setGState(new doc.GState({opacity:0.07}));
-          doc.addImage(logoB64,'JPEG',PW/2-5,PH/2-55,90,90);
-          doc.restoreGraphicsState();
-        }catch(e){}
-      }
-
-      function addDarkFooter(){
-        doc.setFillColor(40,40,40);
-        doc.rect(0,PH-12,PW,12,'F');
-        doc.setFontSize(7);doc.setFont('helvetica','normal');
-        doc.setTextColor(200,200,200);
-        doc.text('Vidyavahini First Grade Degree College — Placement Cell',ML,PH-4.5);
-        doc.text('Page 1',PW-MR,PH-4.5,{align:'right'});
-      }
-
+      const PW=210,PH=297,ML=18,MR=18,MT=22,MB=22,TW=174;
+      let y=MT, overflow=false;
       const LIMIT=PH-MB-12;
 
-      function checkY(need){
-        if(y+need>LIMIT){overflow=true;}
-      }
-
-      function txt(t,opts){
-        const fs=(opts.fs||10)*scale;
-        const bold=opts.bold||false;
-        const col=opts.col||[30,30,30];
-        const align=opts.align||'left';
-        const w=(opts.w||TW);
-        const indent=opts.indent||0;
-        doc.setFontSize(fs);doc.setFont('helvetica',bold?'bold':'normal');
+      const addWatermark=()=>{
+        if(!logoB64) return;
+        try{ doc.saveGraphicsState(); doc.setGState(new doc.GState({opacity:0.07}));
+          doc.addImage(logoB64,'JPEG',PW/2,PH/2-45,80,80); doc.restoreGraphicsState(); }catch(e){}
+      };
+      const checkY=need=>{ if(y+need>LIMIT) overflow=true; };
+      const txt=(t,opts)=>{
+        const fs=(opts.fs||10)*scale, bold=opts.bold||false, col=opts.col||[30,30,30];
+        const w=opts.w||TW, ind=opts.ind||0;
+        doc.setFontSize(fs); doc.setFont('helvetica',bold?'bold':'normal');
         doc.setTextColor(col[0],col[1],col[2]);
-        const lines=doc.splitTextToSize(t,w-indent);
-        const lh=fs*0.42;
-        checkY(lines.length*lh+2);
-        if(!overflow)doc.text(lines,align==='center'?PW/2:ML+indent,y,align==='center'?{align:'center'}:{});
-        y+=lines.length*lh+(opts.after!==undefined?opts.after*scale:2*scale);
-      }
-
-      function rule(grey){
-        y+=1;
-        if(!overflow){
-          const g=grey||180;
-          doc.setDrawColor(g,g,g);doc.setLineWidth(0.3);
-          doc.line(ML,y,PW-MR,y);
-        }
-        y+=4*scale;
-      }
-
-      function section(title){
-        checkY(10);
-        if(!overflow){
-          const fs=11*scale;
-          doc.setFontSize(fs);doc.setFont('helvetica','bold');
-          doc.setTextColor(30,30,30);
-          doc.text(title,ML,y);
-          y+=1;
-          doc.setDrawColor(30,30,30);doc.setLineWidth(0.5);
-          doc.line(ML,y,PW-MR,y);
-        }
+        const ls=doc.splitTextToSize(t,w-ind), lh=fs*0.42;
+        checkY(ls.length*lh+2);
+        if(!overflow) doc.text(ls,opts.cx?PW/2:ML+ind,y,opts.cx?{align:'center'}:{});
+        y+=ls.length*lh+(opts.after!==undefined?opts.after*scale:2*scale);
+      };
+      const rule=()=>{ y+=1; if(!overflow){ doc.setDrawColor(180,180,180); doc.setLineWidth(0.3); doc.line(ML,y,PW-MR,y); } y+=4*scale; };
+      const section=title=>{
+        checkY(10*scale);
+        if(!overflow){ const fs=11*scale; doc.setFontSize(fs); doc.setFont('helvetica','bold'); doc.setTextColor(30,30,30);
+          doc.text(title,ML,y); y+=1; doc.setDrawColor(30,30,30); doc.setLineWidth(0.5); doc.line(ML,y,PW-MR,y); }
         y+=5*scale;
-      }
+      };
 
-      // ── Parse HTML ──
-      const wrap=document.createElement('div');
-      wrap.innerHTML=_rwHtml;
-      let nameText='',contactText='';
-      const bodyNodes=[];
+      // Parse HTML
+      const wrap=document.createElement('div'); wrap.innerHTML=_rwHtml;
+      let nameText='', contactText=''; const bodyNodes=[];
       for(const node of wrap.childNodes){
-        if(node.nodeType!==1)continue;
-        const tag=node.tagName.toLowerCase();
-        const t=node.textContent.trim();
-        if(!t)continue;
-        if(tag==='h1'){nameText=t;continue;}
-        if(tag==='p'&&node.classList.contains('rw-contact-line')){contactText=t;continue;}
-        if(tag==='hr'&&node.classList.contains('rw-header-rule'))continue;
+        if(node.nodeType!==1) continue;
+        const tag=node.tagName.toLowerCase(), t=node.textContent.trim();
+        if(!t) continue;
+        if(tag==='h1'){ nameText=t; continue; }
+        if(tag==='p'&&node.classList.contains('rw-contact-line')){ contactText=t; continue; }
+        if(tag==='hr'&&node.classList.contains('rw-header-rule')) continue;
         bodyNodes.push(node);
       }
 
-      // ── Draw page ──
       addWatermark();
 
       // Name
-      const nameFontSize=26*scale;
-      doc.setFontSize(nameFontSize);doc.setFont('helvetica','bold');doc.setTextColor(20,20,20);
-      doc.text(nameText||'Your Name',PW/2,y,{align:'center'});
-      y+=nameFontSize*0.42+4*scale;
+      const nfs=26*scale; doc.setFontSize(nfs); doc.setFont('helvetica','bold'); doc.setTextColor(20,20,20);
+      doc.text(nameText||'Your Name',PW/2,y,{align:'center'}); y+=nfs*0.42+4*scale;
 
-      // Contact
+      // Contact — strip emoji for PDF, use plain separators
       if(contactText){
-        const stripped=contactText.replace(/📞|✉|🔗/g,'').replace(/\s*\|\s*/g,'  ·  ');
-        const cfs=9*scale;
-        doc.setFontSize(cfs);doc.setFont('helvetica','normal');doc.setTextColor(80,80,80);
+        const stripped=contactText.replace(/📞|✉|🔗/g,'').replace(/\s*\|\s*/g,' · ').replace(/&nbsp;/g,' ').trim();
+        const cfs=9*scale; doc.setFontSize(cfs); doc.setFont('helvetica','normal'); doc.setTextColor(80,80,80);
         const cl=doc.splitTextToSize(stripped,TW);
-        doc.text(cl,PW/2,y,{align:'center'});
-        y+=cl.length*(cfs*0.42)+2*scale;
+        doc.text(cl,PW/2,y,{align:'center'}); y+=cl.length*(cfs*0.42)+2*scale;
       }
-      doc.setDrawColor(180,180,180);doc.setLineWidth(0.4);doc.line(ML,y,PW-MR,y);
-      y+=6*scale;
+      doc.setDrawColor(180,180,180); doc.setLineWidth(0.4); doc.line(ML,y,PW-MR,y); y+=6*scale;
 
-      // Body
+      // Body nodes
       for(const node of bodyNodes){
-        const tag=node.tagName.toLowerCase();
-        const t=node.textContent.trim();
-        if(!t)continue;
-        if(tag==='h2'&&node.classList.contains('rw-section')){section(t);}
-        else if(tag==='p'&&node.classList.contains('rw-about')){txt(t,{fs:10,col:[60,60,60],after:3});}
-        else if(tag==='hr'&&node.classList.contains('rw-rule')){rule();}
-        else if(tag==='p'&&node.classList.contains('rw-entry-company')){txt(t,{fs:9.5,col:[100,100,100],after:1});}
-        else if(tag==='h3'&&node.classList.contains('rw-entry-role')){txt(t,{fs:10.5,bold:true,col:[20,20,20],after:1});}
-        else if(tag==='p'&&node.classList.contains('rw-entry-date')){txt(t,{fs:9,col:[130,130,130],after:1});}
-        else if(tag==='p'&&node.classList.contains('rw-entry-desc')){txt(t,{fs:10,col:[60,60,60],after:2});}
+        const tag=node.tagName.toLowerCase(), t=node.textContent.trim();
+        if(!t) continue;
+        if(tag==='h2'&&node.classList.contains('rw-section')){ section(t); }
+        else if(tag==='p'&&node.classList.contains('rw-about')){ txt(t,{fs:10,col:[60,60,60],after:3}); }
+        else if(tag==='hr'&&node.classList.contains('rw-rule')){ rule(); }
+        // Education specific
+        else if(tag==='p'&&node.classList.contains('rw-edu-inst')){ txt(t,{fs:9.5,col:[100,100,100],after:0.5}); }
+        else if(tag==='h3'&&node.classList.contains('rw-entry-role')){ txt(t,{fs:10.5,bold:true,col:[20,20,20],after:0.5}); }
+        else if(tag==='p'&&node.classList.contains('rw-edu-grade')){ txt(t,{fs:9.5,col:[80,80,80],after:1}); }
+        else if(tag==='div'&&node.classList.contains('rw-edu-gap')){ y+=3*scale; }
+        // Experience
+        else if(tag==='p'&&node.classList.contains('rw-entry-company')){ txt(t,{fs:9.5,col:[100,100,100],after:1}); }
+        else if(tag==='p'&&node.classList.contains('rw-entry-date')){ txt(t,{fs:9,col:[130,130,130],after:1}); }
+        else if(tag==='p'&&node.classList.contains('rw-entry-desc')){ txt(t,{fs:10,col:[60,60,60],after:2}); }
         else if(tag==='ul'){
           for(const li of node.querySelectorAll('li')){
-            const lt=li.textContent.trim();if(!lt)continue;
-            const lfs=10*scale;
-            const lines=doc.splitTextToSize('• '+lt,TW-5);
-            const lh=lfs*0.42;
-            checkY(lines.length*lh+1.5);
-            if(!overflow){
-              doc.setFontSize(lfs);doc.setFont('helvetica','normal');doc.setTextColor(50,50,50);
-              doc.text(lines,ML+3,y);
-            }
-            y+=lines.length*lh+1.5*scale;
+            const lt=li.textContent.trim(); if(!lt) continue;
+            const lfs=10*scale, ls=doc.splitTextToSize('• '+lt,TW-5), lh=lfs*0.42;
+            checkY(ls.length*lh+1.5);
+            if(!overflow){ doc.setFontSize(lfs); doc.setFont('helvetica','normal'); doc.setTextColor(50,50,50); doc.text(ls,ML+3,y); }
+            y+=ls.length*lh+1.5*scale;
           }
           y+=1*scale;
         }
         else if(tag==='div'&&node.classList.contains('rw-skills')){
           const items=[...node.querySelectorAll('.rw-skill-item')].map(el=>el.textContent.trim()).filter(Boolean);
-          const cols=3;const cw=TW/cols;
+          const cols=3, cw=TW/cols;
           for(let rr=0;rr<Math.ceil(items.length/cols);rr++){
             checkY(6*scale);
-            if(!overflow){
-              for(let cc=0;cc<cols;cc++){
-                const item=items[rr*cols+cc];if(!item)continue;
-                const sfs=10*scale;
-                doc.setFontSize(sfs);doc.setFont('helvetica','normal');doc.setTextColor(50,50,50);
-                doc.text(item,ML+cc*cw,y);
-              }
+            if(!overflow) for(let cc=0;cc<cols;cc++){
+              const item=items[rr*cols+cc]; if(!item) continue;
+              doc.setFontSize(10*scale); doc.setFont('helvetica','normal'); doc.setTextColor(50,50,50);
+              doc.text(item,ML+cc*cw,y);
             }
             y+=5.5*scale;
           }
@@ -1768,36 +1763,21 @@ async function downloadRewrittenPDF(){
         }
       }
 
-      if(!overflow){finalDoc=doc;break;}
+      if(!overflow){ finalDoc=doc; break; }
     }
 
-    if(!finalDoc){
-      // Last resort: use the smallest scale doc anyway
-      finalDoc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-      // Just re-render with scale 0.68 without overflow check
-      // (already done in loop, use last doc which was scale=0.68)
-      // Re-run with overflow=false forced
-      const doc2=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-      finalDoc=doc2; // will be blank but at least won't crash
-    }
+    // Fallback: last scale doc
+    if(!finalDoc) finalDoc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
 
-    // Add dark footer to the (only) page
-    const doc=finalDoc;
-    const PH=297,ML=18,MR=18;
-    doc.setFillColor(40,40,40);
-    doc.rect(0,PH-12,210,12,'F');
-    doc.setFontSize(7);doc.setFont('helvetica','normal');
-    doc.setTextColor(200,200,200);
-    doc.text('Vidyavahini First Grade Degree College — Placement Cell',ML,PH-4.5);
-    doc.text('Page 1 of 1',210-MR,PH-4.5,{align:'right'});
+    // Dark footer
+    const PH=297,ML2=18,MR2=18;
+    finalDoc.setFillColor(40,40,40); finalDoc.rect(0,PH-12,210,12,'F');
+    finalDoc.setFontSize(7); finalDoc.setFont('helvetica','normal'); finalDoc.setTextColor(200,200,200);
+    finalDoc.text('Vidyavahini First Grade Degree College — Placement Cell',ML2,PH-4.5);
+    finalDoc.text('Page 1 of 1',210-MR2,PH-4.5,{align:'right'});
 
-    const fname=(ST.name||'Student').replace(/\s+/g,'_')+'_Formatted_Resume.pdf';
-    doc.save(fname);
-
-  }catch(err){
-    console.error(err);
-    alert('PDF error: '+err.message);
-  }
+    finalDoc.save((ST.name||'Student').replace(/\s+/g,'_')+'_Formatted_Resume.pdf');
+  } catch(err){ console.error(err); alert('PDF error: '+err.message); }
 }
 </script>
 
