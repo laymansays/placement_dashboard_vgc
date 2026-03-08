@@ -534,6 +534,13 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>window['pdfjs-dist/build/pdf'].GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
+  <!-- Google Identity Services (for Drive OAuth) -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <!-- Format for Placement — modular pipeline -->
+  <script src="template.js"></script>
+  <script src="resume_extractor.js"></script>
+  <script src="ai_rewriter.js"></script>
+  <script src="output_renderer.js"></script>
 </head>
 <body>
 
@@ -1190,19 +1197,36 @@ function doLogout(){
 
 <script>
 /* ═══════════════════════════════════════════════
-   FORMAT FOR PLACEMENT — Rule-based, no API
+   Format for Placement — wiring
+   Uses: template.js, resume_extractor.js,
+         ai_rewriter.js, output_renderer.js
 ═══════════════════════════════════════════════ */
 
-let _rwHtml = '';
-let _gradeMode = 'percentage'; // 'percentage' | 'cgpa'
+let _rwHtml     = '';
+let _parsedData = null;
+let _gradeMode  = 'percentage';
 
-// ── Modal flow ──────────────────────────────────
+// ── Modal open/close ─────────────────────────────────
 function openRewriteModal(){
+  if(!ST || !ST.resume){
+    alert('No resume found in your profile. Please contact the placement cell.');
+    return;
+  }
   document.getElementById('rw-modal').classList.add('show');
   document.getElementById('rw-dl-btn').style.display = 'none';
-  _rwHtml = '';
+  _rwHtml = ''; _parsedData = null;
   showGradePrompt();
 }
+
+function closeRwModal(){
+  document.getElementById('rw-modal').classList.remove('show');
+}
+
+function setRwBody(html){
+  document.getElementById('rw-body').innerHTML = html;
+}
+
+// ── Step 1: Ask CGPA or Percentage ──────────────────
 function showGradePrompt(){
   setRwBody(`
     <div style="padding:8px 0 4px;">
@@ -1210,7 +1234,7 @@ function showGradePrompt(){
         How should academic performance be shown?
       </p>
       <p style="font-size:12px;color:#64748B;margin:0 0 20px;">
-        This will be applied consistently across all education entries.
+        Applied consistently across all education entries.
       </p>
       <div style="display:flex;gap:12px;">
         <button onclick="pickGrade('percentage')"
@@ -1229,555 +1253,83 @@ function showGradePrompt(){
           onmouseout="this.style.borderColor='#E2E8F0';this.style.background='#fff';">
           <div style="font-size:22px;margin-bottom:8px;">🎓</div>
           <div style="font-size:14px;font-weight:800;color:#1A0519;">CGPA</div>
-          <div style="font-size:11px;color:#94A3B8;margin-top:4px;">e.g. 8.2 / 10</div>
+          <div style="font-size:11px;color:#94A3B8;margin-top:4px;">e.g. 8.2 CGPA</div>
         </button>
       </div>
     </div>`);
 }
-function pickGrade(mode){ _gradeMode=mode; showUploadPrompt(); }
-function closeRwModal(){ document.getElementById('rw-modal').classList.remove('show'); }
-function setRwBody(html){ document.getElementById('rw-body').innerHTML=html; }
 
-function showUploadPrompt(){
+// ── Step 2: Grade picked → start full pipeline ───────
+function pickGrade(mode){
+  _gradeMode = mode;
+  startPipeline();
+}
+
+// ── Progress UI helper ───────────────────────────────
+function showProgress(message, progress){
+  const pct = Math.round((progress || 0) * 100);
   setRwBody(`
-    <div class="rw-drop-zone" id="rw-drop"
-         onclick="document.getElementById('rw-file-inp').click()"
-         ondragover="event.preventDefault();this.classList.add('rw-drag-over')"
-         ondragleave="this.classList.remove('rw-drag-over')"
-         ondrop="event.preventDefault();this.classList.remove('rw-drag-over');handleResumeFile(event.dataTransfer.files[0])">
-      <div class="rw-drop-icon">📂</div>
-      <div class="rw-drop-title">Drop your resume PDF here</div>
-      <div class="rw-drop-hint">or click anywhere to browse</div>
-      <div class="rw-drop-note">This is the same resume you uploaded to Google Drive — just drag it from your Downloads folder</div>
-      <input type="file" id="rw-file-inp" accept=".pdf" style="display:none"
-             onchange="handleResumeFile(this.files[0])"/>
+    <div class="rw-loading">
+      <div class="rw-spinner"></div>
+      <div class="rw-loading-txt">${xe(message)}</div>
+      ${progress > 0 ? `
+      <div style="width:100%;max-width:340px;margin:12px auto 0;
+                  background:#E8D5E7;border-radius:99px;height:6px;overflow:hidden;">
+        <div style="width:${pct}%;height:100%;background:#6D0E6A;
+                    border-radius:99px;transition:width .3s;"></div>
+      </div>
+      <div style="font-size:11px;color:#94A3B8;margin-top:6px;">${pct}%</div>` : ''}
+      ${pct === 0 && progress === 0 ? `
+      <div class="rw-loading-sub">
+        First time: AI model downloads once (~2 GB) and is cached for future use.
+      </div>` : ''}
     </div>`);
 }
-function handleResumeFile(file){
-  if(!file) return;
-  if(!file.name.toLowerCase().endsWith('.pdf')){
-    setRwBody(`<div class="rw-error">⚠️ Please select a PDF file.</div>
-      <div class="rw-retry-wrap"><button class="btn-rw-retry" onclick="showUploadPrompt()">↩ Try Again</button></div>`);
-    return;
-  }
-  setRwBody(`<div class="rw-loading"><div class="rw-spinner"></div>
-    <div class="rw-loading-txt">Reading your resume…</div>
-    <div class="rw-loading-sub">Extracting and reformatting to the placement template.</div></div>`);
-  processResumePDF(file);
-}
 
-// ── PDF extraction ──────────────────────────────
-async function processResumePDF(file){
+// ── Main pipeline ────────────────────────────────────
+async function startPipeline(){
   try {
-    const text = await extractTextFromPDF(file);
-    const parsed = parseResumeText(text);
-    const html = buildResumeHTML(parsed);
-    if(!html.trim()) throw new Error('Could not extract text. Try a text-based PDF (not a scanned image).');
-    _rwHtml = html;
-    setRwBody(`<div class="rw-preview">${html}</div>`);
-    document.getElementById('rw-dl-btn').style.display = '';
-  } catch(e){
-    setRwBody(`<div class="rw-error">⚠️ ${xe(e.message)}</div>
-      <div class="rw-retry-wrap"><button class="btn-rw-retry" onclick="showUploadPrompt()">↩ Try Again</button></div>`);
-  }
-}
 
-async function extractTextFromPDF(file){
-  const pdfjsLib = window['pdfjs-dist/build/pdf'];
-  const buf = await file.arrayBuffer();
-  const pdf = await pdfjsLib.getDocument({data:buf}).promise;
-  let fullText = '';
-  for(let p=1; p<=pdf.numPages; p++){
-    const page = await pdf.getPage(p);
-    const content = await page.getTextContent();
-    const lineMap = {};
-    for(const item of content.items){
-      if(!item.str.trim()) continue;
-      const y = Math.round(item.transform[5]);
-      if(!lineMap[y]) lineMap[y]=[];
-      lineMap[y].push({x:item.transform[4], t:item.str});
-    }
-    const ys = Object.keys(lineMap).map(Number).sort((a,b)=>b-a);
-    fullText += ys.map(y=>lineMap[y].sort((a,b)=>a.x-b.x).map(i=>i.t).join(' ')).join('\n')+'\n';
-  }
-  return fullText;
-}
-
-// ── OCR helpers ─────────────────────────────────
-function stripEmoji(s){
-  return s.replace(/[\u{1F300}-\u{1FFFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]|[\uFE00-\uFE0F]|\u200D|Ø=\S+/gu,'').trim();
-}
-
-function isAddressLine(line){
-  // Never filter institution lines
-  if(/\b(college|school|university|institute|vidyavahini|degree|polytechnic|academy|iit|nit|iim)\b/i.test(line)) return false;
-  // Only strip truly standalone city/state lines (full-line match)
-  return /^\s*(karnataka|maharashtra|telangana|tamilnadu|kerala|andhra|gujarat|delhi|punjab|rajasthan|bengaluru|bangalore|mumbai|hyderabad|chennai|pune|tumkur|hubli|mysore|mangalore|bidar|basavakalyan|gulbarga|kalaburagi|davangere|bellary|bagalkot|belagavi|dharwad|shivamogga)\s*$/i.test(line)
-    || /^\d{6}$/.test(line.trim());
-}
-
-// Common OCR word corrections (applied after general cleanup)
-const OCR_CORRECTIONS = [
-  [/\bMs[\s.]+Wo[\s]*rd\b/gi,          'MS Word'],
-  [/\bMs[\s.]+Ex[\s]*cel\b/gi,         'MS Excel'],
-  [/\bMs[\s.]+Word\b/gi,               'MS Word'],
-  [/\bMs[\s.]+Excel\b/gi,              'MS Excel'],
-  [/\bTally[\s]*Prime\b/gi,            'Tally Prime'],
-  [/\bGoo[\s]*gle[\s]*Sheet[\s]*s?\b/gi,'Google Sheets'],
-  [/\bPower[\s]*Point\b/gi,            'PowerPoint'],
-  [/\bPower[\s]*BI\b/gi,               'Power BI'],
-  // Fix joined compound skill words by splitting before known suffixes
-  [/([a-z])(skill)(s?)\b/gi,           '$1 Skill$3'],
-  [/([a-z])(thinking)\b/gi,            '$1 Thinking'],
-  [/([a-z])(management)\b/gi,          '$1 Management'],
-  [/([a-z])(development)\b/gi,         '$1 Development'],
-  [/([a-z])(analysis)\b/gi,            '$1 Analysis'],
-  // "Add LinkedIn" type prefix lines
-  [/^Add\s+LinkedIn\s*[:\-]+\s*/i,     ''],
-];
-
-function applyOCRCorrections(text){
-  for(const [rx, rep] of OCR_CORRECTIONS) text = text.replace(rx, rep);
-  return text;
-}
-
-// ── Main text parser ─────────────────────────────
-function parseResumeText(text){
-  // ── Step 1: URL repair — remove spaces inside URLs before any other cleanup
-  const textUrlFixed = text
-    .replace(/(linkedin\.com\/in\/)([^\n]*)/gi, (_,pre,rest)=>
-      pre + rest.replace(/\s+/g,'').match(/[\w\-]*/)[0])
-    .replace(/(github\.com\/)([^\n]*)/gi, (_,pre,rest)=>
-      pre + rest.replace(/\s+/g,'').match(/[\w\-]*/)[0]);
-
-  // ── Step 2: General OCR cleanup
-  let cleaned = textUrlFixed
-    .replace(/([A-Za-z]) ([a-z])/g, '$1$2')        // "Wo rd" → "Word"
-    .replace(/([A-Za-z]) ([a-z])/g, '$1$2')        // second pass for multi-gap cases
-    .replace(/([A-Z]) ([A-Z]{1,2}) /g,  '$1$2 ')   // "N SS " → "NSS "
-    .replace(/([A-Z]) ([A-Z]{1,2}) /g,  '$1$2 ')   // second pass
-    .replace(/\-\s+([A-Za-z])/g, '-$1')            // "- Based" → "-Based"
-    .replace(/([A-Za-z]),([A-Za-z])/g, '$1, $2')   // comma spacing
-    .replace(/\(\s+/g, '(')                         // ( text ) → (text)
-    .replace(/\s+\)/g, ')')
-    .replace(/Ø=\S+\s*/g, '')                       // garbled icon chars
-    .replace(/[^\x20-\x7E\n]/g, ch=>{
-      if(/[\u2022\u00B7\u2219\u25AA\u25B8\u25BA\u2013\u2014]/.test(ch)) return ch;
-      return /[\u00C0-\u024F\u0900-\u097F]/.test(ch) ? ch : ' ';
-    })
-    .replace(/  +/g, ' ');                           // collapse multiple spaces
-
-  // ── Step 3: Known word corrections
-  cleaned = applyOCRCorrections(cleaned);
-
-  const lines = cleaned.split('\n').map(l=>l.trim()).filter(l=>l.length>2);
-
-  // ── Regex patterns ──
-  const emailRx     = /[\w.+-]+@[\w.-]+\.[a-zA-Z]{2,}/;
-  const phoneRx     = /(\+91[\s-]?)?[6-9]\d{9}/;
-  const linkedinRx  = /(?:https?:\/\/)?(?:www\.)?linkedin\.com\/in\/[\w-]+/i;
-  const linkedinRx2 = /(?:www\.)?linkedin\.com[^\s]*/i;
-  const githubRx    = /(?:https?:\/\/)?(?:www\.)?github\.com\/[\w-]+/i;
-
-  const email    = (textUrlFixed.match(emailRx)   ||[])[0]||'';
-  const phone    = (textUrlFixed.match(phoneRx)   ||[])[0]||'';
-  const linkedin = (textUrlFixed.match(linkedinRx)||textUrlFixed.match(linkedinRx2)||[])[0]||'';
-  const github   = (textUrlFixed.match(githubRx)  ||[])[0]||'';
-
-  const SECS = {
-    summary:       /^(professional\s+)?(summary|profile|objective|career\s+(summary|objective)|about(\s+me)?|overview)$/i,
-    experience:    /^(work\s+|professional\s+|relevant\s+)?(experience|employment(\s+history)?|work\s+history|internship(s)?)$/i,
-    education:     /^(education(al)?(\s+background|\s+qualifications?)?|academic(\s+background)?|qualifications?|schooling)$/i,
-    projects:      /^(projects?(\s+work)?|academic\s+projects?|personal\s+projects?|key\s+projects?)$/i,
-    skills:        /^((technical\s+|core\s+|key\s+|professional\s+|soft\s+)?skills?|competenc(y|ies)|expertise|technologies|tools(\s+&\s+technologies)?|technical\s+and\s+soft\s+skills?)$/i,
-    awards:        /^(awards?|achievements?|honors?|recognitions?|accomplishments?|extra.?curricular|leadership(\s+&\s+activities)?)$/i,
-    languages:     /^(languages?(\s+known|\s+proficiency|\s+skills?)?)$/i,
-    certifications:/^(certifications?|courses?(\s+completed)?|training|professional\s+development)$/i,
-  };
-
-  // Education table header detector
-  const EDU_HEADER_RX = /^(course|qualification|degree|program|institution|school|college|university|marks|year|percentage|cgpa|grade|s\.?no)(\s+(course|qualification|degree|program|institution|school|college|university|marks|year|percentage|cgpa|grade|s\.?no))+$/i;
-
-  // Name: first non-contact, non-address short line
-  let name = '';
-  for(const l of lines){
-    const lc = stripEmoji(l);
-    if(!emailRx.test(lc) && !phoneRx.test(lc) && !linkedinRx.test(lc) && !githubRx.test(lc)
-       && !isAddressLine(lc) && lc.length>2 && lc.length<60
-       && !Object.values(SECS).some(rx=>rx.test(lc))
-       && !/^\s*Add\s+LinkedIn/i.test(lc)){
-      name = lc; break;
-    }
-  }
-
-  const sections = {};
-  let curSec = null;
-
-  for(const rawLine of lines){
-    const l = stripEmoji(rawLine).replace(/\s+/g,' ').trim();
-    if(!l || l.length<3) continue;
-    if(isAddressLine(l)) continue;
-    if(l===name) continue;
-    // Skip contact lines
-    if((emailRx.test(l)||phoneRx.test(l)||linkedinRx.test(l)||linkedinRx2.test(l)) && l.length<100) continue;
-    // Skip "Add LinkedIn :- ..." prefix lines
-    if(/^\s*Add\s+LinkedIn/i.test(l)) continue;
-
-    // Section header detection
-    let matched=false;
-    for(const [sec,rx] of Object.entries(SECS)){
-      if(rx.test(l)){ curSec=sec; if(!sections[curSec]) sections[curSec]=[]; matched=true; break; }
-    }
-    if(matched) continue;
-
-    // Skip education table header rows
-    if(curSec==='education' && EDU_HEADER_RX.test(l)) continue;
-
-    if(curSec) sections[curSec].push(l);
-  }
-
-  return {name, email, phone, linkedin, github, sections};
-}
-
-// ── Clean / isBullet helpers ─────────────────────
-function clean(line){ return line.replace(/^[\s•·●\-–*▪▸►]+/,'').trim(); }
-function isBullet(line){ return /^[•·●\-–*▪▸►]/.test(line.trim()); }
-
-// ── Education-specific parser ────────────────────
-function parseEduLine(line){
-  const yearRx  = /\b(20\d{2}|19\d{2})\b/;
-  const gradeRx = /(\d{1,3}(?:\.\d{1,2})?\s*%|(?:CGPA\s*[:\-]?\s*)?\d\.\d{1,2}\s*(?:CGPA|\/\s*10)?)/i;
-  const courseRx= /^(\(?\s*(?:b\.?\s*com|bca|b\.?\s*sc|b\.?\s*a\.?|bba|b\.?\s*tech|mba|m\.?\s*com|mca|m\.?\s*sc|m\.?\s*tech|pre[\s\-]?universit\w+|puc|sslc|hsc|ssc|10th|12th|class[\s\-]?x{1,3}|diploma|phd|pg|ug)\s*\)?)/i;
-
-  const yearMatch  = line.match(yearRx);
-  const gradeMatch = line.match(gradeRx);
-  const year  = yearMatch  ? yearMatch[0]  : '';
-  const grade = gradeMatch ? gradeMatch[0].trim() : '';
-
-  let rest = line;
-  if(year)  rest = rest.replace(year,'').trim();
-  if(grade) rest = rest.replace(gradeMatch[0],'').trim();
-  rest = rest.replace(/\s{2,}/g,' ').trim().replace(/[,\s]+$/,'');
-
-  let course='', institution='';
-  const cm = rest.match(courseRx);
-  if(cm){
-    course = cm[0].replace(/[()]/g,'').trim();
-    institution = rest.slice(cm[0].length).trim().replace(/^[,\s]+/,'');
-  } else {
-    // Heuristic: if starts with short word(s) before a long institution name
-    const words = rest.split(/\s+/);
-    const shortPrefix = [];
-    let i=0;
-    while(i<words.length && shortPrefix.join(' ').length<25 && words[i].length<15){
-      shortPrefix.push(words[i]); i++;
-    }
-    if(i<words.length && words.slice(i).join(' ').length>15){
-      course = shortPrefix.join(' ');
-      institution = words.slice(i).join(' ');
-    } else {
-      institution = rest;
-    }
-  }
-
-  return {course:course.trim(), institution:institution.trim(), grade, year};
-}
-
-function convertGradeValue(gradeStr, wantCGPA){
-  // Percentage → CGPA
-  const pctMatch = gradeStr.match(/(\d{1,3}(?:\.\d{1,2})?)\s*%/);
-  if(pctMatch){
-    const pct = parseFloat(pctMatch[1]);
-    if(wantCGPA) return `${(pct/9.5).toFixed(2)} CGPA`;
-    return `${pct}%`;
-  }
-  // CGPA → Percentage
-  const cgpaMatch = gradeStr.match(/(?:CGPA\s*[:\-]?\s*)?(\d\.\d{1,2})\s*(?:CGPA|\/\s*10)?/i);
-  if(cgpaMatch){
-    const cgpa = parseFloat(cgpaMatch[1]);
-    if(!wantCGPA) return `${(cgpa*9.5).toFixed(1)}%`;
-    return `${cgpa} CGPA`;
-  }
-  return gradeStr;
-}
-
-function buildEduHTML(lines, wantCGPA){
-  const EDU_HEADER_RX = /^(course|qualification|degree|institution|marks|year|percentage|cgpa|grade)(\s+\w+)+$/i;
-  let html = '';
-
-  for(const rawLine of lines){
-    const l = clean(rawLine);
-    if(!l || l.length<3) continue;
-    if(EDU_HEADER_RX.test(l)) continue;
-
-    const {course, institution, grade, year} = parseEduLine(l);
-
-    if(institution){
-      html += `<p class="rw-edu-inst">${xe(institution)}</p>`;
-    }
-    const courseYear = [course, year].filter(Boolean).join(', ');
-    if(courseYear){
-      html += `<h3 class="rw-entry-role">${xe(courseYear)}</h3>`;
-    }
-    if(grade){
-      const converted = convertGradeValue(grade, wantCGPA);
-      html += `<p class="rw-edu-grade">${xe(converted)}</p>`;
-    }
-    html += '<div class="rw-edu-gap"></div>';
-  }
-  return html;
-}
-
-// ── Main HTML builder ────────────────────────────
-function buildResumeHTML(parsed){
-  const {name, email, phone, linkedin, github, sections} = parsed;
-  let html = '';
-
-  // Header
-  html += `<h1 class="rw-name">${xe(name||'Your Name')}</h1>`;
-  const contacts = [
-    phone    ? `📞 ${phone}`    : '',
-    email    ? `✉ ${email}`    : '',
-    linkedin ? `🔗 ${linkedin}` : (github ? `🔗 ${github}` : ''),
-  ].filter(Boolean);
-  if(contacts.length) html += `<p class="rw-contact-line">${contacts.map(xe).join('  |  ')}</p>`;
-  html += `<hr class="rw-header-rule">`;
-
-  // About Me
-  const sumLines = (sections.summary||sections.header||[])
-    .filter(l=>!l.match(/[@\d]/)&&clean(l).length>3);
-  if(sumLines.length){
-    html += `<h2 class="rw-section">ABOUT ME</h2>`;
-    html += `<p class="rw-about">${xe(sumLines.map(clean).join(' '))}</p>`;
-    html += `<hr class="rw-rule">`;
-  }
-
-  // Education
-  const edu = sections.education||[];
-  if(edu.length){
-    html += `<h2 class="rw-section">EDUCATION</h2>`;
-    const wantCGPA = (typeof _gradeMode!=='undefined' && _gradeMode==='cgpa');
-    html += buildEduHTML(edu, wantCGPA);
-    html += `<hr class="rw-rule">`;
-  }
-
-  // Projects
-  const proj = sections.projects||[];
-  if(proj.length){
-    html += `<h2 class="rw-section">PROJECTS</h2><ul class="rw-list">`;
-    proj.forEach(l=>{ const t=clean(l); if(t.length>2) html+=`<li>${xe(t)}</li>`; });
-    html += `</ul><hr class="rw-rule">`;
-  }
-
-  // Work Experience
-  const exp = sections.experience||[];
-  if(exp.length){
-    html += `<h2 class="rw-section">WORK EXPERIENCE</h2>`;
-    html += buildEntries(exp);
-    html += `<hr class="rw-rule">`;
-  }
-
-  // Skills — split on bullets, pipes, commas, or 2+ spaces
-  const skillLines = sections.skills||[];
-  if(skillLines.length){
-    html += `<h2 class="rw-section">SKILLS</h2><div class="rw-skills">`;
-    const raw = skillLines.join(' • ');
-    const skills = raw.split(/[•·●|,\n\r]+/)
-      .map(s=>applyOCRCorrections(clean(s)).replace(/\s{2,}/g,' ').trim())
-      .filter(s=>s.length>2);
-    const seen = new Set();
-    skills.forEach(s=>{
-      if(!seen.has(s.toLowerCase())){ seen.add(s.toLowerCase()); html+=`<div class="rw-skill-item">• ${xe(s)}</div>`; }
+    // Step A: Extract text from Drive
+    const rawText = await extractResumeText(ST.resume, (msg, prog) => {
+      showProgress(msg, prog);
     });
-    html += `</div>`;
-  }
 
-  // Awards + Certifications
-  const awards = [...(sections.awards||[]), ...(sections.certifications||[])];
-  if(awards.length){
-    html += `<hr class="rw-rule"><h2 class="rw-section">AWARDS &amp; CERTIFICATIONS</h2><ul class="rw-list">`;
-    awards.forEach(l=>{ const t=clean(l); if(t.length>2) html+=`<li>${xe(t)}</li>`; });
-    html += `</ul>`;
-  }
+    // Step B: Load WebLLM + rewrite
+    const parsed = await rewriteWithAI(rawText, _gradeMode, (msg, prog) => {
+      showProgress(msg, prog);
+    });
 
-  html = html.replace(/<\/ul>\s*<ul class="rw-list">/g,'');
-  return html;
+    // Step C: Build preview HTML
+    _parsedData = parsed;
+    _rwHtml     = buildResumeHTML(parsed);
+
+    setRwBody(`<div class="rw-preview">${_rwHtml}</div>`);
+    document.getElementById('rw-dl-btn').style.display = '';
+
+  } catch(err) {
+    console.error('Pipeline error:', err);
+    setRwBody(`
+      <div class="rw-error">⚠️ ${xe(err.message)}</div>
+      <div class="rw-retry-wrap">
+        <button class="btn-rw-retry" onclick="startPipeline()">↩ Try Again</button>
+      </div>`);
+  }
 }
 
-// ── Experience / generic entry builder ──────────
-function buildEntries(lines){
-  const dateRx=/\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|january|february|march|april|june|july|august|september|october|november|december|\d{4}|present|current|now)\b/i;
-  let html=''; let i=0;
-  while(i<lines.length){
-    const raw=lines[i]; const t=clean(raw);
-    if(!t||t.length<3){i++;continue;}
-    const hasDash=/[—–|]/.test(t), isShort=t.length<72;
-    const hasBullet=isBullet(raw), hasDate=dateRx.test(t);
-    if(hasDash||(!hasBullet&&!hasDate&&isShort)){
-      if(hasDash||t.match(/\|/)) html+=`<p class="rw-entry-company">${xe(t)}</p>`;
-      else html+=`<h3 class="rw-entry-role">${xe(t)}</h3>`;
-      i++;
-      if(i<lines.length&&dateRx.test(clean(lines[i]))){
-        html+=`<p class="rw-entry-date">${xe(clean(lines[i]))}</p>`; i++;
-      }
-      const bullets=[];
-      while(i<lines.length){
-        const nt=clean(lines[i]);
-        if(!nt||nt.length<3){i++;continue;}
-        if((/[—–|]/.test(nt)||(!isBullet(lines[i])&&!dateRx.test(nt)&&nt.length<72))&&bullets.length>0) break;
-        bullets.push(nt); i++;
-      }
-      if(bullets.length) html+=`<ul class="rw-list">${bullets.map(b=>`<li>${xe(b)}</li>`).join('')}</ul>`;
-    } else {
-      if(t.length>2) html+=isBullet(raw)?`<ul class="rw-list"><li>${xe(t)}</li></ul>`:`<p class="rw-entry-desc">${xe(t)}</p>`;
-      i++;
-    }
-  }
-  return html;
-}
-
-// ── PDF Generator ────────────────────────────────
+// ── Download PDF ─────────────────────────────────────
 async function downloadRewrittenPDF(){
-  if(!_rwHtml) return;
+  if(!_parsedData){ alert('Nothing to download yet.'); return; }
   try {
-    const { jsPDF } = window.jspdf;
-
-    let logoB64=null;
-    try{
-      const navImg=document.querySelector('.sp-nav-logo img');
-      if(navImg&&navImg.complete&&navImg.naturalWidth>0){
-        const cvs=document.createElement('canvas');
-        cvs.width=navImg.naturalWidth; cvs.height=navImg.naturalHeight;
-        cvs.getContext('2d').drawImage(navImg,0,0);
-        logoB64=cvs.toDataURL('image/jpeg',0.85);
-      }
-    }catch(e){
-      try{
-        const base=window.location.href.replace(/\/[^\/]*$/,'/');
-        const r2=await fetch(base+'logo.jpg');
-        const blob=await r2.blob();
-        logoB64=await new Promise(res=>{const rd=new FileReader();rd.onload=()=>res(rd.result);rd.readAsDataURL(blob);});
-      }catch(e2){}
-    }
-
-    const scales=[1.0,0.85,0.72,0.62];
-    let finalDoc=null;
-
-    for(const scale of scales){
-      const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-      const PW=210,PH=297,ML=18,MR=18,MT=22,MB=22,TW=174;
-      let y=MT, overflow=false;
-      const LIMIT=PH-MB-12;
-
-      const addWatermark=()=>{
-        if(!logoB64) return;
-        try{ doc.saveGraphicsState(); doc.setGState(new doc.GState({opacity:0.07}));
-          doc.addImage(logoB64,'JPEG',PW/2,PH/2-45,80,80); doc.restoreGraphicsState(); }catch(e){}
-      };
-      const checkY=need=>{ if(y+need>LIMIT) overflow=true; };
-      const txt=(t,opts)=>{
-        const fs=(opts.fs||10)*scale, bold=opts.bold||false, col=opts.col||[30,30,30];
-        const w=opts.w||TW, ind=opts.ind||0;
-        doc.setFontSize(fs); doc.setFont('helvetica',bold?'bold':'normal');
-        doc.setTextColor(col[0],col[1],col[2]);
-        const ls=doc.splitTextToSize(t,w-ind), lh=fs*0.42;
-        checkY(ls.length*lh+2);
-        if(!overflow) doc.text(ls,opts.cx?PW/2:ML+ind,y,opts.cx?{align:'center'}:{});
-        y+=ls.length*lh+(opts.after!==undefined?opts.after*scale:2*scale);
-      };
-      const rule=()=>{ y+=1; if(!overflow){ doc.setDrawColor(180,180,180); doc.setLineWidth(0.3); doc.line(ML,y,PW-MR,y); } y+=4*scale; };
-      const section=title=>{
-        checkY(10*scale);
-        if(!overflow){ const fs=11*scale; doc.setFontSize(fs); doc.setFont('helvetica','bold'); doc.setTextColor(30,30,30);
-          doc.text(title,ML,y); y+=1; doc.setDrawColor(30,30,30); doc.setLineWidth(0.5); doc.line(ML,y,PW-MR,y); }
-        y+=5*scale;
-      };
-
-      // Parse HTML
-      const wrap=document.createElement('div'); wrap.innerHTML=_rwHtml;
-      let nameText='', contactText=''; const bodyNodes=[];
-      for(const node of wrap.childNodes){
-        if(node.nodeType!==1) continue;
-        const tag=node.tagName.toLowerCase(), t=node.textContent.trim();
-        if(!t) continue;
-        if(tag==='h1'){ nameText=t; continue; }
-        if(tag==='p'&&node.classList.contains('rw-contact-line')){ contactText=t; continue; }
-        if(tag==='hr'&&node.classList.contains('rw-header-rule')) continue;
-        bodyNodes.push(node);
-      }
-
-      addWatermark();
-
-      // Name
-      const nfs=26*scale; doc.setFontSize(nfs); doc.setFont('helvetica','bold'); doc.setTextColor(20,20,20);
-      doc.text(nameText||'Your Name',PW/2,y,{align:'center'}); y+=nfs*0.42+4*scale;
-
-      // Contact — strip emoji for PDF, use plain separators
-      if(contactText){
-        const stripped=contactText.replace(/📞|✉|🔗/g,'').replace(/\s*\|\s*/g,' · ').replace(/&nbsp;/g,' ').trim();
-        const cfs=9*scale; doc.setFontSize(cfs); doc.setFont('helvetica','normal'); doc.setTextColor(80,80,80);
-        const cl=doc.splitTextToSize(stripped,TW);
-        doc.text(cl,PW/2,y,{align:'center'}); y+=cl.length*(cfs*0.42)+2*scale;
-      }
-      doc.setDrawColor(180,180,180); doc.setLineWidth(0.4); doc.line(ML,y,PW-MR,y); y+=6*scale;
-
-      // Body nodes
-      for(const node of bodyNodes){
-        const tag=node.tagName.toLowerCase(), t=node.textContent.trim();
-        if(!t) continue;
-        if(tag==='h2'&&node.classList.contains('rw-section')){ section(t); }
-        else if(tag==='p'&&node.classList.contains('rw-about')){ txt(t,{fs:10,col:[60,60,60],after:3}); }
-        else if(tag==='hr'&&node.classList.contains('rw-rule')){ rule(); }
-        // Education specific
-        else if(tag==='p'&&node.classList.contains('rw-edu-inst')){ txt(t,{fs:9.5,col:[100,100,100],after:0.5}); }
-        else if(tag==='h3'&&node.classList.contains('rw-entry-role')){ txt(t,{fs:10.5,bold:true,col:[20,20,20],after:0.5}); }
-        else if(tag==='p'&&node.classList.contains('rw-edu-grade')){ txt(t,{fs:9.5,col:[80,80,80],after:1}); }
-        else if(tag==='div'&&node.classList.contains('rw-edu-gap')){ y+=3*scale; }
-        // Experience
-        else if(tag==='p'&&node.classList.contains('rw-entry-company')){ txt(t,{fs:9.5,col:[100,100,100],after:1}); }
-        else if(tag==='p'&&node.classList.contains('rw-entry-date')){ txt(t,{fs:9,col:[130,130,130],after:1}); }
-        else if(tag==='p'&&node.classList.contains('rw-entry-desc')){ txt(t,{fs:10,col:[60,60,60],after:2}); }
-        else if(tag==='ul'){
-          for(const li of node.querySelectorAll('li')){
-            const lt=li.textContent.trim(); if(!lt) continue;
-            const lfs=10*scale, ls=doc.splitTextToSize('• '+lt,TW-5), lh=lfs*0.42;
-            checkY(ls.length*lh+1.5);
-            if(!overflow){ doc.setFontSize(lfs); doc.setFont('helvetica','normal'); doc.setTextColor(50,50,50); doc.text(ls,ML+3,y); }
-            y+=ls.length*lh+1.5*scale;
-          }
-          y+=1*scale;
-        }
-        else if(tag==='div'&&node.classList.contains('rw-skills')){
-          const items=[...node.querySelectorAll('.rw-skill-item')].map(el=>el.textContent.trim()).filter(Boolean);
-          const cols=3, cw=TW/cols;
-          for(let rr=0;rr<Math.ceil(items.length/cols);rr++){
-            checkY(6*scale);
-            if(!overflow) for(let cc=0;cc<cols;cc++){
-              const item=items[rr*cols+cc]; if(!item) continue;
-              doc.setFontSize(10*scale); doc.setFont('helvetica','normal'); doc.setTextColor(50,50,50);
-              doc.text(item,ML+cc*cw,y);
-            }
-            y+=5.5*scale;
-          }
-          y+=2*scale;
-        }
-      }
-
-      if(!overflow){ finalDoc=doc; break; }
-    }
-
-    // Fallback: last scale doc
-    if(!finalDoc) finalDoc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-
-    // Dark footer
-    const PH=297,ML2=18,MR2=18;
-    finalDoc.setFillColor(40,40,40); finalDoc.rect(0,PH-12,210,12,'F');
-    finalDoc.setFontSize(7); finalDoc.setFont('helvetica','normal'); finalDoc.setTextColor(200,200,200);
-    finalDoc.text('Vidyavahini First Grade Degree College — Placement Cell',ML2,PH-4.5);
-    finalDoc.text('Page 1 of 1',210-MR2,PH-4.5,{align:'right'});
-
-    finalDoc.save((ST.name||'Student').replace(/\s+/g,'_')+'_Formatted_Resume.pdf');
-  } catch(err){ console.error(err); alert('PDF error: '+err.message); }
+    document.getElementById('rw-dl-btn').textContent = '⏳ Generating PDF…';
+    document.getElementById('rw-dl-btn').disabled = true;
+    await downloadFormattedPDF(_parsedData);
+  } catch(err){
+    alert('PDF error: ' + err.message);
+  } finally {
+    document.getElementById('rw-dl-btn').textContent = '⬇ Download PDF';
+    document.getElementById('rw-dl-btn').disabled = false;
+  }
 }
 </script>
 
