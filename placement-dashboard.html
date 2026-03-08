@@ -1950,57 +1950,64 @@ function buildStudentSection(title,students,anchorId){
 }
 
 /* ── Shared PDF builder ── */
-function _buildReportPDF(title, subtitle, allSections){
+async function _buildReportPDF(title, subtitle, allSections){
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
   const DATE_STR = new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
 
-  // ── Draw the college top-bar (purple strip) ──
-  function drawCollegeBar(){
+  // ── Load logo as base64 ──
+  let logoB64 = null;
+  try {
+    const resp = await fetch('logo.jpg');
+    const blob = await resp.blob();
+    logoB64 = await new Promise(res => {
+      const r = new FileReader();
+      r.onload = () => res(r.result);
+      r.readAsDataURL(blob);
+    });
+  } catch(e){ logoB64 = null; }
+
+  // ── Draw full page header: logo left, college name + title centred ──
+  function drawHeader(){
     doc.setFillColor(109,14,106);
-    doc.rect(0,0,210,22,'F');
+    doc.rect(0, 0, 210, 30, 'F');
+    if(logoB64) doc.addImage(logoB64, 'JPEG', 10, 4, 22, 22);
     doc.setTextColor(255,255,255);
     doc.setFontSize(13); doc.setFont('helvetica','bold');
-    doc.text('Vidyavahini First Grade Degree College', 14, 10);
+    doc.text('Vidyavahini First Grade Degree College', 38, 13);
     doc.setFontSize(9); doc.setFont('helvetica','normal');
-    doc.text('Placement Cell — ' + title, 14, 17);
+    doc.text('Placement Cell  —  ' + title, 38, 21);
   }
 
-  // ── Draw company info block below bar ──
-  // Returns the Y position after the block
+  // ── Company info block below header, returns table startY ──
   function drawCompanyBlock(companyName, roles, isContinued){
-    drawCollegeBar();
-    doc.setTextColor(60,60,60);
+    doc.setTextColor(50,50,50);
     doc.setFontSize(11); doc.setFont('helvetica','bold');
-    doc.text(companyName + (isContinued ? '  (contd.)' : ''), 14, 31);
+    doc.text(companyName + (isContinued ? '   (contd.)' : ''), 14, 40);
     doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(80,80,80);
-    doc.text('Role(s): ' + (roles||'—'), 14, 37);
-    doc.setTextColor(150,150,150);
-    doc.text('Generated: ' + DATE_STR, 14, 43);
-    return 49; // table starts at Y=49
+    doc.text('Role(s): ' + (roles||'—'), 14, 47);
+    doc.setTextColor(160,160,160);
+    doc.text('Generated: ' + DATE_STR, 14, 53);
+    doc.setDrawColor(220,200,220); doc.setLineWidth(0.25);
+    doc.line(14, 57, 196, 57);
+    return 61;
   }
 
-  // ── Draw footer ──
+  // ── Footer ──
   function drawFooter(){
     const pg = doc.internal.getCurrentPageInfo().pageNumber;
-    doc.setFontSize(8); doc.setTextColor(160,160,160); doc.setFont('helvetica','normal');
-    doc.text('Vidyavahini Placement Cell', 14, 289);
-    doc.text('Page ' + pg, 196, 289, {align:'right'});
+    doc.setDrawColor(200,180,200); doc.setLineWidth(0.25);
+    doc.line(14, 285, 196, 285);
+    doc.setFontSize(8); doc.setTextColor(180,180,180); doc.setFont('helvetica','normal');
+    doc.text('Vidyavahini First Grade Degree College — Placement Cell', 14, 290);
+    doc.text('Page ' + pg, 196, 290, {align:'right'});
   }
 
-  // ── First page: report cover block ──
-  drawCollegeBar();
-  doc.setTextColor(60,60,60);
-  doc.setFontSize(11); doc.setFont('helvetica','bold');
-  doc.text(subtitle, 14, 31);
-  doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(150,150,150);
-  doc.text('Generated: ' + DATE_STR + '   ·   Companies: ' + allSections.length, 14, 37);
-  drawFooter();
-
-  // ── One page per company ──
-  allSections.forEach((sec) => {
-    doc.addPage();  // always start a fresh page for each company
-    let startY = drawCompanyBlock(sec.companyName, sec.roles, false);
+  // ── One page per company; first company on page 1 (no blank cover) ──
+  allSections.forEach((sec, si) => {
+    if(si > 0) doc.addPage();
+    drawHeader();
+    const startY = drawCompanyBlock(sec.companyName, sec.roles, false);
 
     if(!sec.rows.length){
       doc.setFontSize(9); doc.setTextColor(150,150,150); doc.setFont('helvetica','normal');
@@ -2009,10 +2016,9 @@ function _buildReportPDF(title, subtitle, allSections){
       return;
     }
 
-    // Closure so didDrawPage knows which company it's on
-    const _name  = sec.companyName;
+    const _name = sec.companyName;
     const _roles = sec.roles;
-    let   _firstPage = true;
+    let _isFirst = true;
 
     doc.autoTable({
       startY,
@@ -2020,31 +2026,25 @@ function _buildReportPDF(title, subtitle, allSections){
       body: sec.rows,
       theme: 'grid',
       styles:{
-        fontSize: 9.5,
-        cellPadding: {top:3,bottom:3,left:5,right:5},
-        lineColor: [200,180,200], lineWidth: 0.3,
-        textColor: [30,30,30], font: 'helvetica',
+        fontSize:9.5, cellPadding:{top:3,bottom:3,left:5,right:5},
+        lineColor:[210,185,210], lineWidth:0.3, textColor:[30,30,30], font:'helvetica',
       },
       headStyles:{
-        fillColor: [109,14,106], textColor: [255,255,255],
-        fontStyle: 'bold', fontSize: 9.5, halign: 'left',
+        fillColor:[109,14,106], textColor:[255,255,255], fontStyle:'bold', fontSize:9.5, halign:'left',
       },
       columnStyles:{
-        0: {cellWidth:16, halign:'center'},
-        1: {cellWidth:65},
-        2: {cellWidth:'auto'},
+        0:{cellWidth:16,halign:'center'}, 1:{cellWidth:65}, 2:{cellWidth:'auto'},
       },
-      alternateRowStyles: {fillColor:[247,240,247]},
-      margin: {left:14, right:14, bottom:16, top:49},
-      didDrawPage: () => {
-        if(_firstPage){ _firstPage = false; drawFooter(); return; }
-        // Continuation page — redraw company+role header, then footer
+      alternateRowStyles:{fillColor:[247,240,247]},
+      margin:{left:14, right:14, bottom:18, top:61},
+      didDrawPage:()=>{
+        if(_isFirst){ _isFirst=false; drawFooter(); return; }
+        drawHeader();
         drawCompanyBlock(_name, _roles, true);
         drawFooter();
       },
     });
 
-    // Count below table
     const finalY = doc.lastAutoTable.finalY + 6;
     if(finalY < 282){
       doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(109,14,106);
@@ -2055,7 +2055,7 @@ function _buildReportPDF(title, subtitle, allSections){
   return doc;
 }
 
-function downloadPlacedPDF(anchorId){
+async function downloadPlacedPDF(anchorId){
   const co = COMPANIES.find(x=>x.id===cId);
   if(!co){ toast('No company selected','info'); return; }
 
@@ -2069,7 +2069,7 @@ function downloadPlacedPDF(anchorId){
 
   const rows = students.map((s,i)=>[i+1, s.name||'—', s.email||'—']);
   const roles = co.roles && co.roles.length ? co.roles.join(', ') : '—';
-  const doc = _buildReportPDF(label, label + ' — ' + co.name,
+  const doc = await _buildReportPDF(label, label + ' — ' + co.name,
     [{ companyName: co.name, roles, rows }]);
 
   const fname = co.name.replace(/\s+/g,'_') + '_' + key.replace('students','') + '.pdf';
@@ -2077,7 +2077,7 @@ function downloadPlacedPDF(anchorId){
   toast('PDF downloaded','success','📄');
 }
 
-function exportPDF(type){
+async function exportPDF(type){
   const { jsPDF } = window.jspdf;
 
   if(type === 'companies'){
@@ -2120,7 +2120,7 @@ function exportPDF(type){
       rows: c.studentsRegistered.map((s,i)=>[i+1,s.name||'—',s.email||'—']),
     }));
     if(!sections.length){ toast('No registrations yet','info'); return; }
-    const doc = _buildReportPDF('Registrations Report','All Registrations by Company', sections);
+    const doc = await _buildReportPDF('Registrations Report','All Registrations by Company', sections);
     doc.save('Registrations_Report.pdf');
     toast('PDF downloaded','success','📄'); return;
   }
@@ -2134,7 +2134,7 @@ function exportPDF(type){
         rows: c.studentsSelected.map((s,i)=>[i+1,s.name||'—',s.email||'—']),
       }));
     if(!sections.length){ toast('No drives completed yet','info'); return; }
-    const doc = _buildReportPDF('Drives Done Report','Completed Drives — Selected Students', sections);
+    const doc = await _buildReportPDF('Drives Done Report','Completed Drives — Selected Students', sections);
     doc.save('Drives_Done_Report.pdf');
     toast('PDF downloaded','success','📄'); return;
   }
@@ -2146,7 +2146,7 @@ function exportPDF(type){
       rows: c.studentsSelected.map((s,i)=>[i+1,s.name||'—',s.email||'—']),
     }));
     if(!sections.length){ toast('No placed students yet','info'); return; }
-    const doc = _buildReportPDF('Placement Report','All Placed Students by Company', sections);
+    const doc = await _buildReportPDF('Placement Report','All Placed Students by Company', sections);
     doc.save('Placement_Report.pdf');
     toast('PDF downloaded','success','📄'); return;
   }
