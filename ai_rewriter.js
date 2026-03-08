@@ -79,23 +79,49 @@ async function rewriteWithAI(rawText, gradeMode, onProgress) {
     const systemPrompt = RESUME_TEMPLATE.systemPrompt +
       '\n\nGrade instruction: ' + gradeInstruction(gradeMode);
 
-    // Trim raw text to avoid exceeding context window (~3000 chars is safe for Phi-3 mini)
-    const trimmedText = rawText.length > 6000
-      ? rawText.slice(0, 6000) + '\n[text truncated]'
+    // Trim raw text to avoid exceeding context window
+    const trimmedText = rawText.length > 4000
+      ? rawText.slice(0, 4000) + '\n[text truncated]'
       : rawText;
 
-    const response = await engine.chat.completions.create({
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user',   content: 'Parse this resume and return JSON:\n\n' + trimmedText },
-      ],
-      temperature: 0.05,   // very low — we want consistent structured output
-      max_tokens:  2000,
-    });
+    // Use streaming so we get tokens progressively — avoids silent hang
+    const chunks   = [];
+    let   tokenCount = 0;
 
-    onProgress && onProgress('Formatting output…', 0.95);
+    const streamPromise = (async () => {
+      const stream = await engine.chat.completions.create({
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user',   content: 'Parse this resume and return JSON:\n\n' + trimmedText },
+        ],
+        temperature: 0.05,
+        max_tokens:  1500,
+        stream:      true,
+      });
+      for await (const chunk of stream) {
+        const delta = chunk.choices[0]?.delta?.content || '';
+        if (delta) { chunks.push(delta); tokenCount++; }
+        // Yield to browser every 10 tokens so the UI actually repaints
+        if (tokenCount % 10 === 0) {
+          const pct = Math.min(0.95, 0.85 + tokenCount / 2000 * 0.1);
+          onProgress && onProgress(`AI is writing your resume… (${tokenCount} tokens)`, pct);
+          await new Promise(r => setTimeout(r, 0)); // release thread to browser
+        }
+      }
+    })();
 
-    const raw = response.choices[0].message.content.trim();
+    // 90-second timeout — if model hangs, fail gracefully
+    const timeout = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error(
+        'AI took too long to respond. Your device may not have enough memory. Please try again.'
+      )), 90000)
+    );
+
+    await Promise.race([streamPromise, timeout]);
+
+    onProgress && onProgress('Formatting output…', 0.97);
+
+    const raw = chunks.join('').trim();
 
     // Strip markdown code fences if model adds them
     const jsonStr = raw
