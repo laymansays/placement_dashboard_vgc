@@ -109,8 +109,19 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
 
 /* ── PORTAL BODY ── */
 .sp-body{display:flex;max-width:1280px;margin:0 auto;min-height:calc(100vh - 62px);}
-.sp-sidebar{width:300px;flex-shrink:0;padding:32px 24px 40px;position:sticky;top:62px;max-height:calc(100vh - 62px);overflow-y:auto;}
-.sp-main{flex:1;min-width:0;padding:32px 40px 64px;border-left:1px solid #E2E8F0;}
+.sp-sidebar{width:var(--sidebar-w,300px);flex-shrink:0;padding:32px 24px 40px;position:sticky;top:62px;max-height:calc(100vh - 62px);overflow-y:auto;}
+.sp-resizer{
+  width:6px;flex-shrink:0;cursor:col-resize;
+  background:transparent;position:relative;
+  transition:background .15s;
+}
+.sp-resizer::after{
+  content:'';position:absolute;inset:0 2px;
+  background:#E2E8F0;border-radius:3px;transition:background .15s;
+}
+.sp-resizer:hover::after,
+.sp-resizer.dragging::after{background:#6D0E6A;}
+.sp-main{flex:1;min-width:0;padding:32px 40px 64px;border-left:none;}
 
 /* ── PROFILE CARD ── */
 .profile-card{
@@ -438,9 +449,10 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
 
   <!-- Body -->
   <div class="sp-body">
-    <aside class="sp-sidebar">
+    <aside class="sp-sidebar" id="sp-sidebar">
       <div id="profile-wrap"></div>
     </aside>
+    <div class="sp-resizer" id="sp-resizer"></div>
     <main class="sp-main">
       <div id="inelig-wrap"></div>
       <div id="status-wrap"></div>
@@ -1006,6 +1018,38 @@ function doLogout(){
   document.getElementById('email-err').textContent='';
   document.getElementById('email-inp').focus();
 }
+/* ── SIDEBAR RESIZER ── */
+(function(){
+  const resizer  = document.getElementById('sp-resizer');
+  const sidebar  = document.getElementById('sp-sidebar');
+  if(!resizer || !sidebar) return;
+  const MIN = 200, MAX = 520;
+  let dragging = false, startX = 0, startW = 0;
+
+  resizer.addEventListener('mousedown', e => {
+    dragging = true;
+    startX   = e.clientX;
+    startW   = sidebar.getBoundingClientRect().width;
+    resizer.classList.add('dragging');
+    document.body.style.cursor    = 'col-resize';
+    document.body.style.userSelect = 'none';
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', e => {
+    if(!dragging) return;
+    const w = Math.min(MAX, Math.max(MIN, startW + (e.clientX - startX)));
+    document.documentElement.style.setProperty('--sidebar-w', w + 'px');
+  });
+
+  document.addEventListener('mouseup', () => {
+    if(!dragging) return;
+    dragging = false;
+    resizer.classList.remove('dragging');
+    document.body.style.cursor     = '';
+    document.body.style.userSelect = '';
+  });
+})();
 </script>
 </body>
 </html>
