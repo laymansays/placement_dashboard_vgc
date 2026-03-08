@@ -199,12 +199,22 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
   flex-shrink:0;border-radius:10px;overflow:hidden;
   background:#fff;border:1.5px solid #E2E8F0;
   display:flex;align-items:center;justify-content:center;
+  position:relative;cursor:default;
 }
-.co-av img{width:100%;height:100%;object-fit:contain;}
+.co-av img{
+  position:absolute;inset:0;width:100%;height:100%;
+  object-fit:contain;transition:opacity .25s ease;
+}
 .co-av-ini{
-  width:100%;height:100%;display:flex;align-items:center;justify-content:center;
+  position:absolute;inset:0;width:100%;height:100%;
+  display:flex;align-items:center;justify-content:center;
   font-weight:800;color:#fff;
+  opacity:0;transition:opacity .25s ease;z-index:1;
 }
+.co-av:hover img{ opacity:0; }
+.co-av:hover .co-av-ini{ opacity:1; }
+.co-av img{width:100%;height:100%;object-fit:contain;}
+
 
 /* ── COMPANY CARDS ── */
 .co-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;}
@@ -472,10 +482,10 @@ function logoHtml(name,web,idx,sz){
   const size=sz||48; const d=logoDomain(name,web);
   const cb=`https://logo.clearbit.com/${d}?size=${size*2}`;
   const gf=`https://www.google.com/s2/favicons?domain=${d}&sz=128`;
-  const g=grad(idx||0); const pad=size>56?8:6; const fsz=Math.round(size*.30);
+  const g=grad(idx||0); const pad=size>56?8:6; const fsz=Math.round(size*.32);
   return `<div class="co-av" style="width:${size}px;height:${size}px;border-radius:${Math.round(size*.21)}px;">
-    <img src="${cb}" style="width:100%;height:100%;object-fit:contain;padding:${pad}px;display:block;" onerror="this.style.display='none';this.nextElementSibling.style.display='block';"/>
-    <img src="${gf}" style="width:100%;height:100%;object-fit:contain;padding:${pad+2}px;display:none;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"/>
+    <img src="${cb}" style="object-fit:contain;padding:${pad}px;" onerror="this.style.opacity='0';this.nextElementSibling.style.opacity='1';"/>
+    <img src="${gf}" style="object-fit:contain;padding:${pad+2}px;opacity:0;" onerror="this.style.opacity='0';this.nextElementSibling.style.opacity='1';this.nextElementSibling.style.zIndex='2';"/>
     <div class="co-av-ini" style="background:${g};font-size:${fsz}px;">${ini(name)}</div>
   </div>`;
 }
