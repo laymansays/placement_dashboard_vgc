@@ -5,7 +5,7 @@
    No API key. Runs entirely on device.
 ═══════════════════════════════════════════════════ */
 
-const WEBLLM_MODEL  = 'Phi-3-mini-4k-instruct-q4f16_1-MLC';
+const WEBLLM_MODEL  = 'Llama-3.2-1B-Instruct-q4f16_1-MLC';
 const WEBLLM_CDN    = 'https://esm.run/@mlc-ai/web-llm';
 
 let _engine     = null;   // cached engine instance
@@ -79,13 +79,13 @@ async function rewriteWithAI(rawText, gradeMode, onProgress) {
     const systemPrompt = RESUME_TEMPLATE.systemPrompt +
       '\n\nGrade instruction: ' + gradeInstruction(gradeMode);
 
-    // Trim raw text to avoid exceeding context window
-    const trimmedText = rawText.length > 4000
-      ? rawText.slice(0, 4000) + '\n[text truncated]'
+    // Trim aggressively — 1B model has smaller context window
+    const trimmedText = rawText.length > 2500
+      ? rawText.slice(0, 2500) + '\n[truncated]'
       : rawText;
 
     // Use streaming so we get tokens progressively — avoids silent hang
-    const chunks   = [];
+    const chunks     = [];
     let   tokenCount = 0;
 
     const streamPromise = (async () => {
@@ -95,7 +95,7 @@ async function rewriteWithAI(rawText, gradeMode, onProgress) {
           { role: 'user',   content: 'Parse this resume and return JSON:\n\n' + trimmedText },
         ],
         temperature: 0.05,
-        max_tokens:  1500,
+        max_tokens:  800,   // JSON for a resume fits in ~500-700 tokens
         stream:      true,
       });
       for await (const chunk of stream) {
