@@ -464,9 +464,13 @@ function extractSid(raw){
   return'';
 }
 function drivePhoto(url){
-  if(!url)return'';
-  const m=url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/); if(m)return`https://drive.google.com/uc?export=view&id=${m[1]}`;
-  const m2=url.match(/[?&]id=([a-zA-Z0-9_-]+)/); if(m2)return`https://drive.google.com/uc?export=view&id=${m2[1]}`;
+  if(!url) return '';
+  // Extract file ID from any Google Drive URL format
+  const m = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if(m) return `https://drive.google.com/thumbnail?id=${m[1]}&sz=w400`;
+  const m2 = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  if(m2) return `https://drive.google.com/thumbnail?id=${m2[1]}&sz=w400`;
+  // Already a direct URL or thumbnail URL — return as-is
   return url;
 }
 const GRADS=[['#41083F','#6D0E6A'],['#0369a1','#0e7490'],['#065f46','#0891b2'],['#7c2d12','#b45309'],['#6b21a8','#db2777'],['#991b1b','#ea580c'],['#0f4c3a','#065f46'],['#3730a3','#41083F']];
