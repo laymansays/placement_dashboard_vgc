@@ -1174,20 +1174,13 @@ function closeRwModal(){
 
 function setRwBody(html){ document.getElementById('rw-body').innerHTML = html; }
 
-async function pdfToBase64(url){
-  // For Google Drive links, convert to export URL
-  let fetchUrl = url;
-  const driveMatch = url.match(/[-\w]{25,}/);
-  if(url.includes('drive.google.com') && driveMatch){
-    fetchUrl = 'https://drive.google.com/uc?export=download&id=' + driveMatch[0];
+function driveDirectUrl(url){
+  // Convert any Google Drive share/view URL to a direct download URL
+  const m = url.match(/[-\w]{25,}/);
+  if(url.includes('drive.google.com') && m){
+    return 'https://drive.google.com/uc?export=download&id=' + m[0];
   }
-  const resp = await fetch(fetchUrl);
-  if(!resp.ok) throw new Error('Could not fetch PDF (' + resp.status + ')');
-  const buf  = await resp.arrayBuffer();
-  const bytes = new Uint8Array(buf);
-  let bin = '';
-  bytes.forEach(b => bin += String.fromCharCode(b));
-  return btoa(bin);
+  return url;
 }
 
 async function startRewrite(){
@@ -1195,24 +1188,21 @@ async function startRewrite(){
     <div class="rw-loading">
       <div class="rw-spinner"></div>
       <div class="rw-loading-txt">Reading your resume…</div>
-      <div class="rw-loading-sub">Fetching resume and template, then rewriting with AI.<br>This may take 15–30 seconds.</div>
+      <div class="rw-loading-sub">Sending to AI for rewriting.<br>This may take 15–30 seconds.</div>
     </div>`);
 
   try {
-    // 1. Fetch student resume
     const resumeUrl = ST.resume;
     if(!resumeUrl) throw new Error('No resume URL found in your profile.');
 
-    setRwBody(`<div class="rw-loading"><div class="rw-spinner"></div><div class="rw-loading-txt">Fetching your resume…</div></div>`);
-    const resumeB64 = await pdfToBase64(resumeUrl);
+    // Build absolute URL for the template hosted in the same repo
+    const base = window.location.href.replace(/\/[^\/]*$/, '/');
+    const templateUrl = base + 'resume_format.pdf';
+    const studentUrl  = driveDirectUrl(resumeUrl);
 
-    // 2. Fetch template
-    setRwBody(`<div class="rw-loading"><div class="rw-spinner"></div><div class="rw-loading-txt">Loading resume template…</div></div>`);
-    const tmplB64 = await pdfToBase64('resume_format.pdf');
-
-    // 3. Call Claude API
     setRwBody(`<div class="rw-loading"><div class="rw-spinner"></div><div class="rw-loading-txt">AI is rewriting your resume…</div><div class="rw-loading-sub">Analysing structure, reformatting content.</div></div>`);
 
+    // Pass URLs directly to Claude — Claude's servers fetch the PDFs (no CORS)
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1235,9 +1225,11 @@ Rules:
         messages: [{
           role: 'user',
           content: [
-            { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: tmplB64 },
+            { type: 'document',
+              source: { type: 'url', url: templateUrl },
               title: 'Resume Template — follow this format exactly' },
-            { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: resumeB64 },
+            { type: 'document',
+              source: { type: 'url', url: studentUrl },
               title: "Student's Existing Resume — extract all content from this" },
             { type: 'text', text: 'Rewrite the student resume following the template format. Output only the HTML body content.' }
           ]
@@ -1254,19 +1246,18 @@ Rules:
     const raw  = (data.content||[]).map(b=>b.text||'').join('').trim();
 
     // Strip any accidental markdown fences
-    const html = raw.split('\n').filter(l=>l.trim().indexOf('```')!==0).join('\n').trim();
+    const html = raw.split('\n').filter(l=>l.trim().indexOf('\`\`\`')!==0).join('\n').trim();
     if(!html) throw new Error('AI returned an empty response. Please try again.');
 
     _rwHtml = html;
-
-    // 4. Render preview
     setRwBody(`<div class="rw-preview">${html}</div>`);
     document.getElementById('rw-dl-btn').style.display = '';
 
   } catch(e){
-    setRwBody(`<div class="rw-error">⚠️ ${xe(e.message)}<br><br><small>Check that your resume is accessible and try again.</small></div>`);
+    setRwBody(`<div class="rw-error">⚠️ ${xe(e.message)}<br><br><small>Check that your resume is publicly accessible on Google Drive and try again.</small></div>`);
   }
 }
+
 
 function downloadRewrittenPDF(){
   if(!_rwHtml){ return; }
