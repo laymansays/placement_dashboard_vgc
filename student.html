@@ -140,7 +140,25 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
 .pf-row{display:flex;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px solid #F1F5F9;}
 .pf-row:last-child{border-bottom:none;}
 .pf-k{font-size:11.5px;color:#94A3B8;font-weight:600;white-space:nowrap;flex-shrink:0;}
-.pf-v{font-size:12.5px;color:#1E293B;font-weight:500;text-align:right;overflow-wrap:break-word;min-width:0;}
+.pf-v{
+  font-size:12.5px;color:#1E293B;font-weight:500;text-align:right;
+  overflow:hidden;white-space:nowrap;text-overflow:ellipsis;
+  min-width:0;max-width:160px;position:relative;
+}
+.pf-v .pf-scroll{
+  display:inline-block;
+  white-space:nowrap;
+}
+.pf-v:hover{overflow:hidden;}
+.pf-v:hover .pf-scroll{
+  animation:marquee-scroll 4s linear infinite;
+}
+@keyframes marquee-scroll{
+  0%  { transform:translateX(0); }
+  30% { transform:translateX(0); }
+  70% { transform:translateX(calc(-100% + 160px)); }
+  100%{ transform:translateX(calc(-100% + 160px)); }
+}
 .btn-resume{
   display:block;width:100%;padding:11px;border-radius:10px;
   background:#F7F0F7;color:#6D0E6A;border:1px solid #E8D5E7;
@@ -748,7 +766,7 @@ function renderProfile(elig){
     ?`<img class="profile-photo" src="${xe(s.photoUrl)}" alt="${xe(s.name)}" onerror="this.style.display='none';document.getElementById('ph-ini').style.display='flex';"/><div id="ph-ini" class="profile-ini" style="display:none">${ini(s.name)}</div>`
     :`<div id="ph-ini" class="profile-ini">${ini(s.name)}</div>`;
 
-  const pfRow=(k,v)=>`<div class="pf-row"><span class="pf-k">${k}</span><span class="pf-v">${xe(v||'—')}</span></div>`;
+  const pfRow=(k,v)=>`<div class="pf-row"><span class="pf-k">${k}</span><span class="pf-v"><span class="pf-scroll">${xe(v||'—')}</span></span></div>`;
 
   document.getElementById('profile-wrap').innerHTML=`
     <div class="profile-card">
