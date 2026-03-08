@@ -766,6 +766,8 @@ async function doLogin(email){
     await loadStatus();
     hideLoad();
     renderPortal();
+    // Silently preload AI model in background while student browses
+    if(typeof preloadWebLLM === 'function') preloadWebLLM();
   }catch(e){
     hideLoad();
     console.error('[StudentPortal]', e);
@@ -1220,6 +1222,8 @@ function openRewriteModal(){
 
 function closeRwModal(){
   document.getElementById('rw-modal').classList.remove('show');
+  // Reset busy flag so student can retry after closing mid-process
+  if(typeof _engineBusy !== 'undefined') _engineBusy = false;
 }
 
 function setRwBody(html){
@@ -1281,7 +1285,9 @@ function showProgress(message, progress){
       <div style="font-size:11px;color:#94A3B8;margin-top:6px;">${pct}%</div>` : ''}
       ${pct === 0 && progress === 0 ? `
       <div class="rw-loading-sub">
-        First time: AI model downloads once (~2 GB) and is cached for future use.
+        ${typeof _engine !== 'undefined' && _engine ? 
+          'AI model ready. Processing your resume…' :
+          'AI model is downloading in the background. This may take a few minutes on first use.'}
       </div>` : ''}
     </div>`);
 }
