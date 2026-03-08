@@ -537,6 +537,7 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
   <!-- Google Identity Services (Drive OAuth) -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="resume_extractor.js"></script>
+  <script src="language_engine.js"></script>
 </head>
 <body>
 
@@ -1267,9 +1268,13 @@ async function startExtractAndFormat(){
       <div class="rw-loading-txt">Reading resume…</div></div>`);
     const text = await extractTextFromPDF(file);
 
-    // Step 4: Rule-based parse + render
+    // Step 4: Rule-based parse → language cleanup → render
     const parsed = parseResumeText(text);
-    const html   = buildResumeHTML(parsed);
+    // Run language engine on all sections
+    if (typeof cleanParsedSections === 'function') {
+      cleanParsedSections(parsed.sections, _gradeMode === 'cgpa');
+    }
+    const html = buildResumeHTML(parsed);
     if(!html.trim()) throw new Error('Could not extract text. Make sure your resume is a text-based PDF, not a scanned image.');
     _rwHtml = html;
     setRwBody(`<div class="rw-preview">${html}</div>`);
@@ -1470,19 +1475,94 @@ function convertGradeValue(gradeStr, wantCGPA){
 }
 
 function buildEduHTML(lines, wantCGPA){
-  const EDU_HEADER_RX=/^(course|qualification|degree|institution|marks|year|percentage|cgpa|grade)(\s+\w+)+$/i;
-  let html='';
-  for(const rawLine of lines){
-    const l=clean(rawLine);
-    if(!l||l.length<3) continue;
-    if(EDU_HEADER_RX.test(l)) continue;
-    const {course, institution, grade, year}=parseEduLine(l);
-    if(institution) html+=`<p class="rw-edu-inst">${xe(institution)}</p>`;
-    const cy=[course,year].filter(Boolean).join(', ');
-    if(cy) html+=`<h3 class="rw-entry-role">${xe(cy)}</h3>`;
-    if(grade){ const cv=convertGradeValue(grade,wantCGPA); html+=`<p class="rw-edu-grade">${xe(cv)}</p>`; }
-    html+='<div class="rw-edu-gap"></div>';
+  const EDU_HEADER_RX = /^(course|qualification|degree|institution|marks|year|percentage|cgpa|grade)(\s+\w+)+$/i;
+  const yearRx   = /\b(20\d{2}|19\d{2})\b/;
+  const gradeRx  = /(\d{1,3}(?:\.\d{1,2})?\s*%|(?:CGPA\s*[:\-]?\s*)?\d\.\d{1,2}\s*(?:CGPA|\/\s*10)?)/i;
+
+  // ── Step 1: Group lines into entries ──────────────────
+  // An entry boundary is: a line that contains an institution keyword OR a year
+  // Consecutive lines without a new institution/year keyword belong to the same entry
+  const entries = [];
+  let cur = [];
+
+  const isEntryStart = l => {
+    // Starts a new entry if it has institution keyword or looks like a standalone institution name
+    return /\b(college|school|university|institute|vidyavahini|polytechnic|academy|iit|nit|iim)\b/i.test(l)
+      && !gradeRx.test(l.replace(yearRx,''));
+  };
+
+  for (const rawLine of lines) {
+    const l = clean(rawLine);
+    if (!l || l.length < 2) continue;
+    if (EDU_HEADER_RX.test(l)) continue;
+
+    if (isEntryStart(l) && cur.length > 0) {
+      entries.push(cur);
+      cur = [];
+    }
+    cur.push(l);
   }
+  if (cur.length > 0) entries.push(cur);
+
+  // ── Step 2: For each entry group, extract fields ──────
+  let html = '';
+
+  for (const group of entries) {
+    // Join into one string first to find all values
+    const joined = group.join(' ');
+
+    // Find ALL grade values in the group
+    const allPct  = [...joined.matchAll(/(\d{1,3}(?:\.\d{1,2})?)\s*%/g)].map(m => parseFloat(m[1]));
+    const allCgpa = [...joined.matchAll(/(?:CGPA\s*[:\-]?\s*)?(\d\.\d{1,2})\s*(?:CGPA|\/\s*10)?/gi)].map(m => parseFloat(m[1]));
+
+    // Pick correct grade — only ONE based on user's mode choice
+    let grade = '';
+    if (wantCGPA) {
+      if (allCgpa.length)      grade = `${allCgpa[0].toFixed(2)} CGPA`;
+      else if (allPct.length)  grade = `${(allPct[0]/9.5).toFixed(2)} CGPA`;
+    } else {
+      if (allPct.length)       grade = `${allPct[0]}%`;
+      else if (allCgpa.length) grade = `${(allCgpa[0]*9.5).toFixed(1)}%`;
+    }
+
+    // Find year
+    const yearMatch = joined.match(yearRx);
+    const year = yearMatch ? yearMatch[0] : '';
+
+    // Find course
+    const courseRx = /\b(B\.?\s*Com|BCA|B\.?\s*Sc|B\.?\s*A\.?|BBA|B\.?\s*Tech|MBA|M\.?\s*Com|MCA|M\.?\s*Sc|M\.?\s*Tech|PUC?|SSLC|HSC|SSC|10th|12th|Diploma|PhD)\b/i;
+    const courseMatch = joined.match(courseRx);
+    const course = courseMatch ? courseMatch[0].replace(/\s+/g,' ').trim() : '';
+
+    // Institution — the line containing institution keyword
+    let institution = '';
+    for (const l of group) {
+      if (isEntryStart(l)) {
+        // Strip grade and year from the institution line
+        institution = l
+          .replace(/(\d{1,3}(?:\.\d{1,2})?)\s*%/g, '')
+          .replace(/(?:CGPA\s*[:\-]?\s*)?\d\.\d{1,2}\s*(?:CGPA|\/\s*10)?/gi, '')
+          .replace(yearRx, '')
+          .replace(courseRx, '')
+          .replace(/[,:\s]+$/, '')
+          .replace(/\s{2,}/g, ' ')
+          .trim();
+        // Normalise institution name
+        if (typeof normaliseInstitution === 'function') {
+          institution = normaliseInstitution(institution);
+        }
+        break;
+      }
+    }
+
+    // Render entry
+    if (institution) html += `<p class="rw-edu-inst">${xe(institution)}</p>`;
+    const cy = [course, year].filter(Boolean).join(', ');
+    if (cy)     html += `<h3 class="rw-entry-role">${xe(cy)}</h3>`;
+    if (grade)  html += `<p class="rw-edu-grade">${xe(grade)}</p>`;
+    html += '<div class="rw-edu-gap"></div>';
+  }
+
   return html;
 }
 
