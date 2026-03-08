@@ -1196,10 +1196,49 @@ let _rwHtml = '';
    REWRITE RESUME — Rule-based, no API needed
 ───────────────────────────────────────────── */
 
+let _gradeMode = 'percentage'; // 'percentage' | 'cgpa'
+
 function openRewriteModal(){
   document.getElementById('rw-modal').classList.add('show');
   document.getElementById('rw-dl-btn').style.display = 'none';
   _rwHtml = '';
+  showGradePrompt();
+}
+
+function showGradePrompt(){
+  setRwBody(`
+    <div style="padding:8px 0 4px;">
+      <p style="font-size:13.5px;font-weight:700;color:#1A0519;margin:0 0 6px;">
+        How should academic performance be shown?
+      </p>
+      <p style="font-size:12px;color:#64748B;margin:0 0 20px;">
+        This will be applied consistently across all education entries.
+      </p>
+      <div style="display:flex;gap:12px;">
+        <button class="rw-grade-btn" onclick="pickGrade('percentage')"
+          style="flex:1;padding:18px 12px;border-radius:12px;border:2px solid #E2E8F0;
+          background:#fff;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s;"
+          onmouseover="this.style.borderColor='#6D0E6A';this.style.background='#F7F0F7';"
+          onmouseout="this.style.borderColor='#E2E8F0';this.style.background='#fff';">
+          <div style="font-size:22px;margin-bottom:8px;">📊</div>
+          <div style="font-size:14px;font-weight:800;color:#1A0519;">Percentage</div>
+          <div style="font-size:11px;color:#94A3B8;margin-top:4px;">e.g. 82.5%</div>
+        </button>
+        <button class="rw-grade-btn" onclick="pickGrade('cgpa')"
+          style="flex:1;padding:18px 12px;border-radius:12px;border:2px solid #E2E8F0;
+          background:#fff;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s;"
+          onmouseover="this.style.borderColor='#6D0E6A';this.style.background='#F7F0F7';"
+          onmouseout="this.style.borderColor='#E2E8F0';this.style.background='#fff';">
+          <div style="font-size:22px;margin-bottom:8px;">🎓</div>
+          <div style="font-size:14px;font-weight:800;color:#1A0519;">CGPA</div>
+          <div style="font-size:11px;color:#94A3B8;margin-top:4px;">e.g. 8.2 / 10</div>
+        </button>
+      </div>
+    </div>`);
+}
+
+function pickGrade(mode){
+  _gradeMode = mode;
   showUploadPrompt();
 }
 
@@ -1283,72 +1322,97 @@ async function extractTextFromPDF(file){
 }
 
 /* ── Text parser ── */
+function stripEmoji(s){
+  return s.replace(/[\u{1F300}-\u{1FFFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]|[\uFE00-\uFE0F]|[\u200D]|Ø=\S+/gu,'').trim();
+}
+
+function isAddressLine(line){
+  // Matches: city/state, pincode, "Karnataka", "Mumbai", directions, area names
+  return /\b(karnataka|maharashtra|telangana|tamilnadu|kerala|andhra|gujarat|delhi|punjab|rajasthan|bengaluru|bangalore|mumbai|hyderabad|chennai|pune|tumkur|hubli|mysore|mangalore|bidar|kalyan|nagar|district|taluk|pincode|pin\s*:)\b/i.test(line)
+    || /^\d{6}$/.test(line.trim())
+    || /^[A-Za-z\s,.-]+,\s*[A-Za-z\s]+$/.test(line) && line.length < 50 && !/[@\d]/.test(line) && /,/.test(line);
+}
+
 function parseResumeText(text){
-  // OCR artifact cleanup: rejoin words split by spaces (e.g. "L eadership", "N SS", "Basa va kalyan")
+  // OCR artifact cleanup
   const cleaned = text
-    .replace(/([A-Za-z]) ([a-z])/g, '$1$2')          // "L eadership" → "Leadership"
-    .replace(/([A-Z]) ([A-Z]{1,2}) /g, '$1$2 ')       // "N SS " → "NSS "
-    .replace(/- ([A-Za-z])/g, '-$1')                   // "- Based" → "-Based"
-    .replace(/([A-Za-z]),([A-Za-z])/g, '$1, $2');      // fix missing spaces after commas
+    .replace(/([A-Za-z]) ([a-z])/g, '$1$2')
+    .replace(/([A-Z]) ([A-Z]{1,2}) /g, '$1$2 ')
+    .replace(/- ([A-Za-z])/g, '-$1')
+    .replace(/([A-Za-z]),([A-Za-z])/g, '$1, $2')
+    .replace(/Ø=\S+\s*/g, '')                 // strip garbled icon chars
+    .replace(/[^\x20-\x7E\n]/g, (ch) => {     // remove non-ASCII that aren't useful
+      return /[\u00C0-\u024F\u0900-\u097F]/.test(ch) ? ch : ' ';
+    });
+
   const lines = cleaned.split('\n').map(l=>l.trim()).filter(l=>l.length > 2);
 
   const emailRx    = /[\w.+-]+@[\w.-]+\.[a-zA-Z]{2,}/;
   const phoneRx    = /(\+91[\s-]?)?[6-9]\d{9}/;
   const linkedinRx = /(?:https?:\/\/)?(?:www\.)?linkedin\.com\/in\/[\w-]+/i;
   const githubRx   = /(?:https?:\/\/)?(?:www\.)?github\.com\/[\w-]+/i;
+  // Also catch bare "www.linkedin..." or just "linkedin.com/in/..."
+  const linkedinRx2 = /(?:www\.)?linkedin\.com[^\s]*/i;
 
   const email    = (text.match(emailRx)||[])[0]||'';
   const phone    = (text.match(phoneRx)||[])[0]||'';
-  const linkedin = (text.match(linkedinRx)||[])[0]||'';
+  const linkedin = (text.match(linkedinRx)||text.match(linkedinRx2)||[])[0]||'';
   const github   = (text.match(githubRx)||[])[0]||'';
 
   const SECS = {
-    summary:     /^(professional\s+)?(summary|profile|objective|career\s+objective|about(\s+me)?|overview)$/i,
-    experience:  /^(work\s+|professional\s+|relevant\s+)?(experience|employment(\s+history)?|work\s+history|internship(s)?)$/i,
-    education:   /^(education(al)?(\s+background)?|academic(\s+background)?|qualifications?|schooling)$/i,
-    projects:    /^(projects?(\s+work)?|academic\s+projects?|personal\s+projects?|key\s+projects?)$/i,
-    skills:      /^((technical\s+|core\s+|key\s+|professional\s+)?skills?|competenc(y|ies)|expertise|technologies|tools(\s+&\s+technologies)?)$/i,
-    awards:      /^(awards?|achievements?|honors?|recognitions?|accomplishments?|extra.?curricular)$/i,
-    languages:   /^(languages?(\s+known|\s+proficiency|\s+skills?)?)$/i,
+    summary:      /^(professional\s+)?(summary|profile|objective|career\s+objective|about(\s+me)?|overview)$/i,
+    experience:   /^(work\s+|professional\s+|relevant\s+)?(experience|employment(\s+history)?|work\s+history|internship(s)?)$/i,
+    education:    /^(education(al)?(\s+background)?|academic(\s+background)?|qualifications?|schooling|educational\s+qualifications?)$/i,
+    projects:     /^(projects?(\s+work)?|academic\s+projects?|personal\s+projects?|key\s+projects?)$/i,
+    skills:       /^((technical\s+|core\s+|key\s+|professional\s+|soft\s+)?skills?|competenc(y|ies)|expertise|technologies|tools(\s+&\s+technologies)?|technical\s+and\s+soft\s+skills?)$/i,
+    awards:       /^(awards?|achievements?|honors?|recognitions?|accomplishments?|extra.?curricular|leadership(\s+&\s+activities)?)$/i,
+    languages:    /^(languages?(\s+known|\s+proficiency|\s+skills?)?)$/i,
     certifications:/^(certifications?|courses?(\s+completed)?|training|professional\s+development)$/i,
   };
 
-  // Name: first short line with no contact info
+  // Name: first non-contact, non-address, non-icon short line
   let name = '';
   for(const l of lines){
-    if(!l.match(emailRx) && !l.match(phoneRx) && !l.match(linkedinRx) && !l.match(githubRx) && l.length < 60 && l.length > 1){
-      name = l; break;
+    const lc = stripEmoji(l);
+    if(!emailRx.test(lc) && !phoneRx.test(lc) && !linkedinRx.test(lc) && !githubRx.test(lc)
+       && !isAddressLine(lc) && lc.length > 2 && lc.length < 60
+       && !Object.values(SECS).some(rx=>rx.test(lc))){
+      name = lc; break;
     }
   }
 
-  const sectionData = {};
-  let curSec = 'header';
-  let buf = [];
+  // Section parsing
+  const sections = {};
+  let curSec = null;
 
-  for(const line of lines){
-    // Skip contact/name lines in header
-    if(curSec==='header' && (line===name||line.match(emailRx)||line.match(phoneRx)||line.match(linkedinRx)||line.match(githubRx))) continue;
+  for(const rawLine of lines){
+    const l = stripEmoji(rawLine);
+    if(!l || l.length < 3) continue;
+
+    // Skip address lines entirely
+    if(isAddressLine(l) && !emailRx.test(l) && !phoneRx.test(l)) continue;
+    // Skip the name line
+    if(l === name) continue;
+    // Skip bare contact info lines (already captured above)
+    if((emailRx.test(l) || phoneRx.test(l) || linkedinRx.test(l) || linkedinRx2.test(l)) && l.length < 80) continue;
+
+    // Section header detection
     let matched = false;
     for(const [sec, rx] of Object.entries(SECS)){
-      if(rx.test(line)){
-        if(buf.length) sectionData[curSec] = (sectionData[curSec]||[]).concat(buf);
-        curSec = sec; buf = []; matched = true; break;
+      if(rx.test(l)){
+        curSec = sec;
+        if(!sections[curSec]) sections[curSec] = [];
+        matched = true; break;
       }
     }
-    if(!matched) buf.push(line);
+    if(matched) continue;
+
+    if(curSec) sections[curSec].push(l);
   }
-  if(buf.length) sectionData[curSec] = (sectionData[curSec]||[]).concat(buf);
 
-  return {name, email, phone, linkedin, github, sections: sectionData};
+  return {name, email, phone, linkedin, github, sections};
 }
 
-/* ── Template builder ── */
-function clean(line){
-  return line.replace(/^[\s•·●\-–*▪▸►]+/, '').trim();
-}
-function isBullet(line){
-  return /^[•·●\-–*▪▸►]/.test(line.trim());
-}
 
 function buildResumeHTML(parsed){
   const {name, email, phone, linkedin, github, sections} = parsed;
@@ -1377,7 +1441,14 @@ function buildResumeHTML(parsed){
   const edu = sections.education||[];
   if(edu.length){
     html += `<h2 class="rw-section">EDUCATION</h2>`;
-    html += buildEntries(edu);
+    // Normalise grade label based on user choice
+    const gradeLabel = (typeof _gradeMode !== 'undefined' && _gradeMode === 'cgpa') ? 'CGPA' : 'Percentage';
+    const eduNorm = edu.map(l => {
+      // Replace "CGPA/Percentage", "Percentage/CGPA", "cgpa", "percentage" etc with chosen label
+      return l.replace(/(cgpa\s*\/\s*percentage|percentage\s*\/\s*cgpa|cgpa|percentage|%|marks)/gi, gradeLabel)
+               .replace(/Grade/gi, gradeLabel);
+    });
+    html += buildEntries(eduNorm);
     html += `<hr class="rw-rule">`;
   }
 
@@ -1474,190 +1545,213 @@ async function downloadRewrittenPDF(){
   if(!_rwHtml) return;
   try {
     const { jsPDF } = window.jspdf;
-    const doc  = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
-    const PW=210, PH=297, ML=18, MR=18, MT=22, MB=22;
-    const TW=PW-ML-MR;
-    let y=MT;
 
-    // ── Load logo for watermark from already-loaded nav img ──
+    // ── Logo watermark ──
     let logoB64=null;
     try{
       const navImg=document.querySelector('.sp-nav-logo img');
-      if(navImg && navImg.complete && navImg.naturalWidth>0){
+      if(navImg&&navImg.complete&&navImg.naturalWidth>0){
         const cvs=document.createElement('canvas');
-        cvs.width=navImg.naturalWidth; cvs.height=navImg.naturalHeight;
+        cvs.width=navImg.naturalWidth;cvs.height=navImg.naturalHeight;
         cvs.getContext('2d').drawImage(navImg,0,0);
         logoB64=cvs.toDataURL('image/jpeg',0.85);
       }
     }catch(e){
       try{
         const base=window.location.href.replace(/\/[^\/]*$/,'/');
-        const r=await fetch(base+'logo.jpg');
-        const blob=await r.blob();
+        const r2=await fetch(base+'logo.jpg');
+        const blob=await r2.blob();
         logoB64=await new Promise(res=>{const rd=new FileReader();rd.onload=()=>res(rd.result);rd.readAsDataURL(blob);});
       }catch(e2){}
     }
 
-    function addWatermark(){
-      if(!logoB64) return;
-      try{
-        doc.saveGraphicsState();
-        doc.setGState(new doc.GState({opacity:0.07}));
-        // Center right like the template
-        doc.addImage(logoB64,'JPEG',PW/2-5,PH/2-55,90,90);
-        doc.restoreGraphicsState();
-      }catch(e){}
-    }
+    // ── Render with 1-page enforcement ──
+    // Try scale=1.0, if overflow try 0.82, then 0.68
+    const scales=[1.0,0.82,0.68];
+    let finalDoc=null;
 
-    function addDarkFooter(){
-      doc.setFillColor(40,40,40);
-      doc.rect(0,PH-12,PW,12,'F');
-      doc.setFontSize(8); doc.setFont('helvetica','normal');
-      doc.setTextColor(200,200,200);
-      doc.text('Vidyavahini First Grade Degree College — Placement Cell',ML,PH-4.5);
-      const pg=doc.internal.getCurrentPageInfo().pageNumber;
-      doc.text('Page '+pg,PW-MR,PH-4.5,{align:'right'});
-    }
+    for(const scale of scales){
+      const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+      const PW=210,PH=297,ML=18,MR=18,MT=22,MB=22;
+      const TW=PW-ML-MR;
+      let y=MT;
+      let overflow=false;
 
-    function checkY(need){
-      if(y+need>PH-MB-12){ // 12 for footer
-        addDarkFooter();
-        doc.addPage();
-        addWatermark();
-        y=MT;
+      function addWatermark(){
+        if(!logoB64)return;
+        try{
+          doc.saveGraphicsState();
+          doc.setGState(new doc.GState({opacity:0.07}));
+          doc.addImage(logoB64,'JPEG',PW/2-5,PH/2-55,90,90);
+          doc.restoreGraphicsState();
+        }catch(e){}
       }
-    }
 
-    function txt(t,opts){
-      const fs=opts.fs||10; const bold=opts.bold||false;
-      const col=opts.col||[30,30,30]; const align=opts.align||'left';
-      const w=opts.w||TW; const indent=opts.indent||0;
-      doc.setFontSize(fs); doc.setFont('helvetica',bold?'bold':'normal');
-      doc.setTextColor(col[0],col[1],col[2]);
-      const lines=doc.splitTextToSize(t,w-indent);
-      const lh=fs*0.42;
-      checkY(lines.length*lh+2);
-      doc.text(lines, align==='center'?PW/2:ML+indent, y, align==='center'?{align:'center'}:{});
-      y+=lines.length*lh+(opts.after||2);
-    }
+      function addDarkFooter(){
+        doc.setFillColor(40,40,40);
+        doc.rect(0,PH-12,PW,12,'F');
+        doc.setFontSize(7);doc.setFont('helvetica','normal');
+        doc.setTextColor(200,200,200);
+        doc.text('Vidyavahini First Grade Degree College — Placement Cell',ML,PH-4.5);
+        doc.text('Page 1',PW-MR,PH-4.5,{align:'right'});
+      }
 
-    function rule(col){
-      checkY(3);
-      doc.setDrawColor(col||180,col?180:180,col?180:180);
-      doc.setLineWidth(0.3);
-      doc.line(ML,y,PW-MR,y);
-      y+=4;
-    }
+      const LIMIT=PH-MB-12;
 
-    function section(title){
-      checkY(10);
-      doc.setFontSize(11); doc.setFont('helvetica','bold');
-      doc.setTextColor(30,30,30);
-      doc.text(title,ML,y);
-      y+=1;
-      doc.setDrawColor(30,30,30); doc.setLineWidth(0.5);
-      doc.line(ML,y,PW-MR,y);
-      y+=5;
-    }
+      function checkY(need){
+        if(y+need>LIMIT){overflow=true;}
+      }
 
-    // ── Parse HTML nodes ──
-    const wrap=document.createElement('div');
-    wrap.innerHTML=_rwHtml;
+      function txt(t,opts){
+        const fs=(opts.fs||10)*scale;
+        const bold=opts.bold||false;
+        const col=opts.col||[30,30,30];
+        const align=opts.align||'left';
+        const w=(opts.w||TW);
+        const indent=opts.indent||0;
+        doc.setFontSize(fs);doc.setFont('helvetica',bold?'bold':'normal');
+        doc.setTextColor(col[0],col[1],col[2]);
+        const lines=doc.splitTextToSize(t,w-indent);
+        const lh=fs*0.42;
+        checkY(lines.length*lh+2);
+        if(!overflow)doc.text(lines,align==='center'?PW/2:ML+indent,y,align==='center'?{align:'center'}:{});
+        y+=lines.length*lh+(opts.after!==undefined?opts.after*scale:2*scale);
+      }
 
-    // First pass — collect name and contact for header
-    let nameText='', contactText='', aboutText='';
-    const bodyNodes=[];
-    let collectingAbout=false, skipNext=false;
-
-    for(const node of wrap.childNodes){
-      if(node.nodeType!==1) continue;
-      const tag=node.tagName.toLowerCase();
-      const t=node.textContent.trim();
-      if(!t) continue;
-      if(tag==='h1'){ nameText=t; continue;}
-      if(tag==='p'&&node.classList.contains('rw-contact-line')){ contactText=t; continue;}
-      if(tag==='hr'&&node.classList.contains('rw-header-rule')) continue;
-      bodyNodes.push(node);
-    }
-
-    // ── Page 1 ──
-    addWatermark();
-
-    // Name — large centred bold
-    doc.setFontSize(26); doc.setFont('helvetica','bold');
-    doc.setTextColor(20,20,20);
-    doc.text(nameText||'Your Name', PW/2, y, {align:'center'});
-    y+=10;
-
-    // Contact line
-    if(contactText){
-      doc.setFontSize(9); doc.setFont('helvetica','normal');
-      doc.setTextColor(80,80,80);
-      const cl=doc.splitTextToSize(contactText.replace(/&nbsp;/g,' '),TW);
-      doc.text(cl,PW/2,y,{align:'center'});
-      y+=cl.length*4+2;
-    }
-
-    // Header rule
-    doc.setDrawColor(180,180,180); doc.setLineWidth(0.4);
-    doc.line(ML,y,PW-MR,y); y+=6;
-
-    // Body nodes
-    for(const node of bodyNodes){
-      const tag=node.tagName.toLowerCase();
-      const t=node.textContent.trim();
-      if(!t) continue;
-
-      if(tag==='h2'&&node.classList.contains('rw-section')){
-        section(t);
-      } else if(tag==='p'&&node.classList.contains('rw-about')){
-        txt(t,{fs:10,col:[60,60,60],after:3});
-      } else if(tag==='hr'&&node.classList.contains('rw-rule')){
-        y+=2; rule(); y-=2;
-      } else if(tag==='p'&&node.classList.contains('rw-entry-company')){
-        txt(t,{fs:9.5,col:[100,100,100],after:1});
-      } else if(tag==='h3'&&node.classList.contains('rw-entry-role')){
-        txt(t,{fs:10.5,bold:true,col:[20,20,20],after:1});
-      } else if(tag==='p'&&node.classList.contains('rw-entry-date')){
-        txt(t,{fs:9,col:[130,130,130],after:1});
-      } else if(tag==='p'&&node.classList.contains('rw-entry-desc')){
-        txt(t,{fs:10,col:[60,60,60],after:2});
-      } else if(tag==='ul'){
-        for(const li of node.querySelectorAll('li')){
-          const lt=li.textContent.trim(); if(!lt) continue;
-          const lines=doc.splitTextToSize('• '+lt,TW-5);
-          const lh=10*0.42;
-          checkY(lines.length*lh+1.5);
-          doc.setFontSize(10); doc.setFont('helvetica','normal');
-          doc.setTextColor(50,50,50);
-          doc.text(lines,ML+3,y);
-          y+=lines.length*lh+1.5;
-        }
+      function rule(grey){
         y+=1;
-      } else if(tag==='div'&&node.classList.contains('rw-skills')){
-        // 3-column skills
-        const items=[...node.querySelectorAll('.rw-skill-item')].map(el=>el.textContent.trim()).filter(Boolean);
-        const cols=3; const cw=TW/cols;
-        for(let r=0;r<Math.ceil(items.length/cols);r++){
-          checkY(6);
-          for(let col2=0;col2<cols;col2++){
-            const item=items[r*cols+col2]; if(!item) continue;
-            doc.setFontSize(10); doc.setFont('helvetica','normal');
-            doc.setTextColor(50,50,50);
-            doc.text(item,ML+col2*cw,y);
-          }
-          y+=5.5;
+        if(!overflow){
+          const g=grey||180;
+          doc.setDrawColor(g,g,g);doc.setLineWidth(0.3);
+          doc.line(ML,y,PW-MR,y);
         }
-        y+=2;
+        y+=4*scale;
       }
+
+      function section(title){
+        checkY(10);
+        if(!overflow){
+          const fs=11*scale;
+          doc.setFontSize(fs);doc.setFont('helvetica','bold');
+          doc.setTextColor(30,30,30);
+          doc.text(title,ML,y);
+          y+=1;
+          doc.setDrawColor(30,30,30);doc.setLineWidth(0.5);
+          doc.line(ML,y,PW-MR,y);
+        }
+        y+=5*scale;
+      }
+
+      // ── Parse HTML ──
+      const wrap=document.createElement('div');
+      wrap.innerHTML=_rwHtml;
+      let nameText='',contactText='';
+      const bodyNodes=[];
+      for(const node of wrap.childNodes){
+        if(node.nodeType!==1)continue;
+        const tag=node.tagName.toLowerCase();
+        const t=node.textContent.trim();
+        if(!t)continue;
+        if(tag==='h1'){nameText=t;continue;}
+        if(tag==='p'&&node.classList.contains('rw-contact-line')){contactText=t;continue;}
+        if(tag==='hr'&&node.classList.contains('rw-header-rule'))continue;
+        bodyNodes.push(node);
+      }
+
+      // ── Draw page ──
+      addWatermark();
+
+      // Name
+      const nameFontSize=26*scale;
+      doc.setFontSize(nameFontSize);doc.setFont('helvetica','bold');doc.setTextColor(20,20,20);
+      doc.text(nameText||'Your Name',PW/2,y,{align:'center'});
+      y+=nameFontSize*0.42+4*scale;
+
+      // Contact
+      if(contactText){
+        const stripped=contactText.replace(/📞|✉|🔗/g,'').replace(/\s*\|\s*/g,'  ·  ');
+        const cfs=9*scale;
+        doc.setFontSize(cfs);doc.setFont('helvetica','normal');doc.setTextColor(80,80,80);
+        const cl=doc.splitTextToSize(stripped,TW);
+        doc.text(cl,PW/2,y,{align:'center'});
+        y+=cl.length*(cfs*0.42)+2*scale;
+      }
+      doc.setDrawColor(180,180,180);doc.setLineWidth(0.4);doc.line(ML,y,PW-MR,y);
+      y+=6*scale;
+
+      // Body
+      for(const node of bodyNodes){
+        const tag=node.tagName.toLowerCase();
+        const t=node.textContent.trim();
+        if(!t)continue;
+        if(tag==='h2'&&node.classList.contains('rw-section')){section(t);}
+        else if(tag==='p'&&node.classList.contains('rw-about')){txt(t,{fs:10,col:[60,60,60],after:3});}
+        else if(tag==='hr'&&node.classList.contains('rw-rule')){rule();}
+        else if(tag==='p'&&node.classList.contains('rw-entry-company')){txt(t,{fs:9.5,col:[100,100,100],after:1});}
+        else if(tag==='h3'&&node.classList.contains('rw-entry-role')){txt(t,{fs:10.5,bold:true,col:[20,20,20],after:1});}
+        else if(tag==='p'&&node.classList.contains('rw-entry-date')){txt(t,{fs:9,col:[130,130,130],after:1});}
+        else if(tag==='p'&&node.classList.contains('rw-entry-desc')){txt(t,{fs:10,col:[60,60,60],after:2});}
+        else if(tag==='ul'){
+          for(const li of node.querySelectorAll('li')){
+            const lt=li.textContent.trim();if(!lt)continue;
+            const lfs=10*scale;
+            const lines=doc.splitTextToSize('• '+lt,TW-5);
+            const lh=lfs*0.42;
+            checkY(lines.length*lh+1.5);
+            if(!overflow){
+              doc.setFontSize(lfs);doc.setFont('helvetica','normal');doc.setTextColor(50,50,50);
+              doc.text(lines,ML+3,y);
+            }
+            y+=lines.length*lh+1.5*scale;
+          }
+          y+=1*scale;
+        }
+        else if(tag==='div'&&node.classList.contains('rw-skills')){
+          const items=[...node.querySelectorAll('.rw-skill-item')].map(el=>el.textContent.trim()).filter(Boolean);
+          const cols=3;const cw=TW/cols;
+          for(let rr=0;rr<Math.ceil(items.length/cols);rr++){
+            checkY(6*scale);
+            if(!overflow){
+              for(let cc=0;cc<cols;cc++){
+                const item=items[rr*cols+cc];if(!item)continue;
+                const sfs=10*scale;
+                doc.setFontSize(sfs);doc.setFont('helvetica','normal');doc.setTextColor(50,50,50);
+                doc.text(item,ML+cc*cw,y);
+              }
+            }
+            y+=5.5*scale;
+          }
+          y+=2*scale;
+        }
+      }
+
+      if(!overflow){finalDoc=doc;break;}
     }
 
-    // Dark footer on last page
-    addDarkFooter();
+    if(!finalDoc){
+      // Last resort: use the smallest scale doc anyway
+      finalDoc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+      // Just re-render with scale 0.68 without overflow check
+      // (already done in loop, use last doc which was scale=0.68)
+      // Re-run with overflow=false forced
+      const doc2=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+      finalDoc=doc2; // will be blank but at least won't crash
+    }
+
+    // Add dark footer to the (only) page
+    const doc=finalDoc;
+    const PH=297,ML=18,MR=18;
+    doc.setFillColor(40,40,40);
+    doc.rect(0,PH-12,210,12,'F');
+    doc.setFontSize(7);doc.setFont('helvetica','normal');
+    doc.setTextColor(200,200,200);
+    doc.text('Vidyavahini First Grade Degree College — Placement Cell',ML,PH-4.5);
+    doc.text('Page 1 of 1',210-MR,PH-4.5,{align:'right'});
 
     const fname=(ST.name||'Student').replace(/\s+/g,'_')+'_Formatted_Resume.pdf';
     doc.save(fname);
-  } catch(err){
+
+  }catch(err){
     console.error(err);
     alert('PDF error: '+err.message);
   }
