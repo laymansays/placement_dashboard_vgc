@@ -258,6 +258,20 @@ body{
 .stat-tile-num{font-size:44px;line-height:1;font-weight:800;color:var(--navy);margin-bottom:4px;letter-spacing:-0.04em;transition:color .2s;}
 .stat-tile-lbl{font-size:11.5px;color:var(--text3);font-weight:600;letter-spacing:0.02em;}
 .stat-tile-hint{font-size:10px;color:var(--blue);margin-top:4px;font-weight:600;opacity:0;transition:opacity .2s;}
+/* PDF hover button — on stat-tile and d-stat */
+.tile-pdf-btn{
+  position:absolute;top:10px;right:10px;
+  opacity:0;pointer-events:none;
+  transition:opacity .18s;
+  padding:4px 9px;border-radius:6px;border:1.5px solid var(--border2);
+  background:var(--bg2);color:var(--text2);
+  font-size:10.5px;font-weight:700;font-family:inherit;
+  cursor:pointer;white-space:nowrap;z-index:2;
+  display:inline-flex;align-items:center;gap:4px;
+}
+.stat-tile:hover .tile-pdf-btn,
+.d-stat:hover .tile-pdf-btn{ opacity:1; pointer-events:auto; }
+.tile-pdf-btn:hover{ background:#6D0E6A;color:#fff;border-color:#6D0E6A; }
 .stat-tile:hover .stat-tile-hint{opacity:1;}
 
 /* ── SECTION ── */
@@ -1464,24 +1478,28 @@ function buildHome(){
       </div>
       <div class="home-banner-right">
         <div class="stat-tile" onclick="showStatModal('companies')">
+          <button class="tile-pdf-btn" onclick="event.stopPropagation();exportPDF('companies')" title="Download PDF">⬇ PDF</button>
           <div class="stat-tile-icon">🏢</div>
           <div class="stat-tile-num">${total}</div>
           <div class="stat-tile-lbl">Companies</div>
           <div class="stat-tile-hint">Click to view ↗</div>
         </div>
         <div class="stat-tile" onclick="showStatModal('registrations')">
+          <button class="tile-pdf-btn" onclick="event.stopPropagation();exportPDF('registrations')" title="Download PDF">⬇ PDF</button>
           <div class="stat-tile-icon">📋</div>
           <div class="stat-tile-num">${regs}</div>
           <div class="stat-tile-lbl">Registrations</div>
           <div class="stat-tile-hint">Click to view ↗</div>
         </div>
         <div class="stat-tile" onclick="showStatModal('drives')">
+          <button class="tile-pdf-btn" onclick="event.stopPropagation();exportPDF('drives')" title="Download PDF">⬇ PDF</button>
           <div class="stat-tile-icon">✅</div>
           <div class="stat-tile-num">${done}</div>
           <div class="stat-tile-lbl">Drives Done</div>
           <div class="stat-tile-hint">Click to view ↗</div>
         </div>
         <div class="stat-tile" onclick="showStatModal('placed')">
+          <button class="tile-pdf-btn" onclick="event.stopPropagation();exportPDF('placed')" title="Download PDF">⬇ PDF</button>
           <div class="stat-tile-icon">🎉</div>
           <div class="stat-tile-num">${sel}</div>
           <div class="stat-tile-lbl">Placed</div>
@@ -1630,14 +1648,17 @@ async function buildDetail(id){
 
     <div class="d-stats">
       <div class="d-stat" id="dsr">
+        <button class="tile-pdf-btn" onclick="event.stopPropagation();downloadPlacedPDF('dsr-full')" title="Download PDF">⬇ PDF</button>
         <div class="d-stat-num">${c.studentsRegistered.length}</div>
         <div class="d-stat-lbl">Registered${adminMode?' <small style="opacity:.5">✏</small>':''}</div>
       </div>
       <div class="d-stat" id="dsi">
+        <button class="tile-pdf-btn" onclick="event.stopPropagation();downloadPlacedPDF('dsi-full')" title="Download PDF">⬇ PDF</button>
         <div class="d-stat-num">${c.studentsInterviewed.length}</div>
         <div class="d-stat-lbl">Interviewed${adminMode?' <small style="opacity:.5">✏</small>':''}</div>
       </div>
       <div class="d-stat" id="dss">
+        <button class="tile-pdf-btn" onclick="event.stopPropagation();downloadPlacedPDF('dss-full')" title="Download PDF">⬇ PDF</button>
         <div class="d-stat-num">${c.studentsSelected.length}</div>
         <div class="d-stat-lbl">Selected${adminMode?' <small style="opacity:.5">✏</small>':''}</div>
       </div>
@@ -1928,99 +1949,173 @@ function buildStudentSection(title,students,anchorId){
   </div>`;
 }
 
-function downloadPlacedPDF(anchorId){
-  // Find the company currently in view
-  const c = COMPANIES.find(x=>x.id===cId);
-  if(!c) return;
-  const students = c.studentsSelected;
-  if(!students.length){ toast('No selected students to export','info'); return; }
-
+/* ── Shared PDF builder ── */
+function _buildReportPDF(title, subtitle, allSections){
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
+  let curY = 0;
 
-  // ── Header block ──
-  doc.setFillColor(109, 14, 106);
-  doc.rect(0, 0, 210, 22, 'F');
-  doc.setTextColor(255,255,255);
-  doc.setFontSize(13);
-  doc.setFont('helvetica','bold');
-  doc.text('Vidyavahini First Grade Degree College', 14, 10);
-  doc.setFontSize(9);
-  doc.setFont('helvetica','normal');
-  doc.text('Placement Cell — Selected Students Report', 14, 17);
+  function addPageHeader(){
+    doc.setFillColor(109,14,106);
+    doc.rect(0,0,210,22,'F');
+    doc.setTextColor(255,255,255);
+    doc.setFontSize(13); doc.setFont('helvetica','bold');
+    doc.text('Vidyavahini First Grade Degree College', 14, 10);
+    doc.setFontSize(9); doc.setFont('helvetica','normal');
+    doc.text('Placement Cell — ' + title, 14, 17);
+  }
 
-  // ── Company name + Role ──
+  addPageHeader();
+
+  // Sub-title block
   doc.setTextColor(60,60,60);
-  doc.setFontSize(11);
-  doc.setFont('helvetica','bold');
-  doc.text(`Company: ${c.name}`, 14, 31);
+  doc.setFontSize(11); doc.setFont('helvetica','bold');
+  doc.text(subtitle, 14, 31);
+  doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(150,150,150);
+  doc.text('Generated: ' + new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}), 14, 37);
+  curY = 43;
 
-  const roleText = c.roles && c.roles.length ? c.roles.join(', ') : '—';
-  doc.setFontSize(10);
-  doc.setFont('helvetica','normal');
-  doc.setTextColor(80,80,80);
-  doc.text(`Job Role(s): ${roleText}`, 14, 38);
+  allSections.forEach((sec, si) => {
+    // Section heading: Company + Role
+    if(si > 0) curY += 4;
+    if(curY > 250){ doc.addPage(); addPageHeader(); curY = 28; }
 
-  doc.setFontSize(9);
-  doc.setTextColor(150,150,150);
-  doc.text(`Generated: ${new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})}`, 14, 44);
+    doc.setFontSize(10); doc.setFont('helvetica','bold'); doc.setTextColor(109,14,106);
+    doc.text(sec.companyName, 14, curY); curY += 5;
+    doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(80,80,80);
+    doc.text('Role(s): ' + (sec.roles||'—'), 14, curY); curY += 2;
 
-  // ── AutoTable — Sl.No, Name, Email ──
-  const rows = students.map((s, i) => [
-    i + 1,
-    s.name  || '—',
-    s.email || '—',
-  ]);
+    if(!sec.rows.length){
+      doc.setFontSize(9); doc.setTextColor(150,150,150);
+      doc.text('No records', 14, curY + 4);
+      curY += 10; return;
+    }
 
-  doc.autoTable({
-    startY: 50,
-    head: [['Sl. No.', 'Full Name', 'Email ID']],
-    body: rows,
-    theme: 'grid',
-    styles: {
-      fontSize: 10,
-      cellPadding: { top:4, bottom:4, left:5, right:5 },
-      lineColor: [200, 180, 200],
-      lineWidth: 0.3,
-      textColor: [30, 30, 30],
-      font: 'helvetica',
-    },
-    headStyles: {
-      fillColor: [109, 14, 106],
-      textColor: [255, 255, 255],
-      fontStyle: 'bold',
-      fontSize: 10,
-      halign: 'left',
-    },
-    columnStyles: {
-      0: { cellWidth: 18, halign: 'center' },
-      1: { cellWidth: 70 },
-      2: { cellWidth: 'auto' },
-    },
-    alternateRowStyles: { fillColor: [247, 240, 247] },
-    margin: { left: 14, right: 14 },
-    didDrawPage: (data) => {
-      // Footer on every page
-      const pg = doc.internal.getCurrentPageInfo().pageNumber;
-      const total = doc.internal.getNumberOfPages();
-      doc.setFontSize(8);
-      doc.setTextColor(160,160,160);
-      doc.setFont('helvetica','normal');
-      doc.text(`Page ${pg} of ${total}`, 196, 289, { align:'right' });
-      doc.text('Vidyavahini Placement Cell', 14, 289);
-    },
+    doc.autoTable({
+      startY: curY,
+      head: [['Sl. No.','Full Name','Email ID']],
+      body: sec.rows,
+      theme: 'grid',
+      styles:{ fontSize:9.5, cellPadding:{top:3,bottom:3,left:5,right:5}, lineColor:[200,180,200], lineWidth:0.3, textColor:[30,30,30], font:'helvetica' },
+      headStyles:{ fillColor:[109,14,106], textColor:[255,255,255], fontStyle:'bold', fontSize:9.5, halign:'left' },
+      columnStyles:{ 0:{cellWidth:16,halign:'center'}, 1:{cellWidth:65}, 2:{cellWidth:'auto'} },
+      alternateRowStyles:{ fillColor:[247,240,247] },
+      margin:{ left:14, right:14 },
+      didDrawPage: (data) => {
+        addPageHeader();
+        const pg = doc.internal.getCurrentPageInfo().pageNumber;
+        doc.setFontSize(8); doc.setTextColor(160,160,160); doc.setFont('helvetica','normal');
+        doc.text('Page ' + pg, 196, 289, {align:'right'});
+        doc.text('Vidyavahini Placement Cell', 14, 289);
+      },
+    });
+    curY = doc.lastAutoTable.finalY + 6;
   });
 
-  // ── Summary row below table ──
-  const finalY = doc.lastAutoTable.finalY + 6;
-  doc.setFontSize(9);
-  doc.setFont('helvetica','bold');
-  doc.setTextColor(109, 14, 106);
-  doc.text(`Total Selected: ${students.length} student${students.length!==1?'s':''}`, 14, finalY);
+  // Summary
+  const total = allSections.reduce((s,x)=>s+x.rows.length,0);
+  if(curY < 280){
+    doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(109,14,106);
+    doc.text('Total: ' + total + ' student' + (total!==1?'s':''), 14, curY);
+  }
+  return doc;
+}
 
-  const fname = `${c.name.replace(/\s+/g,'_')}_Selected_Students.pdf`;
+function downloadPlacedPDF(anchorId){
+  const co = COMPANIES.find(x=>x.id===cId);
+  if(!co){ toast('No company selected','info'); return; }
+
+  const map = { 'dsr-full': ['studentsRegistered','Registered Students'],
+                'dsi-full': ['studentsInterviewed','Interviewed / Shortlisted'],
+                'dss-full': ['studentsSelected','Selected / Placed'] };
+  const [key, label] = map[anchorId] || ['studentsSelected','Selected'];
+  const students = co[key] || [];
+
+  if(!students.length){ toast('No students in this list','info'); return; }
+
+  const rows = students.map((s,i)=>[i+1, s.name||'—', s.email||'—']);
+  const roles = co.roles && co.roles.length ? co.roles.join(', ') : '—';
+  const doc = _buildReportPDF(label, label + ' — ' + co.name,
+    [{ companyName: co.name, roles, rows }]);
+
+  const fname = co.name.replace(/\s+/g,'_') + '_' + key.replace('students','') + '.pdf';
   doc.save(fname);
-  toast(`PDF downloaded — ${fname}`,'success','📄');
+  toast('PDF downloaded','success','📄');
+}
+
+function exportPDF(type){
+  const { jsPDF } = window.jspdf;
+
+  if(type === 'companies'){
+    // Summary: one row per company with counts
+    const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
+    doc.setFillColor(109,14,106); doc.rect(0,0,210,22,'F');
+    doc.setTextColor(255,255,255); doc.setFontSize(13); doc.setFont('helvetica','bold');
+    doc.text('Vidyavahini First Grade Degree College', 14, 10);
+    doc.setFontSize(9); doc.setFont('helvetica','normal');
+    doc.text('Placement Cell — All Companies Summary', 14, 17);
+    doc.setTextColor(150,150,150); doc.setFontSize(9);
+    doc.text('Generated: ' + new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}), 14, 31);
+
+    const rows = COMPANIES.map((c,i)=>[
+      i+1, c.name,
+      (c.roles&&c.roles.length ? c.roles.join(', ') : '—'),
+      c.studentsRegistered.length,
+      c.studentsInterviewed.length,
+      c.studentsSelected.length,
+    ]);
+    doc.autoTable({
+      startY:36,
+      head:[['#','Company','Roles','Registered','Interviewed','Selected']],
+      body:rows, theme:'grid',
+      styles:{fontSize:9,cellPadding:{top:3,bottom:3,left:4,right:4},lineColor:[200,180,200],lineWidth:0.3,textColor:[30,30,30]},
+      headStyles:{fillColor:[109,14,106],textColor:[255,255,255],fontStyle:'bold',fontSize:9},
+      columnStyles:{0:{cellWidth:12,halign:'center'},1:{cellWidth:48},2:{cellWidth:'auto'},3:{cellWidth:24,halign:'center'},4:{cellWidth:26,halign:'center'},5:{cellWidth:22,halign:'center'}},
+      alternateRowStyles:{fillColor:[247,240,247]},
+      margin:{left:14,right:14},
+      didDrawPage:()=>{ doc.setFontSize(8);doc.setTextColor(160,160,160);doc.text('Vidyavahini Placement Cell',14,289);doc.text('Page '+doc.internal.getCurrentPageInfo().pageNumber,196,289,{align:'right'}); }
+    });
+    doc.save('All_Companies_Summary.pdf');
+    toast('PDF downloaded','success','📄'); return;
+  }
+
+  if(type === 'registrations'){
+    const sections = COMPANIES.filter(c=>c.studentsRegistered.length>0).map(c=>({
+      companyName: c.name,
+      roles: c.roles&&c.roles.length ? c.roles.join(', ') : '—',
+      rows: c.studentsRegistered.map((s,i)=>[i+1,s.name||'—',s.email||'—']),
+    }));
+    if(!sections.length){ toast('No registrations yet','info'); return; }
+    const doc = _buildReportPDF('Registrations Report','All Registrations by Company', sections);
+    doc.save('Registrations_Report.pdf');
+    toast('PDF downloaded','success','📄'); return;
+  }
+
+  if(type === 'drives'){
+    const sections = COMPANIES
+      .filter(c=>c.studentsSelected.length>0||c.studentsInterviewed.length>0)
+      .map(c=>({
+        companyName: c.name,
+        roles: c.roles&&c.roles.length ? c.roles.join(', ') : '—',
+        rows: c.studentsSelected.map((s,i)=>[i+1,s.name||'—',s.email||'—']),
+      }));
+    if(!sections.length){ toast('No drives completed yet','info'); return; }
+    const doc = _buildReportPDF('Drives Done Report','Completed Drives — Selected Students', sections);
+    doc.save('Drives_Done_Report.pdf');
+    toast('PDF downloaded','success','📄'); return;
+  }
+
+  if(type === 'placed'){
+    const sections = COMPANIES.filter(c=>c.studentsSelected.length>0).map(c=>({
+      companyName: c.name,
+      roles: c.roles&&c.roles.length ? c.roles.join(', ') : '—',
+      rows: c.studentsSelected.map((s,i)=>[i+1,s.name||'—',s.email||'—']),
+    }));
+    if(!sections.length){ toast('No placed students yet','info'); return; }
+    const doc = _buildReportPDF('Placement Report','All Placed Students by Company', sections);
+    doc.save('Placement_Report.pdf');
+    toast('PDF downloaded','success','📄'); return;
+  }
 }
 
 /* ════════════════════════════════════════════════════
