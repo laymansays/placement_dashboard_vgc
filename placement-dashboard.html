@@ -438,6 +438,15 @@ body.admin-mode .d-stat{background:var(--admin-bg);}
 /* ── STUDENT TABLES ── */
 .student-section{background:var(--card-bg);border:1px solid var(--border);border-radius:var(--r2);margin-bottom:14px;overflow:hidden;box-shadow:var(--shadow2);}
 .student-section-head{display:flex;align-items:center;justify-content:space-between;padding:14px 22px;border-bottom:1px solid var(--border);background:var(--bg3);}
+.student-section-head-left{display:flex;align-items:center;gap:10px;}
+.btn-pdf-download{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:5px 12px;border-radius:7px;border:1.5px solid var(--border2);
+  background:var(--bg2);color:var(--text2);
+  font-size:11.5px;font-weight:700;font-family:inherit;
+  cursor:pointer;transition:all .15s;white-space:nowrap;
+}
+.btn-pdf-download:hover{background:#6D0E6A;color:#fff;border-color:#6D0E6A;}
 .student-section-title{font-size:13.5px;font-weight:700;color:var(--text2);}
 .student-count{font-size:22px;font-weight:800;color:var(--navy);line-height:1;letter-spacing:-0.03em;}
 .student-table{width:100%;border-collapse:collapse;font-size:13.5px;}
@@ -649,8 +658,8 @@ body.admin-mode .modal{border-top:3px solid var(--admin);}
 
 </style>
 
-
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 
 </head>
 <body>
@@ -1903,13 +1912,115 @@ function buildStudentSection(title,students,anchorId){
   const hasBranch=students.some(s=>s.class);
   const hasPhone=students.some(s=>s.phone);
   const hasEmail=students.some(s=>s.email);
+  const isSelected = anchorId === 'dss-full';
+  const pdfBtn = isSelected && students.length
+    ? `<button class="btn-pdf-download" onclick="downloadPlacedPDF('${anchorId}')">⬇ PDF</button>`
+    : '';
   return`<div id="${anchorId}" class="student-section">
-    <div class="student-section-head"><span class="student-section-title">${title}</span><span class="student-count">${students.length}</span></div>
+    <div class="student-section-head">
+      <div class="student-section-head-left"><span class="student-section-title">${title}</span><span class="student-count">${students.length}</span></div>
+      ${pdfBtn}
+    </div>
     <table class="student-table">
       <thead><tr><th>#</th><th>Name</th>${hasEmail?'<th>Email</th>':''}${hasBranch?'<th>Class</th>':''}${hasPhone?'<th>Phone</th>':''}</tr></thead>
       <tbody>${students.map(s=>`<tr><td>${xe(s.id)}</td><td>${xe(s.name||'—')}</td>${hasEmail?`<td>${xe(s.email||'—')}</td>`:''}${hasBranch?`<td>${xe(s.class||'—')}</td>`:''}${hasPhone?`<td>${xe(s.phone||'—')}</td>`:''}</tr>`).join('')}</tbody>
     </table>
   </div>`;
+}
+
+function downloadPlacedPDF(anchorId){
+  // Find the company currently in view
+  const c = COMPANIES.find(x=>x.id===cId);
+  if(!c) return;
+  const students = c.studentsSelected;
+  if(!students.length){ toast('No selected students to export','info'); return; }
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
+
+  // ── Header block ──
+  doc.setFillColor(109, 14, 106);
+  doc.rect(0, 0, 210, 22, 'F');
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(13);
+  doc.setFont('helvetica','bold');
+  doc.text('Vidyavahini First Grade Degree College', 14, 10);
+  doc.setFontSize(9);
+  doc.setFont('helvetica','normal');
+  doc.text('Placement Cell — Selected Students Report', 14, 17);
+
+  // ── Company name + Role ──
+  doc.setTextColor(60,60,60);
+  doc.setFontSize(11);
+  doc.setFont('helvetica','bold');
+  doc.text(`Company: ${c.name}`, 14, 31);
+
+  const roleText = c.roles && c.roles.length ? c.roles.join(', ') : '—';
+  doc.setFontSize(10);
+  doc.setFont('helvetica','normal');
+  doc.setTextColor(80,80,80);
+  doc.text(`Job Role(s): ${roleText}`, 14, 38);
+
+  doc.setFontSize(9);
+  doc.setTextColor(150,150,150);
+  doc.text(`Generated: ${new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})}`, 14, 44);
+
+  // ── AutoTable — Sl.No, Name, Email ──
+  const rows = students.map((s, i) => [
+    i + 1,
+    s.name  || '—',
+    s.email || '—',
+  ]);
+
+  doc.autoTable({
+    startY: 50,
+    head: [['Sl. No.', 'Full Name', 'Email ID']],
+    body: rows,
+    theme: 'grid',
+    styles: {
+      fontSize: 10,
+      cellPadding: { top:4, bottom:4, left:5, right:5 },
+      lineColor: [200, 180, 200],
+      lineWidth: 0.3,
+      textColor: [30, 30, 30],
+      font: 'helvetica',
+    },
+    headStyles: {
+      fillColor: [109, 14, 106],
+      textColor: [255, 255, 255],
+      fontStyle: 'bold',
+      fontSize: 10,
+      halign: 'left',
+    },
+    columnStyles: {
+      0: { cellWidth: 18, halign: 'center' },
+      1: { cellWidth: 70 },
+      2: { cellWidth: 'auto' },
+    },
+    alternateRowStyles: { fillColor: [247, 240, 247] },
+    margin: { left: 14, right: 14 },
+    didDrawPage: (data) => {
+      // Footer on every page
+      const pg = doc.internal.getCurrentPageInfo().pageNumber;
+      const total = doc.internal.getNumberOfPages();
+      doc.setFontSize(8);
+      doc.setTextColor(160,160,160);
+      doc.setFont('helvetica','normal');
+      doc.text(`Page ${pg} of ${total}`, 196, 289, { align:'right' });
+      doc.text('Vidyavahini Placement Cell', 14, 289);
+    },
+  });
+
+  // ── Summary row below table ──
+  const finalY = doc.lastAutoTable.finalY + 6;
+  doc.setFontSize(9);
+  doc.setFont('helvetica','bold');
+  doc.setTextColor(109, 14, 106);
+  doc.text(`Total Selected: ${students.length} student${students.length!==1?'s':''}`, 14, finalY);
+
+  const fname = `${c.name.replace(/\s+/g,'_')}_Selected_Students.pdf`;
+  doc.save(fname);
+  toast(`PDF downloaded — ${fname}`,'success','📄');
 }
 
 /* ════════════════════════════════════════════════════
