@@ -22,40 +22,43 @@ body{
   position:fixed;top:20px;left:24px;z-index:500;
   display:flex;align-items:center;
   cursor:pointer;
-  text-decoration:none;
 }
 .fixed-logo-img{
-  width:54px;height:54px;border-radius:15px;
+  /* size driven by JS via --logo-sz custom property */
+  width:var(--logo-sz,54px);
+  height:var(--logo-sz,54px);
+  border-radius:calc(var(--logo-sz,54px) * 0.27);
   background:#fff;overflow:hidden;flex-shrink:0;
   box-shadow:0 4px 24px rgba(0,0,0,0.35),0 0 0 1px rgba(255,255,255,0.08);
-  transition:width .35s cubic-bezier(.4,0,.2,1),
-             height .35s cubic-bezier(.4,0,.2,1),
-             border-radius .35s,
-             box-shadow .25s;
+  transition:width .12s ease-out,
+             height .12s ease-out,
+             border-radius .12s ease-out,
+             box-shadow .2s ease;
 }
 .fixed-logo-img img{width:100%;height:100%;object-fit:contain;display:block;}
-.fixed-logo-wrap.scrolled .fixed-logo-img{
-  width:66px;height:66px;border-radius:18px;
-  box-shadow:0 8px 36px rgba(109,14,106,0.50),0 0 0 1.5px rgba(211,182,210,0.18);
-}
-/* Slide-out text */
+
+/* Slide-out VVFGC text — slides RIGHT from behind logo on hover */
 .fixed-logo-text{
-  max-width:0;overflow:hidden;opacity:0;
+  max-width:0;
+  overflow:hidden;
+  opacity:0;
   white-space:nowrap;
-  font-size:15px;font-weight:900;letter-spacing:0.12em;
-  color:rgba(255,255,255,0.90);
+  font-size:15px;font-weight:900;letter-spacing:0.14em;
+  color:rgba(255,255,255,0.92);
   margin-left:0;
-  transition:max-width .38s cubic-bezier(.4,0,.2,1),
-             opacity .28s ease,
-             margin-left .38s cubic-bezier(.4,0,.2,1);
+  transition:max-width .40s cubic-bezier(.4,0,.2,1),
+             opacity .30s ease,
+             margin-left .40s cubic-bezier(.4,0,.2,1);
   pointer-events:none;
-  text-shadow:0 2px 8px rgba(0,0,0,0.40);
+  text-shadow:0 2px 10px rgba(0,0,0,0.50);
 }
 .fixed-logo-wrap:hover .fixed-logo-text{
-  max-width:120px;opacity:1;margin-left:12px;
+  max-width:140px;
+  opacity:1;
+  margin-left:13px;
 }
 .fixed-logo-wrap:hover .fixed-logo-img{
-  box-shadow:0 8px 32px rgba(109,14,106,0.50),0 0 0 1.5px rgba(211,182,210,0.22);
+  box-shadow:0 8px 32px rgba(109,14,106,0.55),0 0 0 1.5px rgba(211,182,210,0.28);
 }
 
 /* ── SCROLLING NAV (not fixed) ── */
@@ -76,14 +79,23 @@ body{
   overflow:hidden;
 }
 
-/* Mesh background */
+/* Mesh background — wider spread, more balanced */
 .hero::before{
   content:'';position:absolute;inset:0;
   background:
-    radial-gradient(ellipse 70% 55% at 15% 50%,rgba(109,14,106,0.55) 0%,transparent 65%),
-    radial-gradient(ellipse 55% 45% at 85% 55%,rgba(87,11,84,0.40) 0%,transparent 65%),
-    radial-gradient(ellipse 90% 80% at 50% 100%,rgba(42,10,40,0.70) 0%,transparent 55%);
+    radial-gradient(ellipse 80% 65% at 20% 45%, rgba(109,14,106,0.48) 0%,transparent 60%),
+    radial-gradient(ellipse 70% 60% at 80% 50%, rgba(87,11,84,0.38) 0%,transparent 60%),
+    radial-gradient(ellipse 60% 50% at 50% 20%, rgba(109,14,106,0.28) 0%,transparent 55%),
+    radial-gradient(ellipse 90% 70% at 50% 100%,rgba(42,10,40,0.65) 0%,transparent 55%);
   pointer-events:none;
+}
+/* Cursor-following glow — position driven by JS */
+.hero-cursor-glow{
+  position:absolute;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 55% 45% at var(--cx,50%) var(--cy,50%),
+    rgba(139,40,135,0.32) 0%,transparent 65%);
+  transition:background .08s linear;
+  will-change:background;
 }
 /* Grid lines */
 .hero::after{
@@ -302,8 +314,6 @@ body{
 @media(max-width:700px){
   .nav{padding:0 20px;}
   .fixed-logo-wrap{top:14px;left:16px;}
-  .fixed-logo-img{width:44px;height:44px;border-radius:11px;}
-  .fixed-logo-wrap.scrolled .fixed-logo-img{width:54px;height:54px;}
   .hero-content{padding:0 24px;}
   .stat-row{grid-template-columns:repeat(2,1fr);}
   .portal-buttons{flex-direction:column;}
@@ -335,7 +345,8 @@ body{
 </nav>
 
 <!-- ── HERO ── -->
-<section class="hero">
+<section class="hero" id="hero">
+  <div class="hero-cursor-glow" id="hero-cursor-glow"></div>
 
   <!-- Central content -->
   <div class="hero-content">
@@ -418,26 +429,79 @@ body{
 <script src="shared.js"></script>
 <script>
 /* ═══════════════════════════════════════════
-   LOGO — scroll grow + slide text + no-refresh
+   LOGO — proportional scroll grow + slide text
 ═══════════════════════════════════════════ */
 (function(){
   const wrap = document.getElementById('fixed-logo-wrap');
-  if(!wrap) return;
+  const img  = document.getElementById('fixed-logo-img');
+  if(!wrap || !img) return;
 
-  // Grow on scroll, stay grown
-  let grown = false;
-  window.addEventListener('scroll', function(){
-    if(!grown && window.scrollY > 30){
-      grown = true;
-      wrap.classList.add('scrolled');
-    }
-  }, {passive:true});
+  const MIN_SZ = 54;   // px at scroll=0
+  const MAX_SZ = 76;   // px at full grow
+  const SCROLL_RANGE = 220; // px of scroll to go from min→max
 
-  // Clicking logo scrolls to top without reload
+  function updateLogoSize(){
+    const t = Math.min(window.scrollY / SCROLL_RANGE, 1);
+    // ease-out curve
+    const ease = 1 - Math.pow(1 - t, 2);
+    const sz = MIN_SZ + (MAX_SZ - MIN_SZ) * ease;
+    img.style.setProperty('--logo-sz', sz.toFixed(1)+'px');
+    // also set directly so the transition fires smoothly
+    img.style.width  = sz.toFixed(1)+'px';
+    img.style.height = sz.toFixed(1)+'px';
+    img.style.borderRadius = (sz * 0.27).toFixed(1)+'px';
+    // shadow grows too
+    const glow = (ease * 0.45).toFixed(2);
+    img.style.boxShadow = `0 ${4+ease*10}px ${24+ease*20}px rgba(0,0,0,0.35),`
+                        + `0 0 0 ${(1+ease*0.5).toFixed(1)}px rgba(255,255,255,0.09),`
+                        + `0 0 ${ease*32}px rgba(109,14,106,${glow})`;
+  }
+
+  window.addEventListener('scroll', updateLogoSize, {passive:true});
+  updateLogoSize(); // run once on load
+
+  // Click → smooth scroll to top, no reload
   wrap.addEventListener('click', function(e){
     e.preventDefault();
     window.scrollTo({top:0, behavior:'smooth'});
   });
+})();
+
+/* ═══════════════════════════════════════════
+   CURSOR GLOW — follows mouse inside hero
+═══════════════════════════════════════════ */
+(function(){
+  const hero = document.getElementById('hero');
+  const glow = document.getElementById('hero-cursor-glow');
+  if(!hero || !glow) return;
+  let raf = null;
+  let tx=50, ty=50, cx=50, cy=50;
+
+  hero.addEventListener('mousemove', function(e){
+    const r = hero.getBoundingClientRect();
+    tx = ((e.clientX - r.left) / r.width  * 100);
+    ty = ((e.clientY - r.top)  / r.height * 100);
+    if(!raf) raf = requestAnimationFrame(step);
+  });
+
+  hero.addEventListener('mouseleave', function(){
+    // drift back to centre
+    tx=50; ty=50;
+    if(!raf) raf = requestAnimationFrame(step);
+  });
+
+  function step(){
+    raf = null;
+    // lerp for smooth lag
+    cx += (tx - cx) * 0.10;
+    cy += (ty - cy) * 0.10;
+    glow.style.background =
+      `radial-gradient(ellipse 55% 48% at ${cx.toFixed(2)}% ${cy.toFixed(2)}%,`+
+      `rgba(139,40,135,0.32) 0%,transparent 65%)`;
+    // keep animating until we're close enough
+    if(Math.abs(tx-cx) > 0.05 || Math.abs(ty-cy) > 0.05)
+      raf = requestAnimationFrame(step);
+  }
 })();
 
 /* ═══════════════════════════════════════════
@@ -461,7 +525,8 @@ const _CHIP_HINTS={
   'deloitte':'deloitte.com','kpmg':'kpmg.com','ibm':'ibm.com',
   'oracle':'oracle.com','zoho':'zoho.com','freshworks':'freshworks.com',
   'masters union':'mastersunion.org','master\'s union':'mastersunion.org',
-  'prop times':'proptimes.in','proptimes':'proptimes.in'
+  'prop times':'proptimes.in','proptimes':'proptimes.in',
+  'technologics':'technologicsglobal.com','technologics global':'technologicsglobal.com'
 };
 function _chipGrad(i){const p=_CHIP_GRADS[i%_CHIP_GRADS.length];return`linear-gradient(135deg,${p[0]},${p[1]})`;}
 function _chipIni(n){return(n||'?').split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]||'').join('').toUpperCase()||'?';}
