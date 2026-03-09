@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Student Portal · Vidyavahini Placement</title>
+<title>Student Portal \u00b7 Vidyavahini Placement</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
@@ -12,10 +12,10 @@
 html{scroll-behavior:smooth;}
 body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-font-smoothing:antialiased;min-height:100vh;}
 
-/* ── LOGIN PAGE ── */
+/* \u2500\u2500 LOGIN PAGE \u2500\u2500 */
 .login-page{
   min-height:100vh;display:flex;align-items:center;justify-content:center;
-  background:linear-gradient(150deg,#0F172A 0%,#1E1525 50%,#6D0E6A 100%);
+  background:linear-gradient(150deg,#0F172A 0%,#1E293B 50%,#1e3a8a 100%);
   padding:24px;position:relative;overflow:hidden;
 }
 .login-page::before{
@@ -31,13 +31,13 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
   position:absolute;top:20px;left:24px;font-size:12.5px;color:#64748B;
   text-decoration:none;font-weight:600;transition:color .15s;
 }
-.login-back:hover{color:#6D0E6A;}
-.login-logo{
+.login-back:hover{color:#2563EB;}
+.login-logo{overflow:hidden;
   width:64px;height:64px;border-radius:18px;margin:0 auto 20px;
-  background:#fff;
+  background:linear-gradient(135deg,#2563EB,#7c3aed);
   display:flex;align-items:center;justify-content:center;
   font-size:28px;font-weight:900;color:#fff;
-  box-shadow:0 8px 24px rgba(109,14,106,.4);
+  box-shadow:0 8px 24px rgba(37,99,235,.4);
 }
 .login-heading{font-size:26px;font-weight:800;color:#0F172A;letter-spacing:-.03em;margin-bottom:8px;}
 .login-sub{font-size:13.5px;color:#64748B;margin-bottom:32px;line-height:1.5;}
@@ -47,18 +47,18 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
   font-family:'Inter',sans-serif;font-size:14.5px;color:#0F172A;background:#F8FAFC;
   outline:none;transition:all .15s;
 }
-.form-inp:focus{border-color:#6D0E6A;background:#fff;box-shadow:0 0 0 3px rgba(109,14,106,.12);}
+.form-inp:focus{border-color:#2563EB;background:#fff;box-shadow:0 0 0 3px rgba(37,99,235,.12);}
 .form-err{font-size:12.5px;color:#EF4444;font-weight:600;min-height:20px;margin:6px 0 0;text-align:left;}
 .btn-login{
   width:100%;margin-top:14px;padding:13px 20px;border:none;border-radius:10px;
-  background:linear-gradient(135deg,#6D0E6A,#6D0E6A);color:#fff;
+  background:linear-gradient(135deg,#2563EB,#7c3aed);color:#fff;
   font-size:15px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;
-  box-shadow:0 4px 16px rgba(109,14,106,.3);transition:all .2s;
+  box-shadow:0 4px 16px rgba(37,99,235,.3);transition:all .2s;
 }
-.btn-login:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 24px rgba(109,14,106,.4);}
+.btn-login:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 24px rgba(37,99,235,.4);}
 .btn-login:disabled{opacity:.65;cursor:not-allowed;}
 
-/* ── LOADING OVERLAY ── */
+/* \u2500\u2500 LOADING OVERLAY \u2500\u2500 */
 .sp-loading{
   position:fixed;inset:0;background:rgba(15,23,42,.72);backdrop-filter:blur(4px);
   display:none;align-items:center;justify-content:center;flex-direction:column;
@@ -74,9 +74,9 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
 .sp-loading-detail{font-size:12.5px;color:rgba(255,255,255,.55);}
 @keyframes spin{to{transform:rotate(360deg);}}
 
-/* ── PORTAL NAV ── */
+/* \u2500\u2500 PORTAL NAV \u2500\u2500 */
 .sp-nav{
-  position:fixed;top:0;left:0;right:0;z-index:100;
+  position:sticky;top:0;z-index:100;
   background:rgba(255,255,255,.96);backdrop-filter:blur(12px);
   border-bottom:1px solid #E2E8F0;
   display:flex;align-items:center;justify-content:space-between;
@@ -86,7 +86,7 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
 .sp-nav-brand{display:flex;align-items:center;gap:12px;text-decoration:none;}
 .sp-nav-logo{
   width:36px;height:36px;border-radius:9px;flex-shrink:0;
-  background:#fff;
+  background:linear-gradient(135deg,#2563EB,#7c3aed);
   display:flex;align-items:center;justify-content:center;
   font-size:16px;font-weight:900;color:#fff;
 }
@@ -99,31 +99,39 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
   cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;
 }
 .btn-logout:hover{border-color:#CBD5E1;color:#0F172A;}
-.btn-nav-home{
-  padding:7px 11px;border:1.5px solid #E2E8F0;border-radius:8px;
-  background:none;font-size:15px;font-weight:600;color:#64748B;
-  text-decoration:none;font-family:'Inter',sans-serif;transition:all .15s;
-  display:inline-flex;align-items:center;line-height:1;
-}
-.btn-nav-home:hover{border-color:#6D0E6A;color:#6D0E6A;background:#F7F0F7;}
 
-/* ── PORTAL BODY ── */
-.sp-body{display:flex;max-width:1280px;margin:0 auto;min-height:calc(100vh - 62px);}
-.sp-sidebar{width:var(--sidebar-w,300px);flex-shrink:0;padding:32px 24px 40px;position:sticky;top:62px;max-height:calc(100vh - 62px);overflow-y:auto;}
-.sp-resizer{
-  width:6px;flex-shrink:0;cursor:col-resize;
-  background:transparent;position:relative;
-  transition:background .15s;
+/* \u2500\u2500 PORTAL BODY \u2500\u2500 */
+.sp-body{display:block;}
+/* ── TAB BAR ── */
+.sp-tabs-bar{
+  display:flex;align-items:center;gap:4px;
+  padding:0 32px;
+  background:#fff;border-bottom:1.5px solid #E2E8F0;
+  position:sticky;top:62px;z-index:90;
 }
-.sp-resizer::after{
-  content:'';position:absolute;inset:0 2px;
-  background:#E2E8F0;border-radius:3px;transition:background .15s;
+.sp-tab{
+  padding:14px 20px;border:none;background:none;
+  font-size:14px;font-weight:600;color:#64748B;
+  font-family:'Inter',sans-serif;cursor:pointer;
+  border-bottom:2.5px solid transparent;
+  margin-bottom:-1.5px;transition:all .18s;white-space:nowrap;
 }
-.sp-resizer:hover::after,
-.sp-resizer.dragging::after{background:#6D0E6A;}
-.sp-main{flex:1;min-width:0;padding:32px 40px 64px;border-left:none;}
+.sp-tab:hover{color:#6D0E6A;}
+.sp-tab.active{color:#6D0E6A;border-bottom-color:#6D0E6A;}
+.sp-tab-badge{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:18px;height:18px;border-radius:50%;
+  background:#6D0E6A;color:#fff;font-size:10px;
+  font-weight:700;margin-left:6px;
+}
+/* ── TAB PANES ── */
+.sp-content{max-width:1100px;margin:0 auto;padding:32px 40px 64px;}
+.tab-pane{display:none;}
+.tab-pane.active{display:block;}
+.sp-sidebar{display:none;}/* sidebar replaced by tabs */
+.sp-main{display:none;}/* main replaced by tabs */
 
-/* ── PROFILE CARD ── */
+/* \u2500\u2500 PROFILE CARD \u2500\u2500 */
 .profile-card{
   background:#fff;border:1px solid #E2E8F0;border-radius:20px;
   padding:28px 22px;box-shadow:0 2px 16px rgba(0,0,0,.04);text-align:center;
@@ -135,7 +143,7 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
 .profile-photo{width:100%;height:100%;object-fit:cover;display:block;}
 .profile-ini{
   width:100%;height:100%;display:flex;align-items:center;justify-content:center;
-  background:linear-gradient(135deg,#6D0E6A,#6D0E6A);
+  background:linear-gradient(135deg,#2563EB,#7c3aed);
   font-size:28px;font-weight:800;color:#fff;
 }
 .profile-name{font-size:17px;font-weight:800;color:#0F172A;letter-spacing:-.02em;margin-bottom:4px;}
@@ -151,43 +159,15 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
 .pf-row{display:flex;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px solid #F1F5F9;}
 .pf-row:last-child{border-bottom:none;}
 .pf-k{font-size:11.5px;color:#94A3B8;font-weight:600;white-space:nowrap;flex-shrink:0;}
-.pf-v{
-  font-size:12.5px;color:#1E293B;font-weight:500;text-align:right;
-  overflow:hidden;white-space:nowrap;text-overflow:ellipsis;
-  min-width:0;max-width:160px;position:relative;
-}
-.pf-v .pf-scroll{
-  display:inline-block;
-  white-space:nowrap;
-}
-.pf-v:hover{overflow:hidden;}
-.pf-v:hover .pf-scroll{
-  animation:marquee-scroll 4s linear infinite;
-}
-@keyframes marquee-scroll{
-  0%  { transform:translateX(0); }
-  30% { transform:translateX(0); }
-  70% { transform:translateX(calc(-100% + 160px)); }
-  100%{ transform:translateX(calc(-100% + 160px)); }
-}
+.pf-v{font-size:12.5px;color:#1E293B;font-weight:500;text-align:right;word-break:break-all;}
 .btn-resume{
   display:block;width:100%;padding:11px;border-radius:10px;
-  background:#F7F0F7;color:#6D0E6A;border:1px solid #E8D5E7;
+  background:#EFF6FF;color:#2563EB;border:1px solid #BFDBFE;
   text-decoration:none;font-size:13.5px;font-weight:700;text-align:center;transition:all .15s;
 }
-.btn-resume:hover{background:#EDE0EC;}
-.resume-btn-group{display:flex;flex-direction:column;gap:10px;margin-top:16px;}
-.btn-rewrite{
-  display:block;width:100%;padding:11px;border-radius:10px;
-  background:linear-gradient(135deg,#570B54,#6D0E6A);color:#fff;border:none;
-  font-size:13.5px;font-weight:700;text-align:center;cursor:pointer;
-  font-family:'Inter',sans-serif;transition:all .2s;
-  box-shadow:0 3px 12px rgba(109,14,106,.25);
-}
-.btn-rewrite:hover{transform:translateY(-1px);box-shadow:0 5px 16px rgba(109,14,106,.35);}
-.btn-resume:hover{background:#F0E4EF;}
+.btn-resume:hover{background:#DBEAFE;}
 
-/* ── SECTIONS ── */
+/* \u2500\u2500 SECTIONS \u2500\u2500 */
 .sp-section{
   background:#fff;border:1px solid #E2E8F0;border-radius:20px;
   padding:28px;margin-bottom:20px;box-shadow:0 2px 16px rgba(0,0,0,.04);
@@ -197,12 +177,12 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
   margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #F1F5F9;
 }
 .sp-sec-title{font-size:17px;font-weight:800;color:#0F172A;letter-spacing:-.02em;}
-.count-chip{font-size:12px;font-weight:700;padding:3px 12px;border-radius:99px;background:#F7F0F7;color:#6D0E6A;border:1px solid #E8D5E7;}
+.count-chip{font-size:12px;font-weight:700;padding:3px 12px;border-radius:99px;background:#EFF6FF;color:#2563EB;border:1px solid #BFDBFE;}
 .empty-state{text-align:center;padding:32px 16px;color:#94A3B8;}
 .empty-icon{font-size:32px;margin-bottom:12px;}
 .empty-state p{font-size:14px;line-height:1.6;}
 
-/* ── INELIGIBLE BANNER ── */
+/* \u2500\u2500 INELIGIBLE BANNER \u2500\u2500 */
 .inelig-banner{
   background:#FFF7ED;border:1px solid #FED7AA;border-left:4px solid #F97316;
   border-radius:12px;padding:20px 22px;margin-bottom:20px;
@@ -212,15 +192,15 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
 .inelig-title{font-size:14px;font-weight:700;color:#7C2D12;margin-bottom:6px;}
 .inelig-list{list-style:none;padding:0;margin:0 0 8px;}
 .inelig-list li{font-size:13px;color:#9A3412;margin-bottom:3px;padding-left:14px;position:relative;}
-.inelig-list li::before{content:'·';position:absolute;left:2px;font-weight:700;}
+.inelig-list li::before{content:'\u00b7';position:absolute;left:2px;font-weight:700;}
 
-/* ── STATUS GROUPS ── */
+/* \u2500\u2500 STATUS GROUPS \u2500\u2500 */
 .status-group{border:1px solid #F1F5F9;border-radius:12px;overflow:hidden;margin-bottom:12px;}
 .status-group:last-child{margin-bottom:0;}
 .status-group-hdr{font-size:12px;font-weight:700;padding:8px 16px;display:flex;align-items:center;gap:8px;letter-spacing:.04em;}
 .shdr-sel{background:#D1FAE5;color:#065F46;border-bottom:1px solid #A7F3D0;}
 .shdr-int{background:#FEF3C7;color:#92400E;border-bottom:1px solid #FDE68A;}
-.shdr-reg{background:#F0E4EF;color:#41083F;border-bottom:1px solid #E8D5E7;}
+.shdr-reg{background:#DBEAFE;color:#1E40AF;border-bottom:1px solid #BFDBFE;}
 .status-group-hdr .cnt{margin-left:auto;background:rgba(0,0,0,.1);padding:1px 8px;border-radius:99px;font-size:11px;}
 .status-row{display:flex;align-items:center;gap:14px;padding:14px 16px;border-bottom:1px solid #F8FAFC;transition:background .12s;}
 .status-row:last-child{border-bottom:none;}
@@ -231,31 +211,28 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
 .status-pill{font-size:11px;font-weight:700;padding:3px 12px;border-radius:99px;white-space:nowrap;flex-shrink:0;}
 .spill-sel{background:#D1FAE5;color:#065F46;}
 .spill-int{background:#FEF3C7;color:#92400E;}
-.spill-reg{background:#F0E4EF;color:#41083F;}
+.spill-reg{background:#DBEAFE;color:#1E40AF;}
 
-/* ── AVATAR ── */
+/* \u2500\u2500 AVATAR \u2500\u2500 */
 .co-av{
-  flex-shrink:0;border-radius:10px;overflow:hidden;
-  background:#fff;border:1.5px solid #E2E8F0;
-  display:flex;align-items:center;justify-content:center;
-  position:relative;cursor:default;
-}
-.co-av img{
-  position:absolute;inset:0;width:100%;height:100%;
-  object-fit:contain;transition:opacity .25s ease;
+  flex-shrink:0;overflow:hidden;background:#fff;
+  border:1.5px solid #E2E8F0;position:relative;border-radius:10px;
 }
 .co-av-ini{
-  position:absolute;inset:0;width:100%;height:100%;
+  position:absolute;inset:0;
   display:flex;align-items:center;justify-content:center;
-  font-weight:800;color:#fff;
-  opacity:0;transition:opacity .25s ease;z-index:1;
+  font-weight:800;color:#fff;opacity:0;transition:opacity .18s;
 }
-.co-av:hover img{ opacity:0; }
-.co-av:hover .co-av-ini{ opacity:1; }
-.co-av img{width:100%;height:100%;object-fit:contain;}
+.co-av>img{
+  position:absolute;inset:0;width:100%;height:100%;
+  object-fit:contain;opacity:1;transition:opacity .18s;
+}
+.co-av:hover>.co-av-ini{opacity:1;}
+.co-av:hover>img{opacity:0;}
+.co-av.no-logo>.co-av-ini{opacity:1;}
+.co-av.no-logo>img{display:none;}
 
-
-/* ── COMPANY CARDS ── */
+/* \u2500\u2500 COMPANY CARDS \u2500\u2500 */
 .co-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;}
 .co-card{
   background:#fff;border:1.5px solid #E2E8F0;border-radius:16px;
@@ -265,10 +242,10 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
 }
 .co-card::before{
   content:'';position:absolute;top:0;left:0;right:0;height:3px;
-  background:linear-gradient(90deg,#6D0E6A,#6D0E6A);
+  background:linear-gradient(90deg,#2563EB,#7c3aed);
   transform:scaleX(0);transform-origin:left;transition:transform .22s;
 }
-.co-card:hover{border-color:#6D0E6A;box-shadow:0 8px 32px rgba(109,14,106,.14);transform:translateY(-3px);}
+.co-card:hover{border-color:#2563EB;box-shadow:0 8px 32px rgba(37,99,235,.14);transform:translateY(-3px);}
 .co-card:hover::before{transform:scaleX(1);}
 .co-card-head{display:flex;align-items:center;gap:14px;}
 .co-card-name{font-size:15px;font-weight:800;color:#0F172A;line-height:1.2;flex:1;}
@@ -285,63 +262,13 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
 }
 .btn-apply-card{
   width:100%;padding:10px;border-radius:10px;border:none;
-  background:linear-gradient(135deg,#6D0E6A,#6D0E6A);
+  background:linear-gradient(135deg,#2563EB,#7c3aed);
   color:#fff;font-size:13.5px;font-weight:700;font-family:'Inter',sans-serif;
-  cursor:pointer;box-shadow:0 2px 10px rgba(109,14,106,.25);transition:all .2s;
+  cursor:pointer;box-shadow:0 2px 10px rgba(37,99,235,.25);transition:all .2s;
 }
+.btn-apply-card:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(37,99,235,.35);}
 
-/* ── Completed drive card ── */
-.co-card-done{opacity:.92;border-style:dashed;}
-.drive-done-banner{
-  display:flex;align-items:center;gap:12px;
-  background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;
-  padding:10px 14px;margin-bottom:12px;
-}
-.drive-done-icon{font-size:22px;line-height:1;}
-.drive-done-title{font-size:13.5px;font-weight:700;color:#065F46;}
-.drive-done-sub{font-size:12px;color:#16A34A;margin-top:2px;}
-.btn-placed-card{
-  width:100%;padding:10px;border-radius:10px;border:1.5px solid #6D0E6A;
-  background:#fff;color:#6D0E6A;font-size:13.5px;font-weight:700;
-  font-family:'Inter',sans-serif;cursor:pointer;transition:all .2s;
-}
-.btn-placed-card:hover{background:#6D0E6A;color:#fff;}
-
-/* ── Sub-section header ── */
-.sp-sec-sub-head{
-  font-size:12px;font-weight:700;letter-spacing:0.06em;
-  color:#94A3B8;text-transform:uppercase;margin-bottom:12px;
-  display:flex;align-items:center;gap:8px;
-}
-.count-chip-done{background:#D1FAE5;color:#065F46;}
-
-/* ── Placed students list ── */
-.placed-list-head{
-  font-size:13px;font-weight:700;color:#64748B;
-  margin-bottom:12px;text-transform:uppercase;letter-spacing:0.05em;
-}
-.placed-list{display:flex;flex-direction:column;gap:6px;}
-.placed-row{
-  display:flex;align-items:center;gap:12px;
-  padding:10px 14px;background:#F8FAFC;
-  border:1px solid #E2E8F0;border-radius:10px;
-}
-.placed-num{
-  width:24px;height:24px;border-radius:50%;
-  background:#6D0E6A;color:#fff;
-  font-size:11px;font-weight:800;
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
-}
-.placed-name{font-size:14px;font-weight:600;color:#1E293B;}
-.badge-pill{
-  display:inline-flex;align-items:center;
-  font-size:11.5px;font-weight:600;
-  padding:3px 10px;border-radius:999px;
-  background:#F1F5F9;color:#64748B;
-}
-.btn-apply-card:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(109,14,106,.35);}
-
-/* ── COMPANY MODAL ── */
+/* \u2500\u2500 COMPANY MODAL \u2500\u2500 */
 .co-modal{
   position:fixed;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(4px);
   display:none;align-items:center;justify-content:center;padding:24px;z-index:1000;
@@ -361,8 +288,8 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
 .co-modal-name{font-size:20px;font-weight:800;color:#0F172A;letter-spacing:-.02em;margin-bottom:8px;}
 .co-modal-badges{display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
 .badge-pill{font-size:11px;font-weight:600;padding:3px 12px;border-radius:99px;background:#F1F5F9;color:#475569;}
-.badge-date{background:#F7F0F7;color:#41083F;}
-.badge-link{font-size:11.5px;color:#6D0E6A;text-decoration:none;font-weight:600;}
+.badge-date{background:#EFF6FF;color:#1E40AF;}
+.badge-link{font-size:11.5px;color:#2563EB;text-decoration:none;font-weight:600;}
 .badge-link:hover{text-decoration:underline;}
 .co-modal-close{
   margin-left:auto;flex-shrink:0;background:none;border:1.5px solid #E2E8F0;border-radius:8px;
@@ -380,38 +307,26 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
 .jd-box-title{font-size:12px;font-weight:700;color:#64748B;margin-bottom:10px;letter-spacing:.04em;}
 .jd-box-text{font-size:13.5px;color:#1E293B;line-height:1.7;}
 .co-modal-footer{
-  display:flex;align-items:center;gap:12px;
+  display:flex;align-items:center;justify-content:flex-end;gap:10px;
   padding:16px 24px;border-top:1px solid #F1F5F9;
   position:sticky;bottom:0;background:#fff;
 }
-.co-modal-footer>*{flex:1;}
-#modal-apply-slot{display:contents;}
 .btn-modal-close{
-  padding:11px 20px;border:1.5px solid #E2E8F0;border-radius:10px;
+  padding:10px 20px;border:1.5px solid #E2E8F0;border-radius:10px;
   background:none;font-size:14px;font-weight:600;color:#64748B;
   cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;
-  width:100%;
 }
-.btn-modal-close:hover{border-color:#6D0E6A;color:#6D0E6A;}
 .btn-modal-close:hover{border-color:#CBD5E1;color:#0F172A;}
-.btn-modal-dl{
-  padding:11px 20px;border:1.5px solid #6D0E6A;border-radius:10px;
-  background:#fff;color:#6D0E6A;font-size:14px;font-weight:700;font-family:'Inter',sans-serif;
-  cursor:pointer;text-decoration:none;transition:all .2s;
-  display:flex;align-items:center;justify-content:center;gap:6px;width:100%;
-}
-.btn-modal-dl:hover{background:#6D0E6A;color:#fff;}
 .btn-modal-apply{
-  padding:11px 20px;border:none;border-radius:10px;
-  background:linear-gradient(135deg,#570B54,#6D0E6A);
+  padding:10px 24px;border:none;border-radius:10px;
+  background:linear-gradient(135deg,#2563EB,#7c3aed);
   color:#fff;font-size:14px;font-weight:700;font-family:'Inter',sans-serif;
-  cursor:pointer;box-shadow:0 3px 12px rgba(109,14,106,.3);transition:all .2s;
-  width:100%;
+  cursor:pointer;box-shadow:0 3px 12px rgba(37,99,235,.3);transition:all .2s;
 }
-.btn-modal-apply:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(109,14,106,.4);}
-.no-form-txt{font-size:13px;color:#94A3B8;text-align:center;width:100%;}
+.btn-modal-apply:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(37,99,235,.4);}
+.no-form-txt{font-size:13px;color:#94A3B8;}
 
-/* ── RESPONSIVE ── */
+/* \u2500\u2500 RESPONSIVE \u2500\u2500 */
 @media(max-width:768px){
   .sp-nav{padding:0 20px;}
   .sp-nav-name{display:none;}
@@ -428,142 +343,112 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
   .login-card{padding:40px 24px 32px;}
   .sp-section{padding:20px 16px;}
 }
-/* ── Rewrite Resume Modal ── */
-.rw-modal{
-  display:none;position:fixed;inset:0;z-index:300;
-  background:rgba(26,5,25,0.55);backdrop-filter:blur(4px);
-  align-items:center;justify-content:center;padding:16px;
-}
-.rw-modal.show{display:flex;}
-.rw-modal-box{
-  background:#fff;border-radius:18px;width:100%;max-width:720px;
-  max-height:90vh;display:flex;flex-direction:column;
-  box-shadow:0 24px 64px rgba(109,14,106,.22);overflow:hidden;
-}
-.rw-modal-head{
-  display:flex;align-items:flex-start;justify-content:space-between;
-  padding:20px 24px 16px;border-bottom:1px solid #F1F5F9;flex-shrink:0;
-}
-.rw-modal-title{font-size:17px;font-weight:800;color:#1A0519;}
-.rw-modal-sub{font-size:12px;color:#94A3B8;margin-top:2px;}
-.rw-modal-body{flex:1;overflow-y:auto;padding:24px;}
-.rw-modal-footer{
-  display:flex;align-items:center;gap:12px;
-  padding:16px 24px;border-top:1px solid #F1F5F9;flex-shrink:0;
-}
-.rw-modal-footer>*{flex:1;}
-/* Loading state */
-.rw-loading{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:16px;padding:48px 24px;color:#6D0E6A;
-}
-.rw-spinner{
-  width:44px;height:44px;border:4px solid #E8D5E7;
-  border-top-color:#6D0E6A;border-radius:50%;
-  animation:spin .8s linear infinite;
-}
-@keyframes spin{to{transform:rotate(360deg);}}
-.rw-loading-txt{font-size:14px;font-weight:600;color:#570B54;}
-.rw-loading-sub{font-size:12px;color:#94A3B8;text-align:center;}
-/* Preview */
-.rw-preview{
-  font-family:'Inter',sans-serif;font-size:13px;line-height:1.65;color:#1e1e1e;
-  border:1px solid #E8D5E7;border-radius:12px;padding:28px 32px;background:#FDFBFD;
-}
-.rw-preview h1{font-size:20px;font-weight:800;color:#1A0519;margin:0 0 4px;}
-.rw-preview h2{
-  font-size:12px;font-weight:700;color:#6D0E6A;letter-spacing:.08em;
-  text-transform:uppercase;margin:20px 0 6px;
-  border-bottom:1.5px solid #E8D5E7;padding-bottom:4px;
-}
-.rw-preview h3{font-size:13px;font-weight:700;color:#1A0519;margin:10px 0 2px;}
-.rw-preview .rw-entry-date{font-size:11px;color:#888;margin:1px 0 4px;}
-.rw-preview p{margin:3px 0;}
-.rw-preview ul{margin:4px 0;padding-left:18px;}
-.rw-preview li{margin:2px 0;}
-.rw-preview .rw-contact{font-size:12px;color:#64748B;margin-bottom:8px;}
-.rw-preview .rw-divider{border:none;border-top:1px solid #E8D5E7;margin:14px 0;}
-/* Error */
-.rw-error{
-  background:#FFF5F5;border:1px solid #FED7D7;border-radius:10px;
-  padding:20px 24px;color:#C53030;font-size:13px;font-weight:600;
-}
-.btn-rw-retry{
-  padding:9px 20px;border:1.5px solid #6D0E6A;border-radius:8px;
-  background:#fff;color:#6D0E6A;font-size:12.5px;font-weight:700;
-  font-family:'Inter',sans-serif;cursor:pointer;transition:all .2s;display:inline-block;
-}
-.btn-rw-retry:hover{background:#6D0E6A;color:#fff;}
-/* Drop zone */
-.rw-drop-zone{
-  border:2.5px dashed #D3B6D2;border-radius:16px;
-  padding:52px 32px;text-align:center;cursor:pointer;
-  transition:all .2s;margin:4px 0;background:#FDFBFD;
-}
-.rw-drop-zone:hover,.rw-drag-over{
-  border-color:#6D0E6A;background:#F7F0F7;
-  transform:scale(1.01);
-}
-.rw-drop-icon{font-size:48px;margin-bottom:14px;line-height:1;}
+.btn-modal-dl{padding:10px 18px;border:1.5px solid #6D0E6A;border-radius:10px;background:#fff;color:#6D0E6A;font-size:13.5px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;flex-shrink:0;transition:all .15s;}
+.btn-modal-dl:hover{background:#F7F0F7;}
+.btn-modal-apply{flex:1;padding:10px 20px;border:none;border-radius:10px;background:linear-gradient(135deg,#570B54,#6D0E6A);color:#fff;font-size:14px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;box-shadow:0 3px 12px rgba(109,14,106,.25);transition:all .2s;}
+.btn-modal-apply:hover{transform:translateY(-2px);}
+:root{--sidebar-w:300px;}
+.sp-sidebar{width:var(--sidebar-w)!important;}
+.sp-resizer{display:none;}
+
+
+.pf-v.pf-email{overflow:hidden;text-overflow:clip;}
+.pf-v.pf-email .pf-scroll{display:inline-block;white-space:nowrap;padding-right:20px;}
+.pf-v.pf-email .pf-scroll.is-scrolling{animation:marquee-scroll 7s linear infinite;}
+@keyframes marquee-scroll{0%,15%{transform:translateX(0);}85%,100%{transform:translateX(var(--md,0px));}}
+.rw-modal-overlay{position:fixed;inset:0;background:rgba(26,5,25,.55);z-index:9999;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;}
+.rw-modal-overlay.show{opacity:1;pointer-events:all;}
+.rw-modal-box{background:#fff;border-radius:20px;width:90%;max-width:620px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 64px rgba(26,5,25,.28);transform:translateY(20px);transition:transform .25s;}
+.rw-modal-overlay.show .rw-modal-box{transform:translateY(0);}
+.rw-modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 20px 14px;border-bottom:1.5px solid #F1E8F1;flex-shrink:0;}
+.rw-modal-title{font-size:16px;font-weight:800;color:#1A0519;}
+.rw-modal-sub{font-size:11.5px;color:#94A3B8;margin-top:2px;}
+.rw-modal-close{width:30px;height:30px;border-radius:50%;border:none;background:#F7F0F7;color:#6D0E6A;font-size:16px;cursor:pointer;}
+.rw-modal-foot{padding:14px 20px;border-top:1.5px solid #F1E8F1;display:flex;gap:10px;flex-shrink:0;}
+.btn-rw-dl{flex:1;padding:11px;border:none;border-radius:10px;background:linear-gradient(135deg,#570B54,#6D0E6A);color:#fff;font-size:14px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;}
+.btn-rw-close-foot{padding:11px 20px;border:1.5px solid #D3B6D2;border-radius:10px;background:#fff;color:#6D0E6A;font-size:14px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;}
+.rw-loading{text-align:center;padding:32px 16px;}
+.rw-spinner{width:44px;height:44px;border:4px solid #E8D5E7;border-top-color:#6D0E6A;border-radius:50%;animation:rwspin .8s linear infinite;margin:0 auto 16px;}
+@keyframes rwspin{to{transform:rotate(360deg);}}
+.rw-loading-txt{font-size:15px;font-weight:700;color:#6D0E6A;margin-bottom:6px;}
+.rw-loading-sub{font-size:12px;color:#94A3B8;line-height:1.6;}
+.rw-error{background:#FEF2F2;border:1.5px solid #FECACA;border-radius:12px;padding:14px 16px;color:#DC2626;font-size:13px;font-weight:600;margin-bottom:12px;}
+.rw-drop-zone{border:2.5px dashed #D3B6D2;border-radius:16px;padding:44px 32px;text-align:center;cursor:pointer;transition:all .2s;background:#FDFBFD;display:block;}
+.rw-drop-zone:hover,.rw-drag-over{border-color:#6D0E6A;background:#F7F0F7;}
+.rw-drop-icon{font-size:48px;margin-bottom:14px;}
 .rw-drop-title{font-size:17px;font-weight:800;color:#1A0519;margin-bottom:6px;}
 .rw-drop-hint{font-size:13px;color:#6D0E6A;font-weight:600;margin-bottom:14px;}
-.rw-drop-note{
-  font-size:12px;color:#94A3B8;line-height:1.6;
-  max-width:340px;margin:0 auto;
-  background:#F1F5F9;border-radius:8px;padding:10px 14px;
-}
-.rw-retry-wrap{text-align:center;margin-top:16px;}
+.rw-drop-note{font-size:12px;color:#94A3B8;max-width:340px;margin:0 auto;background:#F1F5F9;border-radius:8px;padding:10px 14px;}
+.rw-preview .rw-name{font-size:24px;font-weight:800;text-align:center;margin-bottom:4px;}
+.rw-preview .rw-contact-line{font-size:11.5px;text-align:center;color:#64748B;margin-bottom:8px;}
+.rw-preview .rw-header-rule{border:none;border-top:2px solid #E2E8F0;margin:8px 0 12px;}
+.rw-preview .rw-section{font-size:12px;font-weight:800;letter-spacing:.06em;color:#111;border-bottom:2px solid #111;padding-bottom:2px;margin:14px 0 6px;}
+.rw-preview .rw-rule{border:none;border-top:1px solid #E2E8F0;margin:8px 0;}
+.rw-preview .rw-about{font-size:12px;color:#444;margin-bottom:4px;}
+.rw-preview .rw-list{margin:0;padding-left:18px;}
+.rw-preview .rw-list li{margin-bottom:3px;font-size:12px;}
+.rw-preview .rw-skills{display:grid;grid-template-columns:repeat(3,1fr);gap:3px 8px;}
+.rw-preview .rw-skill-item{font-size:12px;}
+.rw-preview .rw-edu-inst{font-size:12px;color:#555;margin:8px 0 1px;}
+.rw-preview .rw-entry-role{font-size:13px;font-weight:700;color:#111;margin:2px 0 1px;}
+.rw-preview .rw-edu-grade{font-size:11.5px;color:#6D0E6A;font-weight:600;margin:1px 0 2px;}
+.rw-preview .rw-edu-gap{height:8px;}
+.congrats-banner{margin-bottom:16px;position:relative;border-radius:14px;overflow:hidden;}
+.congrats-inner{display:flex;align-items:flex-start;gap:14px;background:linear-gradient(135deg,#FFF7ED,#FEF3C7);border:1.5px solid #FDE68A;border-left:5px solid #F59E0B;border-radius:14px;padding:18px 20px;position:relative;z-index:1;}
+.congrats-icon{font-size:32px;line-height:1;flex-shrink:0;}
+.congrats-title{font-size:15px;font-weight:800;color:#92400E;margin-bottom:3px;}
+.congrats-sub{font-size:13px;color:#78350F;line-height:1.5;}
+.congrats-close{position:absolute;top:10px;right:12px;background:none;border:none;color:#92400E;font-size:16px;cursor:pointer;opacity:.6;z-index:2;}
+.congrats-close:hover{opacity:1;}
+.confetti-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:3;}
+.resume-btn-group{display:flex;flex-direction:column;gap:10px;width:100%;margin-top:4px;}
+.btn-resume{display:block;width:100%;padding:11px;border-radius:10px;background:#F7F0F7;color:#6D0E6A;border:1.5px solid #D3B6D2;text-decoration:none;text-align:center;font-size:13px;font-weight:700;font-family:'Inter',sans-serif;transition:all .15s;}
+.btn-resume:hover{background:#EDE0EC;}
+.btn-rewrite{display:block;width:100%;padding:11px;border-radius:10px;border:none;background:linear-gradient(135deg,#570B54,#6D0E6A);color:#fff;font-size:13px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;transition:all .2s;}
+.btn-rewrite:hover{opacity:.9;transform:translateY(-1px);}
 
-/* Download btn */
-.btn-rw-dl{
-  padding:11px 20px;border:none;border-radius:10px;
-  background:linear-gradient(135deg,#570B54,#6D0E6A);
-  color:#fff;font-size:14px;font-weight:700;font-family:'Inter',sans-serif;
-  cursor:pointer;box-shadow:0 3px 12px rgba(109,14,106,.3);transition:all .2s;
-  width:100%;
-}
-.btn-rw-dl:hover{transform:translateY(-1px);box-shadow:0 5px 16px rgba(109,14,106,.4);}
+/* ── Status badge on company cards ── */
+.status-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;
+  border-radius:999px;font-size:11.5px;font-weight:700;margin-bottom:10px;}
+.status-completed{background:#D1FAE5;color:#065F46;}
+.status-ongoing{background:#EFF6FF;color:#1D4ED8;}
+.status-registrations{background:#FEF9C3;color:#854D0E;}
+.status-default{background:#F1F5F9;color:#475569;}
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script>window['pdfjs-dist/build/pdf'].GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
 </head>
 <body>
 
-<!-- ── LOADING OVERLAY ── -->
+<!-- \u2500\u2500 LOADING OVERLAY \u2500\u2500 -->
 <div id="loading-overlay" class="sp-loading">
   <div class="sp-spinner"></div>
-  <div id="loading-msg" class="sp-loading-msg">Loading…</div>
+  <div id="loading-msg" class="sp-loading-msg">Loading\u2026</div>
   <div id="loading-detail" class="sp-loading-detail"></div>
 </div>
 
-<!-- ── LOGIN PAGE ── -->
+<!-- \u2500\u2500 LOGIN PAGE \u2500\u2500 -->
 <div id="login-page" class="login-page">
   <div class="login-card">
-    <a href="index.html" class="login-back">← Home</a>
-    <div class="login-logo"><img src="logo.jpg" alt="VG" style="width:100%;height:100%;object-fit:contain;border-radius:18px;display:block;"/></div>
+    <a href="index.html" class="login-back">&larr; Home</a>
+    <div class="login-logo"><img src="logo.jpg" alt="V" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"/><span style="display:none;width:100%;height:100%;align-items:center;justify-content:center;font-size:28px;font-weight:800;color:#fff;">V</span></div>
     <h1 class="login-heading">Student Portal</h1>
-    <p class="login-sub">Vidyavahini First Grade Degree College<br>Placement Cell 2025–26</p>
+    <p class="login-sub">Vidyavahini First Grade Degree College<br>Placement Cell 2025&ndash;26</p>
     <label class="form-lbl" for="email-inp">REGISTERED EMAIL ADDRESS</label>
     <input id="email-inp" class="form-inp" type="email" placeholder="yourname@college.edu" autocomplete="email" autocapitalize="off"/>
     <div id="email-err" class="form-err"></div>
-    <button id="login-btn" class="btn-login" type="button">Login to Portal →</button>
+    <button id="login-btn" class="btn-login" type="button">Login to Portal &rarr;</button>
   </div>
 </div>
 
-<!-- ── PORTAL (hidden until login) ── -->
-<div id="portal-page" style="display:none;padding-top:62px;">
+<!-- \u2500\u2500 PORTAL (hidden until login) \u2500\u2500 -->
+<div id="portal-page" style="display:none;">
 
   <!-- Nav -->
   <nav class="sp-nav">
     <a href="index.html" class="sp-nav-brand">
-      <div class="sp-nav-logo"><img src="logo.jpg" alt="VG" style="width:100%;height:100%;object-fit:contain;border-radius:9px;display:block;"/></div>
+      <div class="sp-nav-logo">V</div>
       <span class="sp-nav-title">Placement Portal</span>
     </a>
     <div class="sp-nav-right">
-      <a href="index.html" class="btn-nav-home" title="Home">←</a>
       <span class="sp-nav-name" id="nav-name"></span>
       <button class="btn-logout" id="logout-btn">Logout</button>
     </div>
@@ -576,6 +461,7 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
     </aside>
     <div class="sp-resizer" id="sp-resizer"></div>
     <main class="sp-main">
+      <div id="congrats-banner" style="display:none;"></div>
       <div id="inelig-wrap"></div>
       <div id="status-wrap"></div>
       <div id="avail-wrap"></div>
@@ -583,21 +469,21 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
   </div>
 </div>
 
-<!-- ── COMPANY MODAL ── -->
+<!-- \u2500\u2500 COMPANY MODAL \u2500\u2500 -->
 <div id="co-modal" class="co-modal">
   <div class="co-modal-box">
     <div id="co-modal-inner"></div>
     <div class="co-modal-footer">
       <button class="btn-modal-close" id="modal-close-btn">Close</button>
-      <span id="modal-apply-slot"></span>
+      <div id="modal-apply-slot" style="display:contents;"></div>
     </div>
   </div>
 </div>
 
 <script>
-/* ══════════════════════════════════════════════════════
+/* \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
    SHARED UTILITIES
-══════════════════════════════════════════════════════ */
+\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 */
 const CONFIG_SHEET_ID   = '1Mb9jrzZMSta5NYs28i3STS2tYNqhMtabj3wktvHiYmw';
 const CONFIG_TAB_NAME   = 'CONFIG_TAB';
 const ADMIN_TAB_NAME    = 'ADMIN_MODE';
@@ -605,7 +491,7 @@ const STUDENT_TAB_NAME  = 'STUDENT_MASTER';
 
 function xe(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function ini(n){ return (n||'?').split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]||'').join('').toUpperCase()||'?'; }
-function fmtD(d){ if(!d)return'—'; try{return new Date(d).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});}catch{return d;} }
+function fmtD(d){ if(!d)return'\u2014'; try{return new Date(d).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});}catch{return d;} }
 function extractSid(raw){
   if(!raw)return'';
   raw=String(raw).trim();
@@ -616,16 +502,12 @@ function extractSid(raw){
   return'';
 }
 function drivePhoto(url){
-  if(!url) return '';
-  // Extract file ID from any Google Drive URL format
-  const m = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-  if(m) return `https://drive.google.com/thumbnail?id=${m[1]}&sz=w400`;
-  const m2 = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-  if(m2) return `https://drive.google.com/thumbnail?id=${m2[1]}&sz=w400`;
-  // Already a direct URL or thumbnail URL — return as-is
+  if(!url)return'';
+  const m=url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/); if(m)return`https://drive.google.com/uc?export=view&id=${m[1]}`;
+  const m2=url.match(/[?&]id=([a-zA-Z0-9_-]+)/); if(m2)return`https://drive.google.com/uc?export=view&id=${m2[1]}`;
   return url;
 }
-const GRADS=[['#41083F','#6D0E6A'],['#0369a1','#0e7490'],['#065f46','#0891b2'],['#7c2d12','#b45309'],['#6b21a8','#db2777'],['#991b1b','#ea580c'],['#0f4c3a','#065f46'],['#3730a3','#41083F']];
+const GRADS=[['#1e40af','#7c3aed'],['#0369a1','#0e7490'],['#065f46','#0891b2'],['#7c2d12','#b45309'],['#6b21a8','#db2777'],['#991b1b','#ea580c'],['#0f4c3a','#065f46'],['#3730a3','#1e40af']];
 function grad(i){const p=GRADS[i%GRADS.length];return`linear-gradient(135deg,${p[0]},${p[1]})`;}
 const LOGO_HINTS={'tcs':'tcs.com','infosys':'infosys.com','wipro':'wipro.com','accenture':'accenture.com','cognizant':'cognizant.com','first source':'firstsource.com','firstsource':'firstsource.com','fyers':'fyers.in','rupeek':'rupeek.com','codeyoung':'codeyoung.com','interns elite':'internselite.com','genz':'genzeducatewing.com','cloud unicorn':'cloudunicorn.in','idea infinity':'ideainfinity.in'};
 function logoDomain(name,web){
@@ -635,14 +517,15 @@ function logoDomain(name,web){
   return n.replace(/[^a-z0-9]/g,'')+'.com';
 }
 function logoHtml(name,web,idx,sz){
-  const size=sz||48; const d=logoDomain(name,web);
+  const size=sz||48;const d=logoDomain(name,web);
   const cb=`https://logo.clearbit.com/${d}?size=${size*2}`;
   const gf=`https://www.google.com/s2/favicons?domain=${d}&sz=128`;
-  const g=grad(idx||0); const pad=size>56?8:6; const fsz=Math.round(size*.32);
-  return `<div class="co-av" style="width:${size}px;height:${size}px;border-radius:${Math.round(size*.21)}px;">
-    <img src="${cb}" style="object-fit:contain;padding:${pad}px;" onerror="this.style.opacity='0';this.nextElementSibling.style.opacity='1';"/>
-    <img src="${gf}" style="object-fit:contain;padding:${pad+2}px;opacity:0;" onerror="this.style.opacity='0';this.nextElementSibling.style.opacity='1';this.nextElementSibling.style.zIndex='2';"/>
+  const g=grad(idx||0);const pad=size>56?8:6;const fsz=Math.round(size*.32);
+  const br=Math.round(size*.21);
+  return `<div class="co-av" style="width:${size}px;height:${size}px;border-radius:${br}px;">
     <div class="co-av-ini" style="background:${g};font-size:${fsz}px;">${ini(name)}</div>
+    <img src="${cb}" style="padding:${pad}px;"
+      onerror="if(this.dataset.fb){this.style.display='none';this.parentElement.classList.add('no-logo');}else{this.dataset.fb='1';this.src='${gf}';this.style.padding='${pad+2}px';}"/>
   </div>`;
 }
 
@@ -673,33 +556,35 @@ function parseCSV(csv){
     const ch=csv[i];
     if(ch==='"'){if(inQ&&csv[i+1]==='"'){cur+='"';i++;}else inQ=!inQ;}
     else if(ch===','&&!inQ){row.push(cur.trim());cur='';}
-    else if((ch==='\n'||ch==='\r')&&!inQ){if(ch==='\r'&&csv[i+1]==='\n')i++;row.push(cur.trim());rows.push(row);row=[];cur='';}
+    else if((ch==='\
+'||ch==='\r')&&!inQ){if(ch==='\r'&&csv[i+1]==='\
+')i++;row.push(cur.trim());rows.push(row);row=[];cur='';}
     else cur+=ch;
   }
   if(cur||row.length){row.push(cur.trim());rows.push(row);}
   return rows.filter(r=>r.some(c=>c));
 }
 
-/* ══════════════════════════════════════════════════════
+/* \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
    STATE
-══════════════════════════════════════════════════════ */
+\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 */
 let ST     = null;   // student object
 let COMPS  = [];     // company configs
 let STATUS = {};     // {compId: {reg,int,sel}}
 
-/* ══════════════════════════════════════════════════════
+/* \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
    LOADING UI
-══════════════════════════════════════════════════════ */
+\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 */
 function showLoad(msg, detail){
-  document.getElementById('loading-msg').textContent = msg||'Loading…';
+  document.getElementById('loading-msg').textContent = msg||'Loading\u2026';
   document.getElementById('loading-detail').textContent = detail||'';
   document.getElementById('loading-overlay').classList.add('show');
 }
 function hideLoad(){ document.getElementById('loading-overlay').classList.remove('show'); }
 
-/* ══════════════════════════════════════════════════════
+/* \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
    BOOT
-══════════════════════════════════════════════════════ */
+\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 */
 window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('login-btn').addEventListener('click', handleLogin);
   document.getElementById('email-inp').addEventListener('keydown', e=>{ if(e.key==='Enter') handleLogin(); });
@@ -710,9 +595,9 @@ window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('email-inp').focus();
 });
 
-/* ══════════════════════════════════════════════════════
+/* \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
    LOGIN
-══════════════════════════════════════════════════════ */
+\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 */
 function handleLogin(){
   const email = (document.getElementById('email-inp').value||'').trim();
   const errEl = document.getElementById('email-err');
@@ -720,12 +605,12 @@ function handleLogin(){
   if(!email){ errEl.textContent='Please enter your email address.'; return; }
   if(!email.includes('@')){ errEl.textContent='Please enter a valid email.'; return; }
   const btn = document.getElementById('login-btn');
-  btn.disabled = true; btn.textContent = 'Verifying…';
-  doLogin(email).finally(()=>{ btn.disabled=false; btn.textContent='Login to Portal →'; });
+  btn.disabled = true; btn.textContent = 'Verifying\u2026';
+  doLogin(email).finally(()=>{ btn.disabled=false; btn.textContent='Login to Portal &rarr;'; });
 }
 
 async function doLogin(email){
-  showLoad('Verifying student ID…', 'Fetching student master data');
+  showLoad('Verifying student ID\u2026', 'Fetching student master data');
   try{
     const j = await apiFetch(CONFIG_SHEET_ID, STUDENT_TAB_NAME, 'json');
     const rows = jsonToRows(j);
@@ -748,9 +633,9 @@ async function doLogin(email){
       resume:    row[11]||'',
     };
 
-    showLoad('Loading company data…','Fetching placement configuration');
+    showLoad('Loading company data\u2026','Fetching placement configuration');
     await loadCompanyData();
-    showLoad('Checking your applications…',`Checking ${COMPS.length} companies`);
+    showLoad('Checking your applications\u2026',`Checking ${COMPS.length} companies`);
     await loadStatus();
     hideLoad();
     renderPortal();
@@ -761,9 +646,9 @@ async function doLogin(email){
   }
 }
 
-/* ══════════════════════════════════════════════════════
+/* \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
    LOAD COMPANY DATA
-══════════════════════════════════════════════════════ */
+\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 */
 async function loadCompanyData(){
   const [configJ, adminCsv] = await Promise.all([
     apiFetch(CONFIG_SHEET_ID, CONFIG_TAB_NAME, 'json'),
@@ -796,7 +681,7 @@ async function loadCompanyData(){
       id:idx+1,name,sheetId:sid,tabReg,tabInt,tabSel,
       regFormUrl:v(iForm)||'',
       website:'',interviewMode:'',registrationDate:'',driveDate:'',
-      roles:[],salary:'',location:'',notes:'',eligSummary:'',jdUrl:'',
+      roles:[],salary:'',location:'',notes:'',eligSummary:'',jdUrl:'',adminStatus:'',
     });
   });
 
@@ -810,27 +695,38 @@ async function loadCompanyData(){
       const iRo=col('role'),iN=col('note'),iSal=col('salary','package','ctc','stipend');
       const iLoc=col('location','loc'),iEl=col('elig');
       const _jd=col('jd'),_lk=col('link'); const iJd=_jd!==-1?_jd:_lk;
+      // Actual ADMIN_MODE columns (0-indexed):
+      // 0:Company 1:Website 2:Interview Mode 3:Reg Date 4:Drive Date
+      // 5:POC Name 6:POC Desig 7:POC Email 8:POC Phone 9:Role 10:JD 11:Status
+      const iC2  = iC  !==-1 ? iC   : 0;
+      const iW2  = iW  !==-1 ? iW   : 1;
+      const iMo2 = iMo !==-1 ? iMo  : 2;
+      const iRD2 = iRD !==-1 ? iRD  : 3;
+      const iDD2 = iDD !==-1 ? iDD  : 4;
+      const iRo2 = iRo !==-1 ? iRo  : 9;
+      const iJd2 = col('jd') !==-1 ? col('jd') : 10;  // col 10 = JD link
+      const iSt2 = col('status') !==-1 ? col('status') : 11; // col 11 = Status
+      const norm=s=>(s||'').toLowerCase().replace(/[\s'\u2018\u2019\u201C\u201D\-]/g,'');
       rows.slice(1).forEach(r=>{
-        const nm=(r[iC]||'').trim(); if(!nm)return;
-        const c=COMPS.find(x=>x.name.toLowerCase()===nm.toLowerCase()); if(!c)return;
-        if(iW!==-1)c.website=r[iW]||'';
-        if(iMo!==-1)c.interviewMode=r[iMo]||'';
-        if(iDD!==-1)c.driveDate=r[iDD]||'';
-        if(iRD!==-1)c.registrationDate=r[iRD]||'';
-        if(iRo!==-1)c.roles=(r[iRo]||'').split(',').map(s=>s.trim()).filter(Boolean);
-        if(iN!==-1)c.notes=r[iN]||'';
-        if(iSal!==-1)c.salary=r[iSal]||'';
-        if(iLoc!==-1)c.location=r[iLoc]||'';
-        if(iEl!==-1)c.eligSummary=r[iEl]||'';
-        if(iJd!==-1)c.jdUrl=(r[iJd]||'').trim();
+        const nm=(r[iC2]||'').trim(); if(!nm)return;
+        const c=COMPS.find(x=>norm(x.name)===norm(nm));
+        if(!c){console.warn('[Portal] ADMIN no match:',JSON.stringify(nm));return;}
+        c.website       = (r[iW2] ||'').trim() || c.website;
+        c.interviewMode = (r[iMo2]||'').trim() || c.interviewMode;
+        c.driveDate     = (r[iDD2]||'').trim() || c.driveDate;
+        c.registrationDate = (r[iRD2]||'').trim() || c.registrationDate;
+        const roles=(r[iRo2]||'').split(',').map(s=>s.trim()).filter(Boolean);
+        if(roles.length) c.roles = roles;
+        c.jdUrl       = (r[iJd2]||'').trim() || c.jdUrl;
+        c.adminStatus = (r[iSt2]||'').trim() || c.adminStatus;
       });
     }
   }
 }
 
-/* ══════════════════════════════════════════════════════
+/* \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
    CHECK STATUS IN ALL COMPANIES
-══════════════════════════════════════════════════════ */
+\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 */
 async function loadStatus(){
   const em = ST.email.toLowerCase();
   STATUS = {};
@@ -844,53 +740,47 @@ async function loadStatus(){
     };
     const [rr,ir,sr]=await Promise.all([fetchTab(c.tabReg),fetchTab(c.tabInt),fetchTab(c.tabSel)]);
     const has=rows=>rows.some(r=>(r[2]||'').toLowerCase().trim()===em);
-
-    // Detect name column by header label, fall back to col index 1
-    const nameIdx = (rows)=>{
-      if(!rows.length) return 1;
-      // Check if first row looks like a header (non-numeric values)
-      const hdr = rows[0];
-      const idx = hdr.findIndex(h=>(h||'').toLowerCase().includes('name'));
-      return idx !== -1 ? idx : 1;
-    };
-    const ni = nameIdx(sr);
-
-    // Extract placed student names (skip header row if col contains "name")
-    const isHeaderRow = r => (r[ni]||'').toLowerCase().includes('name') || (r[2]||'').toLowerCase().includes('email');
-    const selData = sr.filter(r => !isHeaderRow(r) && (r[ni]||'').trim());
-    const placedNames = selData.map(r=>(r[ni]||'').trim()).filter(Boolean);
-
-    STATUS[c.id]={
-      reg:    has(rr),
-      int:    has(ir),
-      sel:    has(sr),
-      driveComplete: placedNames.length > 0,   // drive is done if anyone was selected
-      placedNames,                              // full list of placed student names
-    };
+    const selData=sr.length>1&&(sr[0][2]||'').toLowerCase().includes('email')?sr.slice(1):sr;
+    const placedNames=selData.filter(r=>r.some(v=>v)).map(r=>(r[2]||r[1]||r[3]||'').trim()).filter(Boolean);
+    STATUS[c.id]={reg:has(rr),int:has(ir),sel:has(sr),driveComplete:placedNames.length>0,placedNames};
   }));
 }
 
-/* ══════════════════════════════════════════════════════
+/* \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
    ELIGIBILITY
-══════════════════════════════════════════════════════ */
+\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 */
 function isEligible(s){
   return s.tenth>=60 && s.twelfth>=60 && (s.backlogs||'').toLowerCase()==='no';
 }
 
-/* ══════════════════════════════════════════════════════
+/* \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
    RENDER PORTAL
-══════════════════════════════════════════════════════ */
+\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 */
 function renderPortal(){
-  document.getElementById('login-page').style.display  = 'none';
-  document.getElementById('portal-page').style.display = 'block';
-  document.getElementById('nav-name').textContent = ST.name;
+  document.getElementById('login-page').style.display='none';
+  document.getElementById('portal-page').style.display='block';
+  document.getElementById('nav-name').textContent=ST.name;
 
-  const elig = isEligible(ST);
+  const isPlaced=Object.values(STATUS).some(s=>s&&s.sel);
+  if(isPlaced){
+    const companies=COMPS.filter(c=>STATUS[c.id]?.sel).map(c=>c.name);
+    const banner=document.getElementById('congrats-banner');
+    if(banner){
+      banner.innerHTML=`<div class="congrats-inner"><span class="congrats-icon">&#127881;</span><div style="flex:1;min-width:0;"><div class="congrats-title">Congratulations, ${xe(ST.name.split(' ')[0])}!</div><div class="congrats-sub">You have been selected by <strong>${xe(companies.join(', '))}</strong>. Wishing you a great career ahead!</div></div><button class="congrats-close" onclick="this.closest('.congrats-banner').style.display='none'">&#x2715;</button></div>`;
+      banner.style.display='block';
+      const cvs=document.createElement('canvas');cvs.className='confetti-canvas';
+      banner.insertBefore(cvs,banner.firstChild);
+      setTimeout(()=>launchConfetti(cvs),100);
+    }
+  }
+
+  const elig=isEligible(ST);
   renderProfile(elig);
   renderInelig(elig);
   renderStatus();
-  if(elig) renderAvailable();
+  if(elig)renderAvailable();
   else document.getElementById('avail-wrap').innerHTML='';
+  setTimeout(autoSizeForEmail,350);
 }
 
 /* Profile */
@@ -900,29 +790,29 @@ function renderProfile(elig){
     ?`<img class="profile-photo" src="${xe(s.photoUrl)}" alt="${xe(s.name)}" onerror="this.style.display='none';document.getElementById('ph-ini').style.display='flex';"/><div id="ph-ini" class="profile-ini" style="display:none">${ini(s.name)}</div>`
     :`<div id="ph-ini" class="profile-ini">${ini(s.name)}</div>`;
 
-  const pfRow=(k,v)=>`<div class="pf-row"><span class="pf-k">${k}</span><span class="pf-v"><span class="pf-scroll">${xe(v||'—')}</span></span></div>`;
+  const pfRow=(k,v,isEmail)=>{
+  if(isEmail)return`<div class="pf-row"><span class="pf-k">${k}</span><span class="pf-v pf-email" id="email-pf-v"><span class="pf-scroll" id="email-pf-scroll">${xe(v||'\u2014')}</span></span></div>`;
+  return`<div class="pf-row"><span class="pf-k">${k}</span><span class="pf-v">${xe(v||'\u2014')}</span></div>`;
+};
 
   document.getElementById('profile-wrap').innerHTML=`
     <div class="profile-card">
       <div class="profile-photo-wrap">${photoHtml}</div>
       <div class="profile-name">${xe(s.name)}</div>
       <div class="profile-sub">${xe(s.course)}</div>
-      <div class="profile-sub2">Sem ${xe(s.semester)} · Sec ${xe(s.section)}</div>
-      <span class="elig-badge ${elig?'elig-yes':'elig-no'}">${elig?'✓ Eligible':'✗ Not Eligible'}</span>
+      <div class="profile-sub2">Sem ${xe(s.semester)} \u00b7 Sec ${xe(s.section)}</div>
+      <span class="elig-badge ${elig?'elig-yes':'elig-no'}">${elig?'\u2713 Eligible':'\u2717 Not Eligible'}</span>
       <div class="profile-fields">
-        ${pfRow('📧 Email',s.email)}
-        ${pfRow('📱 Phone',s.phone)}
-        ${pfRow('📚 Course',s.course)}
-        ${pfRow('📅 Semester',s.semester)}
-        ${pfRow('🏛️ Section',s.section)}
-        ${pfRow('📊 10th %',s.tenth+'%')}
-        ${pfRow('📊 12th %',s.twelfth+'%')}
-        ${pfRow('⚠️ Backlogs',s.backlogs)}
+        ${pfRow('\ud83d\udce7 Email',s.email,true)}
+        ${pfRow('\ud83d\udcf1 Phone',s.phone)}
+        ${pfRow('\ud83d\udcda Course',s.course)}
+        ${pfRow('\ud83d\udcc5 Semester',s.semester)}
+        ${pfRow('\ud83c\udfdb\ufe0f Section',s.section)}
+        ${pfRow('\ud83d\udcca 10th %',s.tenth+'%')}
+        ${pfRow('\ud83d\udcca 12th %',s.twelfth+'%')}
+        ${pfRow('\u26a0\ufe0f Backlogs',s.backlogs)}
       </div>
-      ${s.resume?`<div class="resume-btn-group">
-        <a href="${xe(s.resume)}" target="_blank" rel="noopener" class="btn-resume">📄 View Resume ↗</a>
-        <button class="btn-rewrite" onclick="openRewriteModal()">📋 Format for Placement</button>
-      </div>`:''}
+      ${s.resume?`<div class="resume-btn-group"><a href="${xe(s.resume)}" target="_blank" rel="noopener" class="btn-resume">&#128196; View Resume &#x2197;</a><button class="btn-rewrite" onclick="openRewriteModal()">&#128203; Format for Placement</button></div>`:''}
     </div>`;
 }
 
@@ -936,7 +826,7 @@ function renderInelig(elig){
   if((s.backlogs||'').toLowerCase()!=='no')reasons.push('Active backlogs are present in your academic record');
   document.getElementById('inelig-wrap').innerHTML=`
     <div class="inelig-banner">
-      <div class="inelig-icon">⚠️</div>
+      <div class="inelig-icon">\u26a0\ufe0f</div>
       <div>
         <div class="inelig-title">Not Eligible for Campus Placements</div>
         <ul class="inelig-list">${reasons.map(r=>`<li>${xe(r)}</li>`).join('')}</ul>
@@ -961,7 +851,7 @@ function renderStatus(){
         ${logoHtml(c.name,c.website,c.id-1,40)}
         <div class="status-info">
           <div class="status-co-name">${xe(c.name)}</div>
-          <div class="status-detail">${c.roles.length?xe(c.roles.slice(0,2).join(', ')+(c.roles.length>2?' +more':'')):''}${c.driveDate?` · Drive: ${fmtD(c.driveDate)}`:''}</div>
+          <div class="status-detail">${c.roles.length?xe(c.roles.slice(0,2).join(', ')+(c.roles.length>2?' +more':'')):''}${c.driveDate?` \u00b7 Drive: ${fmtD(c.driveDate)}`:''}</div>
         </div>
         <span class="status-pill ${pillCls}">${title}</span>
       </div>`).join('')}
@@ -969,13 +859,13 @@ function renderStatus(){
   };
 
   const content=total
-    ?`<div>${makeGroup('🎉','Selected',sel,'shdr-sel','spill-sel')}${makeGroup('⭐','Shortlisted',intv,'shdr-int','spill-int')}${makeGroup('📋','Registered',reg,'shdr-reg','spill-reg')}</div>`
-    :`<div class="empty-state"><div class="empty-icon">📭</div><p>No applications yet.<br>Browse available companies below to apply.</p></div>`;
+    ?`<div>${makeGroup('\ud83c\udf89','Selected',sel,'shdr-sel','spill-sel')}${makeGroup('\u2b50','Shortlisted',intv,'shdr-int','spill-int')}${makeGroup('\ud83d\udccb','Registered',reg,'shdr-reg','spill-reg')}</div>`
+    :`<div class="empty-state"><div class="empty-icon">\ud83d\udced</div><p>No applications yet.<br>Browse available companies below to apply.</p></div>`;
 
   document.getElementById('status-wrap').innerHTML=`
     <div class="sp-section">
       <div class="sp-sec-head">
-        <span class="sp-sec-title">📊 Your Placement Status</span>
+        <span class="sp-sec-title">\ud83d\udcca Your Placement Status</span>
         ${total?`<span class="count-chip">${total} compan${total!==1?'ies':'y'}</span>`:''}
       </div>
       ${content}
@@ -983,69 +873,71 @@ function renderStatus(){
 }
 
 /* Available companies */
+
+function statusBadge(s){
+  if(!s)return'';
+  const lc=s.toLowerCase();
+  let cls='status-default',icon='&#9679;';
+  if(lc==='completed'){cls='status-completed';icon='&#10003;';}
+  else if(lc.includes('ongoing')){cls='status-ongoing';icon='&#9654;';}
+  else if(lc.includes('registration')){cls='status-registrations';icon='&#128221;';}
+  return`<div class="status-badge ${cls}">${icon} ${xe(s)}</div>`;
+}
 function renderAvailable(){
   const applied=new Set(COMPS.filter(c=>{const s=STATUS[c.id];return s&&(s.reg||s.int||s.sel);}).map(c=>c.id));
   const avail=COMPS.filter(c=>!applied.has(c.id));
+  const open=avail.filter(c=>!STATUS[c.id]?.driveComplete && c.adminStatus.toLowerCase()!=='completed');
+  const done=avail.filter(c=>STATUS[c.id]?.driveComplete || c.adminStatus.toLowerCase()==='completed');
 
-  if(!avail.length){
+  if(!open.length&&!done.length){
     document.getElementById('avail-wrap').innerHTML=`
       <div class="sp-section">
-        <div class="sp-sec-head"><span class="sp-sec-title">🏢 Available Companies</span></div>
-        <div class="empty-state"><div class="empty-icon">🎊</div><p>You have applied to all available companies!</p></div>
+        <div class="sp-sec-head"><span class="sp-sec-title">\ud83c\udfe2 Available Companies</span></div>
+        <div class="empty-state"><div class="empty-icon">\ud83c\udf8a</div><p>You have applied to all available companies!</p></div>
       </div>`;
     return;
   }
 
-  // Split into open drives and completed drives
-  const open      = avail.filter(c => !STATUS[c.id]?.driveComplete);
-  const completed = avail.filter(c =>  STATUS[c.id]?.driveComplete);
-
-  const openCards = open.map(c => {
+  const openCards=open.map(c=>{
     const chips=[
-      c.roles.length    ?mkChip('💼',c.roles.join(', ')):null,
-      c.salary          ?mkChip('💰',c.salary):null,
-      c.location        ?mkChip('📍',c.location):null,
-      c.driveDate       ?mkChip('📅',fmtD(c.driveDate)):null,
-      c.interviewMode   ?mkChip('🖥️',c.interviewMode):null,
+      c.roles.length  ?mkChip('\ud83d\udcbc',c.roles.join(', ')):null,
+      c.salary        ?mkChip('\ud83d\udcb0',c.salary):null,
+      c.location      ?mkChip('\ud83d\udccd',c.location):null,
+      c.driveDate     ?mkChip('\ud83d\udcc5',fmtD(c.driveDate)):null,
+      c.interviewMode ?mkChip('\ud83d\udda5\ufe0f',c.interviewMode):null,
     ].filter(Boolean).join('');
     return`<div class="co-card" onclick="openCoModal(${c.id})">
       <div class="co-card-head">${logoHtml(c.name,c.website,c.id-1,52)}<div class="co-card-name">${xe(c.name)}</div></div>
+      ${c.adminStatus?statusBadge(c.adminStatus):''}
       <div class="co-chips">${chips||'<span class="chip-empty">Details coming soon</span>'}</div>
       ${c.eligSummary?`<div class="elig-sum">${xe(c.eligSummary)}</div>`:''}
-      <button class="btn-apply-card" onclick="event.stopPropagation();openCoModal(${c.id})">View Details &amp; Apply →</button>
+      <button class="btn-apply-card" onclick="event.stopPropagation();openCoModal(${c.id})">View Details &amp; Apply \u2192</button>
     </div>`;
   }).join('');
 
-  const completedCards = completed.map(c => {
-    const count = STATUS[c.id].placedNames.length;
-    return`<div class="co-card co-card-done" onclick="openPlacedModal(${c.id})">
+  const doneCards=done.map(c=>{
+    const n=STATUS[c.id]?.placedNames?.length||0;
+    return`<div class="co-card" style="opacity:.82;" onclick="openPlacedModal(${c.id})">
       <div class="co-card-head">${logoHtml(c.name,c.website,c.id-1,52)}<div class="co-card-name">${xe(c.name)}</div></div>
-      <div class="drive-done-banner">
-        <span class="drive-done-icon">✅</span>
-        <div>
-          <div class="drive-done-title">Drive Completed</div>
-          <div class="drive-done-sub">${count} student${count!==1?'s':''} placed</div>
-        </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 0 10px;">
+        <span style="font-size:18px;">\u2705</span>
+        <div><div style="font-size:13px;font-weight:700;color:#065F46;">Drive Completed</div>
+        <div style="font-size:12px;color:#6B7280;">${n} student${n!==1?'s':''} placed</div></div>
       </div>
-      <button class="btn-placed-card" onclick="event.stopPropagation();openPlacedModal(${c.id})">View Placed Students →</button>
+      <button style="width:100%;padding:9px;border-radius:10px;border:1.5px solid #6D0E6A;background:#fff;color:#6D0E6A;font-size:13px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;" onclick="event.stopPropagation();openPlacedModal(${c.id})">View Placed Students \u2192</button>
     </div>`;
   }).join('');
 
-  const openSection = open.length ? `
-    <div class="sp-sec-sub-head">Open for Applications <span class="count-chip">${open.length}</span></div>
-    <div class="co-grid">${openCards}</div>` : '';
-
-  const doneSection = completed.length ? `
-    <div class="sp-sec-sub-head" style="margin-top:${open.length?'28px':'0'}">Drive Completed <span class="count-chip count-chip-done">${completed.length}</span></div>
-    <div class="co-grid">${completedCards}</div>` : '';
+  const openSec=open.length?`<div style="font-size:12px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;display:flex;align-items:center;gap:8px;">Open for Applications <span style="background:#F7F0F7;color:#6D0E6A;padding:2px 8px;border-radius:999px;font-size:11px;">${open.length}</span></div><div class="co-grid">${openCards}</div>`:'';
+  const doneSec=done.length?`<div style="font-size:12px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.06em;margin:${open.length?'28px':'0'} 0 12px;display:flex;align-items:center;gap:8px;">Past Placement Drives <span style="background:#F1F5F9;color:#64748B;padding:2px 8px;border-radius:999px;font-size:11px;">${done.length}</span></div><div class="co-grid">${doneCards}</div>`:'';
 
   document.getElementById('avail-wrap').innerHTML=`
     <div class="sp-section">
       <div class="sp-sec-head">
-        <span class="sp-sec-title">🏢 Available Companies</span>
-        ${open.length?`<span class="count-chip">${open.length} open</span>`:''}
+        <span class="sp-sec-title">\ud83c\udfe2 Available Companies</span>
+        ${open.length?`<span style="background:#F7F0F7;color:#6D0E6A;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;">${open.length} open</span>`:''}
       </div>
-      ${openSection}${doneSection}
+      ${openSec}${doneSec}
     </div>`;
 }
 
@@ -1053,9 +945,9 @@ function mkChip(icon,text){
   return`<div class="chip"><span>${icon}</span><span>${xe(text)}</span></div>`;
 }
 
-/* ══════════════════════════════════════════════════════
+/* \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
    COMPANY MODAL
-══════════════════════════════════════════════════════ */
+\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 */
 function openCoModal(id){
   const c=COMPS.find(x=>x.id===id); if(!c)return;
   const mfRow=(k,v)=>`<div class="mf-row"><span class="mf-k">${xe(k)}</span><span class="mf-v">${xe(v)}</span></div>`;
@@ -1067,7 +959,7 @@ function openCoModal(id){
     c.driveDate             ?mfRow('Drive Date',         fmtD(c.driveDate)):null,
     c.registrationDate      ?mfRow('Reg. Deadline',      fmtD(c.registrationDate)):null,
     c.interviewMode         ?mfRow('Interview Mode',     c.interviewMode):null,
-    mfRow('Eligibility', c.eligSummary||'10th ≥ 60%, 12th ≥ 60%, No Active Backlogs'),
+    mfRow('Eligibility', c.eligSummary||'10th \u2265 60%, 12th \u2265 60%, No Active Backlogs'),
   ].filter(Boolean).join('');
 
   document.getElementById('co-modal-inner').innerHTML=`
@@ -1076,70 +968,51 @@ function openCoModal(id){
       <div style="flex:1;min-width:0;">
         <div class="co-modal-name">${xe(c.name)}</div>
         <div class="co-modal-badges">
+          ${c.adminStatus?`<span class="badge-pill ${c.adminStatus.toLowerCase()==='completed'?'badge-done':c.adminStatus.toLowerCase().includes('ongoing')?'badge-ongoing':''}">${xe(c.adminStatus)}</span>`:''}
           ${c.interviewMode?`<span class="badge-pill">${xe(c.interviewMode)}</span>`:''}
-          ${c.driveDate?`<span class="badge-pill badge-date">📅 ${fmtD(c.driveDate)}</span>`:''}
-          ${c.website?`<a href="${xe(c.website)}" target="_blank" rel="noopener" class="badge-link">🔗 Website ↗</a>`:''}
+          ${c.driveDate?`<span class="badge-pill badge-date">\ud83d\udcc5 ${fmtD(c.driveDate)}</span>`:''}
+          ${c.website?`<a href="${xe(c.website)}" target="_blank" rel="noopener" class="badge-link">\ud83d\udd17 Website \u2197</a>`:''}
         </div>
       </div>
-      <button class="co-modal-close" onclick="closeModal()">✕</button>
+      <button class="co-modal-close" onclick="closeModal()">\u2715</button>
     </div>
     <div class="co-modal-body">
       <div class="mf-grid">${rows}</div>
-      ${c.notes?`<div class="jd-box"><div class="jd-box-title">📋 JOB DESCRIPTION</div><div class="jd-box-text">${xe(c.notes).replace(/\n/g,'<br/>')}</div></div>`:''}
+      ${c.notes?`<div class="jd-box"><div class="jd-box-title">\ud83d\udccb JOB DESCRIPTION</div><div class="jd-box-text">${xe(c.notes).split('\n').join('<br/>')}</div></div>`:''}
     </div>`;
 
   const applySlot=document.getElementById('modal-apply-slot');
-  let footerHtml = '';
-  if(c.jdUrl){
-    footerHtml += `<a class="btn-modal-dl" href="${xe(c.jdUrl)}" target="_blank" rel="noopener" download>⬇ Download JD</a>`;
-  }
-  if(c.regFormUrl){
-    footerHtml += `<button class="btn-modal-apply" onclick="applyNow('${xe(c.regFormUrl)}')">Apply Now →</button>`;
-  } else {
-    footerHtml += `<span class="no-form-txt">Registration form not yet available</span>`;
-  }
-  applySlot.innerHTML = footerHtml;
+  const parts=[];
+  if(c.jdUrl)parts.push(`<a href="${xe(c.jdUrl)}" target="_blank" rel="noopener" style="padding:10px 18px;border:1.5px solid #6D0E6A;border-radius:10px;background:#fff;color:#6D0E6A;font-size:13.5px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;flex-shrink:0;">\u2b07 Download JD</a>`);
+  if(c.regFormUrl)parts.push(`<button class="btn-modal-apply" style="flex:1;" onclick="applyNow('${xe(c.regFormUrl)}')">Apply Now \u2192</button>`);
+  else parts.push(`<span class="no-form-txt">Registration form not yet available</span>`);
+  applySlot.innerHTML=parts.join('');
   document.getElementById('co-modal').classList.add('show');
 }
 
+function openPlacedModal(id){
+  const comp=COMPS.find(x=>x.id===id);if(!comp)return;
+  const names=STATUS[comp.id]?.placedNames||[];
+  document.getElementById('co-modal-inner').innerHTML=`
+    <div class="co-modal-head">
+      ${logoHtml(comp.name,comp.website,comp.id-1,60)}
+      <div style="flex:1;min-width:0;"><div class="co-modal-name">${xe(comp.name)}</div>
+      <div class="co-modal-badges"><span class="badge-pill" style="background:#D1FAE5;border-color:#6EE7B7;color:#065F46;">\u2705 Drive Completed</span></div></div>
+      <button class="co-modal-close" onclick="closeModal()">\u2715</button>
+    </div>
+    <div class="co-modal-body">
+      <div style="font-size:12px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;">Students Placed (${names.length})</div>
+      <div style="display:flex;flex-direction:column;gap:6px;">${names.map((n,i)=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#F8FAFC;border-radius:8px;"><span style="font-size:11px;font-weight:700;color:#94A3B8;min-width:18px;">${i+1}</span><span style="font-size:13.5px;font-weight:600;color:#1A0519;">${xe(n)}</span></div>`).join('')||'<div style="color:#94A3B8;font-size:13px;">No data available</div>'}</div>
+    </div>`;
+  document.getElementById('modal-apply-slot').innerHTML='';
+  document.getElementById('co-modal').classList.add('show');
+}
 function closeModal(){ document.getElementById('co-modal').classList.remove('show'); }
 function applyNow(url){ window.open(url,'_blank','noopener'); }
 
-/* ══════════════════════════════════════════════════════
-   PLACED STUDENTS MODAL
-══════════════════════════════════════════════════════ */
-function openPlacedModal(id){
-  const c    = COMPS.find(x=>x.id===id); if(!c) return;
-  const names = STATUS[c.id]?.placedNames || [];
-
-  const rows = names.map((n,i)=>
-    `<div class="placed-row"><span class="placed-num">${i+1}</span><span class="placed-name">${xe(n)}</span></div>`
-  ).join('');
-
-  document.getElementById('co-modal-inner').innerHTML=`
-    <div class="co-modal-head">
-      ${logoHtml(c.name,c.website,c.id-1,60)}
-      <div style="flex:1;min-width:0;">
-        <div class="co-modal-name">${xe(c.name)}</div>
-        <div class="co-modal-badges">
-          <span class="badge-pill" style="background:#D1FAE5;color:#065F46;">✅ Drive Completed</span>
-          <span class="badge-pill">${names.length} Student${names.length!==1?'s':''} Placed</span>
-        </div>
-      </div>
-      <button class="co-modal-close" onclick="closeModal()">✕</button>
-    </div>
-    <div class="co-modal-body">
-      <div class="placed-list-head">Students selected by ${xe(c.name)}</div>
-      <div class="placed-list">${rows||'<div style="color:#94A3B8;font-size:13px;padding:12px 0;">No names available</div>'}</div>
-    </div>`;
-
-  document.getElementById('modal-apply-slot').innerHTML = '';
-  document.getElementById('co-modal').classList.add('show');
-}
-
-/* ══════════════════════════════════════════════════════
+/* \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
    LOGOUT
-══════════════════════════════════════════════════════ */
+\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 */
 function doLogout(){
   ST=null; COMPS=[]; STATUS={};
   document.getElementById('portal-page').style.display='none';
@@ -1148,365 +1021,119 @@ function doLogout(){
   document.getElementById('email-err').textContent='';
   document.getElementById('email-inp').focus();
 }
-/* ── SIDEBAR RESIZER ── */
-(function(){
-  const resizer  = document.getElementById('sp-resizer');
-  const sidebar  = document.getElementById('sp-sidebar');
-  if(!resizer || !sidebar) return;
-  const MIN = 200, MAX = 520;
-  let dragging = false, startX = 0, startW = 0;
-
-  resizer.addEventListener('mousedown', e => {
-    dragging = true;
-    startX   = e.clientX;
-    startW   = sidebar.getBoundingClientRect().width;
-    resizer.classList.add('dragging');
-    document.body.style.cursor    = 'col-resize';
-    document.body.style.userSelect = 'none';
-    e.preventDefault();
-  });
-
-  document.addEventListener('mousemove', e => {
-    if(!dragging) return;
-    const w = Math.min(MAX, Math.max(MIN, startW + (e.clientX - startX)));
-    document.documentElement.style.setProperty('--sidebar-w', w + 'px');
-  });
-
-  document.addEventListener('mouseup', () => {
-    if(!dragging) return;
-    dragging = false;
-    resizer.classList.remove('dragging');
-    document.body.style.cursor     = '';
-    document.body.style.userSelect = '';
-  });
-})();
 </script>
 
-
-<script>
-/* ═══════════════════════════════════════════════
-   REWRITE RESUME — AI-powered
-═══════════════════════════════════════════════ */
-
-let _rwHtml = '';
-
-/* ─────────────────────────────────────────────
-   REWRITE RESUME — Rule-based, no API needed
-───────────────────────────────────────────── */
-
-function openRewriteModal(){
-  document.getElementById('rw-modal').classList.add('show');
-  document.getElementById('rw-dl-btn').style.display = 'none';
-  _rwHtml = '';
-  showUploadPrompt();
-}
-
-function closeRwModal(){
-  document.getElementById('rw-modal').classList.remove('show');
-}
-
-function setRwBody(html){ document.getElementById('rw-body').innerHTML = html; }
-
-function showUploadPrompt(){
-  setRwBody(`
-    <div class="rw-drop-zone" id="rw-drop"
-         onclick="document.getElementById('rw-file-inp').click()"
-         ondragover="event.preventDefault();this.classList.add('rw-drag-over')"
-         ondragleave="this.classList.remove('rw-drag-over')"
-         ondrop="event.preventDefault();this.classList.remove('rw-drag-over');handleResumeFile(event.dataTransfer.files[0])">
-      <div class="rw-drop-icon">📂</div>
-      <div class="rw-drop-title">Drop your resume PDF here</div>
-      <div class="rw-drop-hint">or click anywhere to browse</div>
-      <div class="rw-drop-note">This is the same resume you uploaded to Google Drive — just drag it from your Downloads folder</div>
-      <input type="file" id="rw-file-inp" accept=".pdf" style="display:none"
-             onchange="handleResumeFile(this.files[0])"/>
-    </div>`);
-}
-
-function handleResumeFile(file){
-  if(!file) return;
-  if(!file.name.toLowerCase().endsWith('.pdf')){
-    setRwBody(`
-      <div class="rw-error">⚠️ Please select a PDF file.</div>
-      <div class="rw-retry-wrap"><button class="btn-rw-retry" onclick="showUploadPrompt()">↩ Try Again</button></div>`);
-    return;
-  }
-  setRwBody(`<div class="rw-loading">
-    <div class="rw-spinner"></div>
-    <div class="rw-loading-txt">Reading your resume…</div>
-    <div class="rw-loading-sub">Extracting and reformatting to the placement template.</div>
-  </div>`);
-  processResumePDF(file);
-}
-
-
-async function processResumePDF(file){
-  try {
-    const text = await extractTextFromPDF(file);
-    const parsed = parseResumeText(text);
-    const html = buildResumeHTML(parsed);
-    if(!html.trim()){ throw new Error('Could not extract text from this PDF. Try a text-based PDF (not a scanned image).'); }
-    _rwHtml = html;
-    setRwBody(`<div class="rw-preview">${html}</div>`);
-    document.getElementById('rw-dl-btn').style.display = '';
-  } catch(e){
-    setRwBody(`
-      <div class="rw-error">⚠️ ${xe(e.message)}</div>
-      <div style="text-align:center;margin-top:16px;">
-        <button class="btn-rw-retry" onclick="startFetchAndFormat()">↩ Try Again</button>
-      </div>`);
-  }
-}
-
-/* ── PDF.js text extraction ── */
-async function extractTextFromPDF(file){
-  const pdfjsLib = window['pdfjs-dist/build/pdf'];
-  const buf = await file.arrayBuffer();
-  const pdf = await pdfjsLib.getDocument({data: buf}).promise;
-  let fullText = '';
-  for(let p = 1; p <= pdf.numPages; p++){
-    const page = await pdf.getPage(p);
-    const content = await page.getTextContent();
-    const lineMap = {};
-    for(const item of content.items){
-      if(!item.str.trim()) continue;
-      const y = Math.round(item.transform[5]);
-      if(!lineMap[y]) lineMap[y] = [];
-      lineMap[y].push({x: item.transform[4], t: item.str});
-    }
-    const ys = Object.keys(lineMap).map(Number).sort((a,b)=>b-a);
-    fullText += ys.map(y=>lineMap[y].sort((a,b)=>a.x-b.x).map(i=>i.t).join(' ')).join('\n') + '\n';
-  }
-  return fullText;
-}
-
-/* ── Text parser ── */
-function parseResumeText(text){
-  const lines = text.split('\n').map(l=>l.trim()).filter(l=>l.length > 0);
-
-  const emailRx    = /[\w.+-]+@[\w.-]+\.[a-zA-Z]{2,}/;
-  const phoneRx    = /(\+91[\s-]?)?[6-9]\d{9}/;
-  const linkedinRx = /(?:https?:\/\/)?(?:www\.)?linkedin\.com\/in\/[\w-]+/i;
-  const githubRx   = /(?:https?:\/\/)?(?:www\.)?github\.com\/[\w-]+/i;
-
-  const email    = (text.match(emailRx)||[])[0]||'';
-  const phone    = (text.match(phoneRx)||[])[0]||'';
-  const linkedin = (text.match(linkedinRx)||[])[0]||'';
-  const github   = (text.match(githubRx)||[])[0]||'';
-
-  const SECS = {
-    summary:     /^(professional\s+)?(summary|profile|objective|career\s+objective|about(\s+me)?|overview)$/i,
-    experience:  /^(work\s+|professional\s+|relevant\s+)?(experience|employment(\s+history)?|work\s+history|internship(s)?)$/i,
-    education:   /^(education(al)?(\s+background)?|academic(\s+background)?|qualifications?|schooling)$/i,
-    projects:    /^(projects?(\s+work)?|academic\s+projects?|personal\s+projects?|key\s+projects?)$/i,
-    skills:      /^((technical\s+|core\s+|key\s+|professional\s+)?skills?|competenc(y|ies)|expertise|technologies|tools(\s+&\s+technologies)?)$/i,
-    awards:      /^(awards?|achievements?|honors?|recognitions?|accomplishments?|extra.?curricular)$/i,
-    languages:   /^(languages?(\s+known|\s+proficiency|\s+skills?)?)$/i,
-    certifications:/^(certifications?|courses?(\s+completed)?|training|professional\s+development)$/i,
-  };
-
-  // Name: first short line with no contact info
-  let name = '';
-  for(const l of lines){
-    if(!l.match(emailRx) && !l.match(phoneRx) && !l.match(linkedinRx) && !l.match(githubRx) && l.length < 60 && l.length > 1){
-      name = l; break;
-    }
-  }
-
-  const sectionData = {};
-  let curSec = 'header';
-  let buf = [];
-
-  for(const line of lines){
-    // Skip contact/name lines in header
-    if(curSec==='header' && (line===name||line.match(emailRx)||line.match(phoneRx)||line.match(linkedinRx)||line.match(githubRx))) continue;
-    let matched = false;
-    for(const [sec, rx] of Object.entries(SECS)){
-      if(rx.test(line)){
-        if(buf.length) sectionData[curSec] = (sectionData[curSec]||[]).concat(buf);
-        curSec = sec; buf = []; matched = true; break;
-      }
-    }
-    if(!matched) buf.push(line);
-  }
-  if(buf.length) sectionData[curSec] = (sectionData[curSec]||[]).concat(buf);
-
-  return {name, email, phone, linkedin, github, sections: sectionData};
-}
-
-/* ── Template builder ── */
-function clean(line){
-  // Strip leading bullet chars and extra whitespace
-  return line.replace(/^[\s•·●\-–*▪▸►]+/, '').trim();
-}
-
-function isBullet(line){
-  return /^[•·●\-–*▪▸►]/.test(line.trim());
-}
-
-function buildResumeHTML(parsed){
-  const {name, email, phone, linkedin, github, sections} = parsed;
-  let html = '';
-
-  // ── Header ──
-  html += `<h1>${xe(name||'Your Name')}</h1>`;
-  const sumLines = (sections.summary || sections.header || [])
-    .filter(l => !l.match(/[@\d]/) && clean(l).length > 3);
-  if(sumLines.length) html += `<p class="rw-contact">${xe(sumLines.map(clean).join(' '))}</p>`;
-  const contacts = [phone, linkedin||github, email].filter(Boolean);
-  if(contacts.length) html += `<p class="rw-contact">${contacts.map(xe).join('  ·  ')}</p>`;
-
-  // ── Experience ──
-  const exp = sections.experience||[];
-  if(exp.length){ html += `<hr class="rw-divider"><h2>EXPERIENCE</h2>${buildEntries(exp)}`; }
-
-  // ── Education ──
-  const edu = sections.education||[];
-  if(edu.length){ html += `<hr class="rw-divider"><h2>EDUCATION</h2>${buildEntries(edu)}`; }
-
-  // ── Projects ──
-  const proj = sections.projects||[];
-  if(proj.length){ html += `<hr class="rw-divider"><h2>PROJECTS</h2>${buildEntries(proj)}`; }
-
-  // ── Skills ──
-  const skillLines = sections.skills||[];
-  if(skillLines.length){
-    html += `<hr class="rw-divider"><h2>SKILLS</h2><ul>`;
-    // Split on commas, pipes, bullets — deduplicate
-    const skills = skillLines
-      .join(' ')
-      .split(/[,|•·●\n\r]+/)
-      .map(s => clean(s))
-      .filter(s => s.length > 1);
-    const seen = new Set();
-    skills.forEach(s => {
-      if(!seen.has(s.toLowerCase())){ seen.add(s.toLowerCase()); html += `<li>${xe(s)}</li>`; }
-    });
-    html += `</ul>`;
-  }
-
-  // ── Awards + Certifications ──
-  const awards = [...(sections.awards||[]), ...(sections.certifications||[])];
-  if(awards.length){
-    html += `<hr class="rw-divider"><h2>AWARDS</h2><ul>`;
-    awards.forEach(l => {
-      const t = clean(l);
-      if(t.length > 1) html += `<li>${xe(t)}</li>`;
-    });
-    html += `</ul>`;
-  }
-
-  // ── Languages ──
-  const langs = (sections.languages||[]).map(clean).filter(l=>l.length>1);
-  if(langs.length){
-    html += `<hr class="rw-divider"><h2>LANGUAGES</h2><p>${xe(langs.join(', '))}</p>`;
-  }
-
-  // Merge adjacent <ul> blocks that got split
-  html = html.replace(/<\/ul>\s*<ul>/g, '');
-  return html;
-}
-
-function buildEntries(lines){
-  const dateRx = /\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|january|february|march|april|june|july|august|september|october|november|december|\d{4}|present|current|now)\b/i;
-  let html = '';
-  let i = 0;
-
-  while(i < lines.length){
-    const raw = lines[i];
-    const t   = clean(raw);
-    if(!t){ i++; continue; }
-
-    const hasDash     = /[—–|]/.test(t);
-    const isShort     = t.length < 72;
-    const hasBullet   = isBullet(raw);
-    const hasDate     = dateRx.test(t);
-
-    // Treat as a section entry heading if:
-    // - contains an em-dash / pipe (Company — Role pattern)
-    // - OR short, not a bullet, no date (likely a title line)
-    if(hasDash || (!hasBullet && !hasDate && isShort)){
-      html += `<h3>${xe(t)}</h3>`;
-      i++;
-      // Next line: date range?
-      if(i < lines.length && dateRx.test(clean(lines[i]))){
-        html += `<p class="rw-entry-date">${xe(clean(lines[i]))}</p>`;
-        i++;
-      }
-      // Collect description lines until next heading
-      const bullets = [];
-      while(i < lines.length){
-        const nt = clean(lines[i]);
-        if(!nt){ i++; continue; }
-        const nextIsHeading = ((/[—–|]/.test(nt) || (!isBullet(lines[i]) && !dateRx.test(nt) && nt.length < 72)) && bullets.length > 0);
-        if(nextIsHeading) break;
-        if(nt.length > 1) bullets.push(nt);
-        i++;
-      }
-      if(bullets.length){
-        html += `<ul>${bullets.map(b=>`<li>${xe(b)}</li>`).join('')}</ul>`;
-      }
-    } else {
-      // Standalone bullet or paragraph
-      if(t.length > 1){
-        html += isBullet(raw)
-          ? `<ul><li>${xe(t)}</li></ul>`
-          : `<p>${xe(t)}</p>`;
-      }
-      i++;
-    }
-  }
-  return html;
-}
-
-
-
-function downloadRewrittenPDF(){
-  if(!_rwHtml){ return; }
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
-
-  // Render the preview div to PDF using html() method
-  const container = document.createElement('div');
-  container.style.cssText = 'font-family:helvetica;font-size:12px;padding:24px;width:170mm;color:#1e1e1e;';
-  container.innerHTML = _rwHtml;
-  document.body.appendChild(container);
-
-  doc.html(container, {
-    callback: (d) => {
-      document.body.removeChild(container);
-      const fname = (ST.name||'Student').replace(/\s+/g,'_') + '_Rewritten_Resume.pdf';
-      d.save(fname);
-    },
-    x: 14,
-    y: 14,
-    width: 182,
-    windowWidth: 650,
-    margin: [14,14,14,14],
-    autoPaging: 'text',
-  });
-}
-</script>
-
-<!-- ── REWRITE RESUME MODAL ── -->
-<div id="rw-modal" class="rw-modal">
+<!-- FORMAT FOR PLACEMENT MODAL -->
+<div class="rw-modal-overlay" id="rw-modal">
   <div class="rw-modal-box">
     <div class="rw-modal-head">
-      <div>
-        <div class="rw-modal-title">📋 Format for Placement</div>
-        <div class="rw-modal-sub">Reformatting your resume to the placement cell template</div>
-      </div>
-      <button class="co-modal-close" onclick="closeRwModal()">✕</button>
+      <div><div class="rw-modal-title">&#128203; Format for Placement</div>
+      <div class="rw-modal-sub">Reformatting your resume to placement cell template</div></div>
+      <button class="rw-modal-close" onclick="closeRwModal()">&times;</button>
     </div>
-    <div class="rw-modal-body" id="rw-body">
-      <!-- states: loading / preview / error -->
-    </div>
-    <div class="rw-modal-footer">
-      <button class="btn-modal-close" onclick="closeRwModal()">Close</button>
-      <button class="btn-rw-dl" id="rw-dl-btn" style="display:none" onclick="downloadRewrittenPDF()">⬇ Download PDF</button>
+    <div id="rw-body" style="flex:1;overflow-y:auto;padding:20px;"></div>
+    <div class="rw-modal-foot">
+      <button class="btn-rw-close-foot" onclick="closeRwModal()">Close</button>
+      <button class="btn-rw-dl" id="rw-dl-btn" style="display:none" onclick="downloadRewrittenPDF()">&#11015; Download PDF</button>
     </div>
   </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>if(window['pdfjs-dist/build/pdf'])window['pdfjs-dist/build/pdf'].GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="resume_extractor.js"></script>
+<script src="language_engine.js"></script>
+<script>
+/* ── CONFETTI ── */
+function launchConfetti(canvas){
+  if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  canvas.width=canvas.offsetWidth;canvas.height=canvas.offsetHeight;
+  if(!canvas.width||!canvas.height)return;
+  const W=canvas.width,H=canvas.height;
+  const COLORS=['#6D0E6A','#F59E0B','#10B981','#3B82F6','#EF4444','#8B5CF6','#EC4899','#F97316'];
+  const pieces=Array.from({length:80},()=>({x:Math.random()*W,y:-10-Math.random()*H*.4,r:3+Math.random()*4,d:1.5+Math.random()*2,color:COLORS[Math.floor(Math.random()*COLORS.length)],tilt:0,tiltSpd:.07+Math.random()*.06,tiltAngle:0,shape:Math.random()>.5?'rect':'circle'}));
+  let frame,done=false;
+  function draw(){ctx.clearRect(0,0,W,H);for(const p of pieces){p.tiltAngle+=p.tiltSpd;p.y+=p.d;p.tilt=12*Math.sin(p.tiltAngle);if(p.y>H){p.y=-10;p.x=Math.random()*W;}ctx.save();ctx.globalAlpha=.9;ctx.fillStyle=p.color;ctx.translate(p.x,p.y);ctx.rotate(p.tilt*Math.PI/180);if(p.shape==='rect')ctx.fillRect(-p.r,-p.r/2,p.r*2,p.r);else{ctx.beginPath();ctx.arc(0,0,p.r,0,2*Math.PI);ctx.fill();}ctx.restore();}if(!done)frame=requestAnimationFrame(draw);}
+  draw();setTimeout(()=>{done=true;cancelAnimationFrame(frame);ctx.clearRect(0,0,W,H);},5000);
+}
+
+/* ── SIDEBAR RESIZER ── */
+(function(){
+  const resizer=document.getElementById('sp-resizer');
+  const sidebar=document.getElementById('sp-sidebar');
+  if(!resizer||!sidebar)return;
+  const MIN=200,MAX=540;let dragging=false,startX=0,startW=0;
+  resizer.addEventListener('mousedown',e=>{dragging=true;startX=e.clientX;startW=sidebar.getBoundingClientRect().width;resizer.classList.add('dragging');document.body.style.cursor='col-resize';document.body.style.userSelect='none';e.preventDefault();});
+  document.addEventListener('mousemove',e=>{if(!dragging)return;const w=Math.min(MAX,Math.max(MIN,startW+(e.clientX-startX)));document.documentElement.style.setProperty('--sidebar-w',w+'px');});
+  document.addEventListener('mouseup',()=>{if(!dragging)return;dragging=false;resizer.classList.remove('dragging');document.body.style.cursor='';document.body.style.userSelect='';});
+})();
+
+/* ── FIX 6: Auto-size sidebar to fit email (called from renderPortal) ── */
+function autoSizeForEmail(){
+  const sidebar=document.getElementById('sp-sidebar');
+  const emailV=document.getElementById('email-pf-v');
+  const emailScr=document.getElementById('email-pf-scroll');
+  if(!sidebar||!emailV||!emailScr)return;
+  const MIN=200,MAX=540;
+  const containerW=emailV.getBoundingClientRect().width;
+  const textW=emailScr.scrollWidth;
+  const overflow=textW-containerW;
+  if(overflow>4){
+    const sidebarW=sidebar.getBoundingClientRect().width;
+    const target=Math.min(MAX,Math.max(sidebarW,sidebarW+overflow+32));
+    if(target>sidebarW)document.documentElement.style.setProperty('--sidebar-w',target+'px');
+    requestAnimationFrame(()=>{
+      const newW=emailV.getBoundingClientRect().width;
+      const newOv=emailScr.scrollWidth-newW;
+      if(newOv>4){emailScr.style.setProperty('--md',-newOv+'px');emailScr.classList.add('is-scrolling');}
+      else emailScr.classList.remove('is-scrolling');
+    });
+  }else emailScr.classList.remove('is-scrolling');
+}
+
+/* ── FORMAT FOR PLACEMENT ── */
+let _rwHtml='',_gradeMode='percentage';
+function openRewriteModal(){document.getElementById('rw-modal').classList.add('show');document.getElementById('rw-dl-btn').style.display='none';_rwHtml='';showGradePrompt();}
+function closeRwModal(){document.getElementById('rw-modal').classList.remove('show');}
+function setRwBody(html){document.getElementById('rw-body').innerHTML=html;}
+function showGradePrompt(){setRwBody(`<div style="padding:8px 0 4px;"><p style="font-size:13.5px;font-weight:700;color:#1A0519;margin:0 0 6px;">How should academic performance be shown?</p><p style="font-size:12px;color:#64748B;margin:0 0 20px;">Applied consistently across all education entries.</p><div style="display:flex;gap:12px;"><button onclick="pickGrade('percentage')" style="flex:1;padding:14px;border-radius:12px;border:2px solid #D3B6D2;background:#fff;cursor:pointer;font-size:13px;font-weight:700;color:#6D0E6A;" onmouseover="this.style.background='#F7F0F7'" onmouseout="this.style.background='#fff'">&#128202; Percentage<br><span style="font-size:11px;color:#94A3B8;font-weight:500;">e.g. 79.5%</span></button><button onclick="pickGrade('cgpa')" style="flex:1;padding:14px;border-radius:12px;border:2px solid #D3B6D2;background:#fff;cursor:pointer;font-size:13px;font-weight:700;color:#6D0E6A;" onmouseover="this.style.background='#F7F0F7'" onmouseout="this.style.background='#fff'">&#127891; CGPA<br><span style="font-size:11px;color:#94A3B8;font-weight:500;">e.g. 8.37 CGPA</span></button></div></div>`);}
+function pickGrade(mode){_gradeMode=mode;startExtractAndFormat();}
+function setLoading(msg,sub){setRwBody(`<div class="rw-loading"><div class="rw-spinner"></div><div class="rw-loading-txt">${msg}</div><div class="rw-loading-sub">${sub||''}</div></div>`);}
+function showUploadFallback(err){setRwBody(`${err?`<div class="rw-error">&#9888; ${err}<br><small style="font-weight:400;color:#9F1239">Upload your PDF directly below instead.</small></div>`:''}
+<label class="rw-drop-zone" id="rw-drop"><div class="rw-drop-icon">&#128196;</div><div class="rw-drop-title">Upload Resume PDF</div><div class="rw-drop-hint">Click here or drag &amp; drop your PDF</div><div class="rw-drop-note">Processed locally — not uploaded to any server</div></label><input type="file" id="rw-file-inp" accept=".pdf" style="display:none"/>`);document.getElementById('rw-file-inp').onchange=e=>{if(e.target.files[0])handleResumeFile(e.target.files[0]);};const drop=document.getElementById('rw-drop');drop.addEventListener('click',()=>document.getElementById('rw-file-inp').click());drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('rw-drag-over');});drop.addEventListener('dragleave',()=>drop.classList.remove('rw-drag-over'));drop.addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('rw-drag-over');const f=e.dataTransfer.files[0];if(f&&f.type==='application/pdf')handleResumeFile(f);});}
+async function handleResumeFile(file){if(!file||file.type!=='application/pdf'){setRwBody('<div class="rw-error">&#10060; Please select a PDF file.</div>');return;}try{setLoading('Reading PDF…','Extracting text from your resume');const text=await extractTextFromPDF(file);setLoading('Formatting…','Applying placement cell template');const parsed=parseResumeText(text);if(typeof cleanParsedSections==='function')cleanParsedSections(parsed.sections,_gradeMode==='cgpa');const html=buildResumeHTML(parsed);_rwHtml=html;setRwBody(`<div class="rw-preview">${html}</div>`);document.getElementById('rw-dl-btn').style.display='block';}catch(err){setRwBody(`<div class="rw-error">&#10060; ${err.message||'Failed to read PDF.'}</div><div style="text-align:center;margin-top:16px;"><button style="padding:9px 20px;border:1.5px solid #6D0E6A;border-radius:8px;background:#fff;color:#6D0E6A;font-size:12.5px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;" onclick="showUploadFallback('')">&#8617; Upload Instead</button></div>`);}}
+async function startExtractAndFormat(){if(!ST||!ST.resume){showUploadFallback('No resume URL linked to your profile.');return;}if(typeof fetchResumeFile!=='function'){showUploadFallback('Drive connector not loaded — upload below.');return;}setLoading('Connecting to Google Drive…','Authenticating with your Google account');try{const file=await fetchResumeFile(ST.resume,(msg)=>setLoading('Fetching resume…',msg));await handleResumeFile(file);}catch(err){showUploadFallback(err.message||'Could not fetch from Google Drive.');}}
+async function extractTextFromPDF(file){const pdfjsLib=window['pdfjs-dist/build/pdf'];if(!pdfjsLib)throw new Error('PDF.js not loaded');pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';const buf=await file.arrayBuffer();const pdf=await pdfjsLib.getDocument({data:buf}).promise;let lines=[];for(let p=1;p<=pdf.numPages;p++){const page=await pdf.getPage(p);const tc=await page.getTextContent();const vp=page.getViewport({scale:1});const byY={};for(const item of tc.items){const y=Math.round(vp.height-item.transform[5]);if(!byY[y])byY[y]=[];byY[y].push(item.str);}const sorted=Object.keys(byY).sort((a,b)=>+a-+b);for(const y of sorted)lines.push(byY[y].join(' ').trim());}return lines.filter(l=>l.trim()).join('\n');}
+function xeR(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function cleanS(s){return String(s||'').replace(/\s+/g,' ').trim();}
+function stripEmoji(s){return String(s||'').replace(/[\u{1F300}-\u{1FFFF}]/gu,'').trim();}
+const OCR_CORRECTIONS=[[/\bC\s+s?EET\b/gi,'CSEET'],[/\bCS\s+EET\b/gi,'CSEET'],[/\bj\.\s*[Pp]\.\s*Morgan\b/g,'J.P. Morgan'],[/\bJ\.\s*[Pp]\.\s*Morgan\b/g,'J.P. Morgan'],[/\bcollege\s*-\s*[Ll]evel\b/gi,'college-level'],[/\bM\s+S\s+Word\b/gi,'MS Word'],[/\bM\s+S\s+Excel\b/gi,'MS Excel'],[/\bPower\s*Point\b/gi,'PowerPoint'],[/\bTally\s+Prime\b/gi,'Tally Prime'],[/\bG\s+S\s+T\b/gi,'GST'],[/\bT\s+D\s+S\b/gi,'TDS'],[/\(\s+([A-Za-z])/g,'($1'],[/([A-Za-z])\s+\)/g,'$1)']];
+function applyOCR(text){for(const[rx,rep]of OCR_CORRECTIONS)text=text.replace(rx,rep);return text;}
+const INST_RX=/\b(college|school|university|institute|vidyavahini|polytechnic|academy)\b/i;
+const SEC_HDR={
+  summary:  /^(professional\s+(summary|profile|objective)|career\s+(summary|objective|goal)|personal\s+(statement|profile)|about(\s+m(e|yself))?|who\s+am\s+i|intro(duction)?|profile|summary|objective|overview|bio(graphy)?|self\s+(introduction|description)|myself)$/i,
+  experience:/^(work\s+)?(experience|employment|internship|career\s+history)s?$/i,
+  education: /^(academic\s+)?(education(al(\s+qualifications?)?)?|qualification|academic\s+background)s?$/i,
+  projects:  /^(projects?|academic\s+projects?|personal\s+projects?|key\s+projects?)$/i,
+  skills:    /^(technical(\s+and\s+soft)?\s+)?(skills?|core\s+competencies|competencies|expertise)$|^technical\s+and\s+soft\s+skills?$/i,
+  awards:    /^(awards?|achievements?|certifications?|awards?\s+&\s+certifications?|leadership\s+(&|and)\s+activities|extra\s*.?\s*curricular)$/i
+};
+function parseResumeText(rawText){let text=applyOCR(rawText);text=rawText.split('\n').map(l=>applyOCR(l)).join('\n');const lines=text.split('\n').map(l=>l.trim()).filter(Boolean);const emailRx=/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/;const phoneRx=/(\+91[\s\-]?)?[6-9]\d{9}/;const liRx=/(?:https?:\/\/)?(?:www\.)?linkedin\.com\/in\/[\w\-]+\/?/i;const ghRx=/(?:https?:\/\/)?(?:www\.)?github\.com\/[\w\-]+\/?/i;let name='',email='',phone='',linkedin='',github='';const cL=new Set();for(let i=0;i<Math.min(10,lines.length);i++){const l=lines[i];const lForMatch=l.replace(/[^\x00-\x7F]/g,' ');const lClean=lForMatch.replace(/^[^a-zA-Z0-9]+/,'').trim();if(!name&&lClean.length>1&&lClean.length<60&&/^[A-Z][A-Z\s]+$/.test(lClean)){name=lClean;cL.add(i);}const em=(lForMatch||l).match(emailRx);if(em&&!email){email=em[0];cL.add(i);}const ph=(lForMatch||l).match(phoneRx);if(ph&&!phone){phone=ph[0];cL.add(i);}const li=(lForMatch||l).match(liRx);if(li&&!linkedin){linkedin=li[0];cL.add(i);}const gh=(lForMatch||l).match(ghRx);if(gh&&!github){github=gh[0];cL.add(i);}}const sections={summary:[],education:[],experience:[],projects:[],skills:[],awards:[],certifications:[]};let cur='_pre';const pre=[];for(let i=0;i<lines.length;i++){if(cL.has(i))continue;const l=lines[i];const lc=l.toLowerCase().replace(/[^\x00-\x7F]/g,'').trim();if(!lc||/^[\ud83c-\udfff]{1,3}\s*(basavakalyan|karnataka|\d{6})/i.test(l))continue;let m=false;for(const[sec,rx]of Object.entries(SEC_HDR)){if(rx.test(lc)){cur=sec;m=true;break;}}if(m)continue;if(cur==='_pre')pre.push(l);else sections[cur].push(l);}if(!sections.summary.length&&pre.length)sections.summary=pre.filter(l=>l.length>15&&!/^\d/.test(l));return{name,email,phone,linkedin,github,sections};}
+function buildEduHTML(lines,wantCGPA){lines=lines.filter(l=>!/^(course|qualification|degree)\s+(institution|school|marks|year)/i.test(l.trim()));const yRx=/\b(20\d{2}|19\d{2})\b/;const pRx=/(\d{1,3}(?:\.\d{1,2})?)%/g;const cRx=/(\d\.\d{1,2})\s*(?:CGPA|\/\s*10)?/gi;const coRx=/\b(B\.?\s*Com|BCA|B\.?\s*Sc|BBA|B\.?\s*Tech|MBA|M\.?\s*Com|MCA|Pre[\-\s]?University|PU\s*C?|SSLC|HSC|SSC|10th|12th|Diploma|PhD)\b/i;const entries=[];let cur={instLines:[],otherLines:[]};for(const raw of lines){const l=cleanS(raw);if(!l||l.length<2)continue;if(INST_RX.test(l)){if(cur.instLines.length||cur.otherLines.length)entries.push(cur);cur={instLines:[l],otherLines:[]};}else cur.otherLines.push(l);}if(cur.instLines.length||cur.otherLines.length)entries.push(cur);if(!entries.length&&lines.length)entries.push({instLines:[],otherLines:lines.map(cleanS).filter(Boolean)});let html='';for(const e of entries){const all=[...e.instLines,...e.otherLines];const j=all.join(' ');const pm=[...j.matchAll(pRx)].map(m=>parseFloat(m[1]));const cm=[...j.matchAll(cRx)].map(m=>parseFloat(m[1]));let grade='';if(wantCGPA){if(cm.length)grade=cm[0].toFixed(2)+' CGPA';else if(pm.length)grade=(pm[0]/9.5).toFixed(2)+' CGPA';}else{if(pm.length)grade=pm[0]+'%';else if(cm.length)grade=(cm[0]*9.5).toFixed(1)+'%';}const yr=j.match(yRx)?j.match(yRx)[0]:'';const com=j.match(coRx)?j.match(coRx)[0].trim():'';const inst=e.instLines.length?e.instLines[0].replace(pRx,'').replace(cRx,'').replace(yRx,'').replace(coRx,'').replace(/\s{2,}/g,' ').replace(/[,:\s]+$/,'').trim():'';if(inst)html+=`<p class="rw-edu-inst">${xeR(inst)}</p>`;const cy=[com,yr].filter(Boolean).join(', ');if(cy)html+=`<h3 class="rw-entry-role">${xeR(cy)}</h3>`;if(grade)html+=`<p class="rw-edu-grade">${xeR(grade)}</p>`;html+='<div class="rw-edu-gap"></div>';}return html;}
+const AU=new Set(['GST','TDS','PAN','NSS','NCC','CGPA','GPA','MBA','BCA','BBA','BCom','MCom','MCA','BSc','MSc','BTech','MTech','PhD','PUC','SSLC','HSC','SSC','AI','ML','SQL','HTML','CSS','PHP','API','CRM','ERP','SAP','UI','UX','IT','HR','PR','SEBI','ICSI','NISM','ICAI','CA','CS','CSEET']);
+const PN=new Set(['Excel','Word','PowerPoint','Tally','Python','Java','Linux','Windows','Google','Microsoft','LinkedIn','GitHub','Canva','Figma','MySQL','MongoDB']);
+const SW=new Set(['a','an','the','and','but','or','for','in','on','at','to','by','of','up','as','is','are','was','with','from']);
+function toSC(str){if(!str)return str;return str.trim().split(/\s+/).map((w,i)=>{if(/^[A-Z](\.[A-Z])+\.?$/.test(w))return w;const b=w.replace(/[^a-zA-Z]/g,'');const U=b.toUpperCase();if(AU.has(U))return w.replace(b,U);if(PN.has(b))return w.replace(b,b.charAt(0).toUpperCase()+b.slice(1).toLowerCase());if(i===0)return w.charAt(0).toUpperCase()+w.slice(1).toLowerCase();if(SW.has(b.toLowerCase()))return w.toLowerCase();return w.charAt(0).toLowerCase()+w.slice(1);}).join(' ');}
+function rejoinBullets(lines){const BR=/^[•·●\-–*▪▸►]/;const result=[];for(let i=0;i<lines.length;i++){const cur=cleanS(lines[i]);const next=lines[i+1]?cleanS(lines[i+1]):null;if(!cur)continue;if(!/[.!?:)]$/.test(cur)&&next&&!BR.test(next)){lines[i+1]=cur+' '+next.replace(BR,'').trim();continue;}result.push(cur);}return result;}
+const WV=[[/\bwas responsible for\b/gi,'managed'],[/\bresponsible for\b/gi,'managed'],[/\bworked on\b/gi,'developed'],[/\bworked with\b/gi,'collaborated with'],[/\bwas part of\b/gi,'contributed to'],[/\bhelped (?:to |in )?/gi,'assisted in '],[/\bmade a\b/gi,'developed a'],[/\bmade the\b/gi,'developed the']];
+function procBullet(raw){let t=cleanS(raw).replace(/^[•·●\-–*▪▸►\s]+/,'');for(const[rx,rep]of WV)t=t.replace(rx,rep);t=toSC(t);t=t.replace(/\.\s*$/,'');return t;}
+function cleanParsedSections(sections,wantCGPA){if(sections.summary&&sections.summary.length){let text=sections.summary.map(cleanS).join(' ');text=text.charAt(0).toUpperCase()+text.slice(1);if(!/[.!?]$/.test(text))text+='.';sections.summary=[text];}for(const sec of['projects','experience','awards','certifications']){if(!sections[sec]||!sections[sec].length)continue;sections[sec]=rejoinBullets(sections[sec]).map(procBullet).filter(Boolean);}if(sections.skills&&sections.skills.length)sections.skills=sections.skills.map(l=>applyOCR(cleanS(l).replace(/^[•·●\-–*▪▸►\s]+/,''))).filter(Boolean);return sections;}
+function buildEntries(lines){return rejoinBullets(lines).map(l=>{const t=procBullet(l);return t?`<li>${xeR(t)}</li>`:''}).filter(Boolean).join('');}
+function buildResumeHTML(parsed){const{name,email,phone,linkedin,github,sections}=parsed;let html='';if(name)html+=`<h1 class="rw-name">${xeR(stripEmoji(name))}</h1>`;const contacts=[];if(phone)contacts.push(stripEmoji(phone));if(email)contacts.push(email);if(linkedin)contacts.push(linkedin.replace(/^https?:\/\/(www\.)?/i,''));if(github)contacts.push(github.replace(/^https?:\/\/(www\.)?/i,''));if(contacts.length)html+=`<p class="rw-contact-line">${contacts.map(xeR).join(' &nbsp;&middot;&nbsp; ')}</p>`;html+=`<hr class="rw-header-rule">`;const sumL=(sections.summary||[]).filter(l=>cleanS(l).length>4);if(sumL.length){html+=`<h2 class="rw-section">ABOUT ME</h2><p class="rw-about">${xeR(sumL.join(' '))}</p><hr class="rw-rule">`;}const edu=sections.education||[];if(edu.length){html+=`<h2 class="rw-section">EDUCATION</h2>${buildEduHTML(edu,_gradeMode==='cgpa')}<hr class="rw-rule">`;}const proj=sections.projects||[];if(proj.length){html+=`<h2 class="rw-section">PROJECTS</h2><ul class="rw-list">${buildEntries(proj)}</ul><hr class="rw-rule">`;}const exp=sections.experience||[];if(exp.length){html+=`<h2 class="rw-section">WORK EXPERIENCE</h2><ul class="rw-list">${buildEntries(exp)}</ul><hr class="rw-rule">`;}const sk=sections.skills||[];if(sk.length){html+=`<h2 class="rw-section">SKILLS</h2><div class="rw-skills">`;for(const s of sk){const t=cleanS(s).replace(/^[•·●\-–*▪▸►\s]+/,'');if(t)html+=`<div class="rw-skill-item">${xeR(t)}</div>`;}html+=`</div><hr class="rw-rule">`;}const aw=[...(sections.awards||[]),...(sections.certifications||[])];if(aw.length)html+=`<h2 class="rw-section">AWARDS &amp; CERTIFICATIONS</h2><ul class="rw-list">${buildEntries(aw)}</ul>`;return html;}
+function downloadRewrittenPDF(){if(!_rwHtml)return;try{const{jsPDF}=window.jspdf;const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});const PW=210,PH=297,ML=18,MR=18,MT=18,MB=22,TW=174;let y=MT;function chkY(n){if(y+n>PH-MB){doc.addPage();y=MT;}}function txt(s,o={}){const fs=o.fs||11;doc.setFontSize(fs);doc.setFont('helvetica',o.bold?'bold':'normal');doc.setTextColor(...(o.col||[30,30,30]));const w=doc.splitTextToSize(String(s),o.w||TW);const lh=fs*.38;chkY(w.length*lh+2);doc.text(w,o.x||ML,y,o.align?{align:o.align}:{});y+=w.length*lh+(o.after!==undefined?o.after:2.5);}function rule(col=[200,185,200],w=.3){chkY(4);doc.setDrawColor(...col);doc.setLineWidth(w);doc.line(ML,y,PW-MR,y);y+=4;}function sec(t){chkY(10);doc.setFontSize(10);doc.setFont('helvetica','bold');doc.setTextColor(109,14,106);doc.text(t,ML,y);y+=1;doc.setDrawColor(109,14,106);doc.setLineWidth(.5);doc.line(ML,y,PW-MR,y);y+=5;}const wrap=document.createElement('div');wrap.innerHTML=_rwHtml;for(const node of wrap.children){const tag=node.tagName.toLowerCase();const t=node.textContent.trim();if(!t)continue;if(tag==='h1')txt(t,{fs:22,bold:true,col:[20,20,20],after:1,align:'center',x:PW/2});else if(tag==='p'&&node.classList.contains('rw-contact-line'))txt(t.split('·').map(s=>s.trim()).filter(Boolean).join('  ·  '),{fs:9,col:[80,80,80],after:1,align:'center',x:PW/2});else if(tag==='hr'&&node.classList.contains('rw-header-rule'))rule([180,160,180],.4);else if(tag==='hr')rule([220,205,220],.25);else if(tag==='h2'&&node.classList.contains('rw-section'))sec(t);else if(tag==='p'&&node.classList.contains('rw-about'))txt(t,{fs:10,col:[50,50,50],after:3});else if(tag==='p'&&node.classList.contains('rw-edu-inst'))txt(t,{fs:9.5,col:[100,100,100],after:1});else if(tag==='h3'&&node.classList.contains('rw-entry-role'))txt(t,{fs:10.5,bold:true,col:[20,20,20],after:1});else if(tag==='p'&&node.classList.contains('rw-edu-grade'))txt(t,{fs:9.5,col:[109,14,106],after:1});else if(tag==='div'&&node.classList.contains('rw-edu-gap'))y+=4;else if(tag==='ul'){for(const li of node.querySelectorAll('li')){const lt=li.textContent.trim();if(!lt)continue;const ls=doc.splitTextToSize(lt,TW-6);const lh=10*.38;chkY(ls.length*lh+1.5);doc.setFontSize(10);doc.setFont('helvetica','normal');doc.setTextColor(30,30,30);doc.text('•',ML,y);doc.text(ls,ML+5,y);y+=ls.length*lh+1.5;}y+=1;}else if(tag==='div'&&node.classList.contains('rw-skills')){const items=[...node.querySelectorAll('.rw-skill-item')].map(el=>el.textContent.trim()).filter(Boolean);const cw=TW/3;for(let i=0;i<items.length;i+=3){chkY(6);doc.setFontSize(9.5);doc.setFont('helvetica','normal');doc.setTextColor(30,30,30);for(let j=0;j<3;j++){if(items[i+j])doc.text('• '+items[i+j],ML+j*cw,y,{maxWidth:cw-2});}y+=5.5;}y+=2;}}doc.setFillColor(40,40,40);doc.rect(0,PH-8,PW,8,'F');doc.setFontSize(7.5);doc.setFont('helvetica','normal');doc.setTextColor(200,200,200);doc.text('Vidyavahini First Grade Degree College — Placement Cell',ML,PH-2.5);doc.text('Page 1 of 1',PW-MR,PH-2.5,{align:'right'});doc.save(`${(ST&&ST.name?ST.name.replace(/\s+/g,'_'):'Resume')}_Placement.pdf`);}catch(err){alert('PDF error: '+err.message);}}
+</script>
 </body>
-</html>
+</html>>
