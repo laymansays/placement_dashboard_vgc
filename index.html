@@ -174,6 +174,91 @@ body{
   border-top:1px solid rgba(109,14,106,0.25);
 }
 
+/* ── COMPANIES CAROUSEL ── */
+.companies-section{
+  position:relative;z-index:1;
+  padding:48px 0 52px;
+  display:none;
+}
+.companies-label{
+  display:flex;align-items:center;justify-content:center;
+  gap:16px;margin-bottom:28px;
+}
+.companies-label-line{
+  height:1px;width:80px;
+  background:linear-gradient(90deg,transparent,rgba(211,182,210,0.20));
+}
+.companies-label-line.right{
+  background:linear-gradient(-90deg,transparent,rgba(211,182,210,0.20));
+}
+.companies-label-text{
+  font-size:10.5px;font-weight:700;letter-spacing:0.14em;
+  color:rgba(255,255,255,0.28);white-space:nowrap;
+}
+
+.ticker-wrap{
+  overflow:hidden;position:relative;margin-bottom:12px;
+}
+.ticker-wrap::before,.ticker-wrap::after{
+  content:'';position:absolute;top:0;bottom:0;width:140px;z-index:2;pointer-events:none;
+}
+.ticker-wrap::before{left:0;background:linear-gradient(90deg,#1A0519 20%,transparent 100%);}
+.ticker-wrap::after{right:0;background:linear-gradient(-90deg,#1A0519 20%,transparent 100%);}
+
+.ticker-row{
+  display:flex;gap:12px;width:max-content;
+  will-change:transform;
+}
+.ticker-row.dir-left{animation:tickLeft linear infinite;}
+.ticker-row.dir-right{animation:tickRight linear infinite;}
+.ticker-row:hover{animation-play-state:paused;}
+@keyframes tickLeft{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+@keyframes tickRight{from{transform:translateX(-50%);}to{transform:translateX(0);}}
+
+/* ── COMPANY CHIP ── */
+.co-chip{
+  display:flex;align-items:center;gap:11px;
+  padding:11px 18px 11px 12px;
+  border-radius:16px;
+  background:rgba(109,14,106,0.10);
+  border:1.5px solid rgba(211,182,210,0.10);
+  backdrop-filter:blur(10px);
+  white-space:nowrap;flex-shrink:0;
+  cursor:default;
+  transition:background .2s,border-color .2s,transform .2s,box-shadow .2s;
+}
+.co-chip:hover{
+  background:rgba(109,14,106,0.22);
+  border-color:rgba(211,182,210,0.26);
+  transform:translateY(-3px);
+  box-shadow:0 8px 28px rgba(109,14,106,0.28);
+}
+.co-chip-logo{
+  width:40px;height:40px;border-radius:10px;
+  background:#fff;overflow:hidden;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:800;
+}
+.co-chip-info{display:flex;flex-direction:column;gap:3px;}
+.co-chip-name{
+  font-size:13px;font-weight:700;
+  color:rgba(255,255,255,0.88);
+  max-width:130px;overflow:hidden;text-overflow:ellipsis;
+}
+.co-chip-status{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:10.5px;font-weight:600;
+}
+.sdot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.s-placed{color:#4ADE80;}
+.s-placed .sdot{background:#4ADE80;box-shadow:0 0 5px #4ADE80;animation:pulse 2s ease-in-out infinite;}
+.s-ongoing{color:#FCD34D;}
+.s-ongoing .sdot{background:#FCD34D;}
+.s-active{color:#93C5FD;}
+.s-active .sdot{background:#93C5FD;}
+.s-upcoming{color:rgba(255,255,255,0.30);}
+.s-upcoming .sdot{background:rgba(255,255,255,0.22);}
+
 /* ── RESPONSIVE ── */
 @media(max-width:700px){
   .nav{padding:0 20px;}
@@ -262,13 +347,124 @@ body{
   </div>
 </section>
 
+<!-- ── COMPANIES CAROUSEL ── -->
+<div class="companies-section" id="companies-section">
+  <div class="companies-label">
+    <div class="companies-label-line"></div>
+    <span class="companies-label-text">COMPANIES HIRING FROM VIDYAVAHINI · 2025–26</span>
+    <div class="companies-label-line right"></div>
+  </div>
+  <div id="ticker-row-1-wrap" class="ticker-wrap"></div>
+  <div id="ticker-row-2-wrap" class="ticker-wrap"></div>
+</div>
+
 <footer class="footer">
   Vidyavahini First Grade Degree College · Placement Cell · 2025–26
 </footer>
 
 <script src="shared.js"></script>
 <script>
-/* ─── Index page: load stats in background ─── */
+/* ═══════════════════════════════════════════
+   COMPANY CAROUSEL
+═══════════════════════════════════════════ */
+const _CHIP_GRADS=[
+  ['#1e40af','#7c3aed'],['#0369a1','#0e7490'],['#065f46','#0891b2'],
+  ['#7c2d12','#b45309'],['#6b21a8','#db2777'],['#991b1b','#ea580c'],
+  ['#0f4c3a','#065f46'],['#3730a3','#1e40af']
+];
+const _CHIP_HINTS={
+  'tcs':'tcs.com','infosys':'infosys.com','wipro':'wipro.com',
+  'accenture':'accenture.com','cognizant':'cognizant.com',
+  'first source':'firstsource.com','firstsource':'firstsource.com',
+  'fyers':'fyers.in','rupeek':'rupeek.com','codeyoung':'codeyoung.com',
+  'interns elite':'internselite.com','genz':'genzeducatewing.com',
+  'cloud unicorn':'cloudunicorn.in','idea infinity':'ideainfinity.in',
+  'deloitte':'deloitte.com','kpmg':'kpmg.com','ibm':'ibm.com',
+  'oracle':'oracle.com','zoho':'zoho.com','freshworks':'freshworks.com'
+};
+function _chipGrad(i){const p=_CHIP_GRADS[i%_CHIP_GRADS.length];return`linear-gradient(135deg,${p[0]},${p[1]})`;}
+function _chipIni(n){return(n||'?').split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]||'').join('').toUpperCase()||'?';}
+function _chipDomain(name,web){
+  if(web){try{const u=web.startsWith('http')?web:'https://'+web;return new URL(u).hostname.replace(/^www\./,'');}catch(e){}}
+  const n=(name||'').toLowerCase();
+  for(const[k,v]of Object.entries(_CHIP_HINTS)){if(n.includes(k))return v;}
+  return n.replace(/[^a-z0-9]/g,'')+'.com';
+}
+
+function _makeChip(c){
+  const d=_chipDomain(c.name,c.website);
+  const cb=`https://logo.clearbit.com/${d}?size=80`;
+  const wf=`https://${d}/favicon.ico`;
+  const gf=`https://www.google.com/s2/favicons?domain=${d}&sz=64`;
+  const g=_chipGrad(c.id-1);
+  const letters=_chipIni(c.name);
+  // Escape for inline onerror attribute
+  const gEsc=g.replace(/'/g,"\\'");
+  return `<div class="co-chip">
+    <div class="co-chip-logo">
+      <img src="${cb}" style="width:100%;height:100%;object-fit:contain;padding:4px;"
+        onerror="if(this.dataset.fb==='2'){this.remove();this.parentElement.style.background='${gEsc}';this.parentElement.style.color='#fff';this.parentElement.textContent='${letters}';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='${gf}';}else{this.dataset.fb='1';this.src='${wf}';}"/>
+    </div>
+    <div class="co-chip-info">
+      <span class="co-chip-name">${c.name}</span>
+      <span class="co-chip-status s-upcoming" data-chip-id="${c.id}">
+        <span class="sdot"></span>Upcoming
+      </span>
+    </div>
+  </div>`;
+}
+
+function _setTickerSpeed(rowEl, pxPerSec){
+  // scrollWidth is 2× content because items are doubled
+  const w = rowEl.scrollWidth / 2;
+  rowEl.style.animationDuration = (w / pxPerSec).toFixed(1) + 's';
+}
+
+function buildCarousel(companies){
+  if(!companies||!companies.length) return;
+  const sec = document.getElementById('companies-section');
+  if(!sec) return;
+
+  // Split into two rows (alternate company by index)
+  const row1 = companies.filter((_,i)=>i%2===0);
+  const row2 = companies.filter((_,i)=>i%2!==0);
+
+  function buildRow(list, dir, wrapId){
+    if(!list.length) return;
+    const html = list.map(_makeChip).join('');
+    const row  = document.createElement('div');
+    row.className = `ticker-row ${dir}`;
+    row.innerHTML  = html + html; // duplicate for seamless loop
+    const wrap = document.getElementById(wrapId);
+    if(wrap){ wrap.innerHTML=''; wrap.appendChild(row); }
+    // Set speed after DOM insertion so scrollWidth is valid
+    requestAnimationFrame(()=>_setTickerSpeed(row, dir==='dir-left' ? 45 : 36));
+  }
+
+  buildRow(row1, 'dir-left',  'ticker-row-1-wrap');
+  if(row2.length) buildRow(row2, 'dir-right', 'ticker-row-2-wrap');
+  else document.getElementById('ticker-row-2-wrap').style.display='none';
+
+  sec.style.display = 'block';
+}
+
+function updateChipStatus(id, key){
+  const map = {
+    placed:  {cls:'s-placed',  label:'Placed ✓'},
+    ongoing: {cls:'s-ongoing', label:'Ongoing'},
+    active:  {cls:'s-active',  label:'Registered'},
+    upcoming:{cls:'s-upcoming',label:'Upcoming'}
+  };
+  const s = map[key] || map.upcoming;
+  document.querySelectorAll(`[data-chip-id="${id}"]`).forEach(el=>{
+    el.className = `co-chip-status ${s.cls}`;
+    el.innerHTML = `<span class="sdot"></span>${s.label}`;
+  });
+}
+
+/* ═══════════════════════════════════════════
+   STATS LOADER
+═══════════════════════════════════════════ */
 
 const setNum = (id, val) => {
   const el = document.getElementById(id);
@@ -296,6 +492,7 @@ async function loadIndexStats(){
   try{
     companies = await loadConfig();
     setNum('st-companies', companies.length);
+    buildCarousel(companies); // ← build carousel as soon as names are known
   }catch(e){
     setNum('st-companies', '—');
     setNum('st-reg', '—');
@@ -327,6 +524,10 @@ async function loadIndexStats(){
       totalSel += sel;
       // Mirror dashboard: drive is "done" when sel > 0 OR int > 0
       if(sel > 0 || int_ > 0) drivesDone++;
+
+      // ← Update this company's chip status in the carousel
+      const statusKey = sel > 0 ? 'placed' : int_ > 0 ? 'ongoing' : reg > 0 ? 'active' : 'upcoming';
+      updateChipStatus(c.id, statusKey);
     }catch(e){
       console.warn('[stats] company', c.name, e.message);
     }
