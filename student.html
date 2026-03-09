@@ -112,9 +112,9 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;}
 .elig-sum{font-size:11.5px;color:#64748B;margin-bottom:10px;}
 .btn-apply-card{width:100%;padding:10px;border-radius:10px;border:none;background:linear-gradient(135deg,#570B54,#6D0E6A);color:#fff;font-size:13px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;transition:all .2s;}
 .btn-apply-card:hover{opacity:.9;}
-.co-card-upcoming{border-color:#FEF3C7;background:#FFFDF5;}
-.co-card-upcoming:hover{border-color:#FDE68A;box-shadow:0 6px 20px rgba(133,77,14,.10);}
-.btn-upcoming-card{background:linear-gradient(135deg,#92400E,#B45309);}
+.co-card-upcoming{border-color:#BFDBFE;background:#F0F7FF;}
+.co-card-upcoming:hover{border-color:#93C5FD;box-shadow:0 6px 20px rgba(29,78,216,.10);}
+.btn-upcoming-card{background:linear-gradient(135deg,#1D4ED8,#3B82F6);}
 
 /* ── STATUS BADGE ON CARDS ── */
 .status-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;font-size:11.5px;font-weight:700;margin-bottom:8px;}
@@ -717,9 +717,9 @@ function renderAvailable(){
   const applied=new Set(COMPS.filter(c=>{const s=STATUS[c.id];return s&&(s.reg||s.int||s.sel);}).map(c=>c.id));
   const avail=COMPS.filter(c=>!applied.has(c.id));
   const stLc=c=>c.adminStatus.toLowerCase().trim();
-  const isCompleted=c=>stLc(c)==='completed';
-  const isUpcoming=c=>stLc(c)===''||stLc(c)==='registrations done';
-  const isOpen=c=>!isCompleted(c)&&!isUpcoming(c);
+  const isOpen    =c=>stLc(c)==='registrations started'||stLc(c)==='ongoing';
+  const isCompleted=c=>stLc(c)==='completed'||stLc(c)==='closed';
+  const isUpcoming =c=>!isOpen(c)&&!isCompleted(c); // blank + anything else
   const open=avail.filter(isOpen);
   const upcoming=avail.filter(isUpcoming);
   const done=avail.filter(isCompleted);
@@ -779,21 +779,21 @@ function renderAvailable(){
     ].filter(Boolean).join('');
     return`<div class="co-card co-card-upcoming" onclick="openCoModal(${c.id})">
       <div class="co-card-head">${logoHtml(c.name,c.website,c.id-1,52)}<div class="co-card-name">${xe(c.name)}</div></div>
-      ${statusBadge(c.adminStatus||'Registrations Done')}
+      ${c.adminStatus?statusBadge(c.adminStatus):''}
       <div class="co-chips">${chips||''}</div>
       <button class="btn-apply-card btn-upcoming-card" onclick="event.stopPropagation();openCoModal(${c.id})">View Details &#8594;</button>
     </div>`;
   }).join('');
 
-  const openSec  = open.length     ? mkSubHead('Open for Applications',open.length,'#F7F0F7','#6D0E6A')     +`<div class="co-grid">${openCards}</div>`   :'';
-  const upcomSec = upcoming.length ? mkSubHead('Registrations Closed',upcoming.length,'#FEF9C3','#854D0E')  +`<div class="co-grid">${upcomingCards}</div>`:'';
-  const doneSec  = done.length     ? mkSubHead('Past Placement Drives',done.length,'#F1F5F9','#64748B')     +`<div class="co-grid">${doneCards}</div>`    :'';
+  const openSec  = open.length     ? mkSubHead('Available Companies',open.length,'#F7F0F7','#6D0E6A')     +`<div class="co-grid">${openCards}</div>`   :'';
+  const upcomSec = upcoming.length ? mkSubHead('Upcoming',upcoming.length,'#EFF6FF','#1D4ED8')  +`<div class="co-grid">${upcomingCards}</div>`:'';
+  const doneSec  = done.length     ? mkSubHead('Drives Completed',done.length,'#F1F5F9','#64748B')     +`<div class="co-grid">${doneCards}</div>`    :'';
   const gap = n => n ? '<div style="height:28px;"></div>' : '';
 
   document.getElementById('avail-wrap').innerHTML=`
     <div class="sp-section">
       <div class="sp-sec-head">
-        <span class="sp-sec-title">&#127962; Companies</span>
+        <span class="sp-sec-title">&#127962; Companies for Placements</span>
         ${open.length?`<span style="background:#F7F0F7;color:#6D0E6A;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;">${open.length} open</span>`:''}
       </div>
       ${openSec}${gap(open.length&&(upcoming.length||done.length))}${upcomSec}${gap(upcoming.length&&done.length)}${doneSec}
