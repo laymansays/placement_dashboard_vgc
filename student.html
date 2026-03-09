@@ -77,6 +77,9 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;}
 .btn-resume{display:block;width:100%;padding:11px;border-radius:10px;background:#F7F0F7;color:#6D0E6A;border:1.5px solid #D3B6D2;text-decoration:none;text-align:center;font-size:13px;font-weight:700;font-family:'Inter',sans-serif;transition:all .15s;}
 .btn-resume:hover{background:#EDE0EC;}
 .btn-rewrite{display:block;width:100%;padding:11px;border-radius:10px;border:none;background:linear-gradient(135deg,#570B54,#6D0E6A);color:#fff;font-size:13px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;transition:all .2s;}
+.btn-resume-formatted{background:linear-gradient(135deg,#1a7a1a,#2d9e2d)!important;}
+.btn-reset-resume{background:none;border:1px solid #aaa;color:#666;font-size:11px;padding:4px 10px;border-radius:20px;cursor:pointer;margin-top:4px;}
+.btn-reset-resume:hover{border-color:#6D0E6A;color:#6D0E6A;}
 .btn-rewrite:hover{opacity:.9;transform:translateY(-1px);}
 
 /* ── SECTIONS ── */
@@ -461,7 +464,8 @@ async function doLogin(email){
       backlogs:  row[8]||'',
       tenth:     parseFloat((row[9]||'').replace('%',''))||0,
       twelfth:   parseFloat((row[10]||'').replace('%',''))||0,
-      resume:    row[11]||'',
+      resume:        row[11]||'',
+      formattedResume: row[12]||'',
     };
 
     showLoad('Loading company data\u2026','Fetching placement configuration');
@@ -678,7 +682,25 @@ function renderProfile(elig){
         ${pfRow('\ud83d\udcca 12th %',s.twelfth+'%')}
         ${pfRow('\u26a0\ufe0f Backlogs',s.backlogs)}
       </div>
-      ${s.resume?`<div class="resume-btn-group"><a href="${xe(s.resume)}" target="_blank" rel="noopener" class="btn-resume">&#128196; View Resume &#x2197;</a><button class="btn-rewrite" onclick="openRewriteModal()">&#128203; Format for Placement</button></div>`:''}
+      ${ (()=>{
+  if(s.formattedResume){
+    // Formatted resume exists — show it, hide original, offer reset
+    return `<div class="resume-btn-group">
+      <a href="${xe(s.formattedResume)}" target="_blank" rel="noopener"
+         class="btn-resume btn-resume-formatted">&#10003; Formatted Resume &#x2197;</a>
+      <button class="btn-rewrite" onclick="openRewriteModal()">&#128203; Re-format</button>
+      <button class="btn-reset-resume" onclick="resetFormattedResume()"
+         title="Remove formatted resume and restore original">&#8635; Reset to Original</button>
+    </div>`;
+  } else if(s.resume){
+    // No formatted resume yet — show original + format button
+    return `<div class="resume-btn-group">
+      <a href="${xe(s.resume)}" target="_blank" rel="noopener"
+         class="btn-resume">&#128196; View Resume &#x2197;</a>
+      <button class="btn-rewrite" onclick="openRewriteModal()">&#128203; Format for Placement</button>
+    </div>`;
+  } return '';
+})() }
     </div>`;
 }
 
@@ -1392,7 +1414,114 @@ for(let pg=1;pg<=totalPages;pg++){
 /* ── save ── */
 const fname=(ST&&ST.name?ST.name.trim().replace(/\s+/g,'_'):'Resume');
 doc.save(fname+"_Resume_VGI'26.pdf");
+try{
+  const pdfBlob=doc.output('blob');
+  await uploadFormattedResume(pdfBlob, fname+"_Resume_VGI'26.pdf");
+}catch(uErr){console.warn('[Portal] Auto-upload skipped:',uErr.message);}
 }catch(err){alert('PDF error: '+err.message);}}
+/* ═══════════════════════════════════════════════════════
+   uploadFormattedResume — Drive upload + STUDENT_MASTER write
+   ═══════════════════════════════════════════════════════ */
+/* Reset formatted resume — clears col M and restores original view */
+async function resetFormattedResume(){
+  if(!confirm('Remove formatted resume and restore your original resume link?'))return;
+  const CLIENT_ID='232351760567-mtg3h8nbdngjsomsivvtv995nb6fsnd8.apps.googleusercontent.com';
+  const SHEET_ID='1Mb9jrzZMSta5NYs28i3STS2tYNqhMtabj3wktvHiYmw';
+  const TAB='STUDENT_MASTER';
+  try{
+    const token=await new Promise((ok,fail)=>{
+      const cl=google.accounts.oauth2.initTokenClient({
+        client_id:CLIENT_ID,
+        scope:'https://www.googleapis.com/auth/spreadsheets',
+        callback:r=>r.error?fail(new Error(r.error)):ok(r.access_token),
+      });
+      cl.requestAccessToken({prompt:''});
+    });
+    // Find row by email
+    const rr=await fetch(
+      `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(TAB)}!D:D`,
+      {headers:{Authorization:`Bearer ${token}`}});
+    const {values=[]}=await rr.json();
+    const rowIdx=values.findIndex(r=>(r[0]||'').toLowerCase().trim()===ST.email.toLowerCase().trim());
+    if(rowIdx<0)throw new Error('Row not found');
+    const sheetRow=rowIdx+1;
+    // Clear col M
+    await fetch(
+      `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(TAB)}!M${sheetRow}?valueInputOption=RAW`,
+      {method:'PUT',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},
+       body:JSON.stringify({values:[['']]})
+    });
+    ST.formattedResume='';
+    const isPlaced=Object.values(STATUS).some(s=>s&&s.sel);
+    renderProfile(!isPlaced);
+    console.log('[Portal] Formatted resume cleared.');
+  }catch(e){alert('Could not reset: '+e.message);}
+}
+
+async function uploadFormattedResume(pdfBlob, filename){
+  const CLIENT_ID='232351760567-mtg3h8nbdngjsomsivvtv995nb6fsnd8.apps.googleusercontent.com';
+  const SHEET_ID='1Mb9jrzZMSta5NYs28i3STS2tYNqhMtabj3wktvHiYmw';
+  const TAB='STUDENT_MASTER';
+
+  /* 1. OAuth token with drive.file + spreadsheets */
+  const token=await new Promise((ok,fail)=>{
+    if(typeof google==='undefined'||!google.accounts){fail(new Error('GIS not loaded'));return;}
+    const cl=google.accounts.oauth2.initTokenClient({
+      client_id:CLIENT_ID,
+      scope:'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/spreadsheets',
+      callback:r=>r.error?fail(new Error(r.error)):ok(r.access_token),
+    });
+    cl.requestAccessToken({prompt:''});
+  });
+
+  /* 2. Upload PDF to Drive (multipart) */
+  const meta=JSON.stringify({name:filename,mimeType:'application/pdf'});
+  const BD='-------VGI26BOUNDARY';
+  const body=new Blob([
+    `--${BD}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n`,meta,
+    `\r\n--${BD}\r\nContent-Type: application/pdf\r\n\r\n`,pdfBlob,
+    `\r\n--${BD}--`
+  ],{type:`multipart/related; boundary="${BD}"`});
+
+  const up=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',
+    {method:'POST',headers:{Authorization:`Bearer ${token}`},body});
+  if(!up.ok)throw new Error('Drive upload HTTP '+up.status);
+  const {id:fid}=await up.json();
+
+  /* 3. Make file viewable by anyone with link */
+  await fetch(`https://www.googleapis.com/drive/v3/files/${fid}/permissions`,{
+    method:'POST',
+    headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},
+    body:JSON.stringify({role:'reader',type:'anyone'})
+  });
+  const fileUrl=`https://drive.google.com/file/d/${fid}/view?usp=sharing`;
+
+  /* 4. Find student row in STUDENT_MASTER by email (col D = index 3) */
+  const rr=await fetch(
+    `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(TAB)}!D:D`,
+    {headers:{Authorization:`Bearer ${token}`}}
+  );
+  if(!rr.ok)throw new Error('Sheets read HTTP '+rr.status);
+  const {values=[]}=await rr.json();
+  const rowIdx=values.findIndex(r=>(r[0]||'').toLowerCase().trim()===ST.email.toLowerCase().trim());
+  if(rowIdx<0)throw new Error('Student email not found in STUDENT_MASTER');
+  const sheetRow=rowIdx+1; // 1-indexed
+
+  /* 5. Write Drive URL to col M of that row */
+  const wr=await fetch(
+    `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(TAB)}!M${sheetRow}?valueInputOption=RAW`,
+    {method:'PUT',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},
+     body:JSON.stringify({values:[[fileUrl]]})}
+  );
+  if(!wr.ok)throw new Error('Sheets write HTTP '+wr.status);
+
+  /* 6. Update in-memory ST and re-render sidebar */
+  ST.formattedResume=fileUrl;
+  const isPlaced=Object.values(STATUS).some(s=>s&&s.sel);
+  renderProfile(!isPlaced);
+  console.log('[Portal] Formatted resume saved to Drive+Sheets:',fileUrl);
+}
+
 </script>
 </body>
 </html>>
