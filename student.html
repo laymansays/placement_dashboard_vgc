@@ -25,7 +25,7 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;}
 .login-card{background:#fff;border-radius:24px;padding:52px 44px 44px;width:100%;max-width:440px;box-shadow:0 32px 80px rgba(0,0,0,.35);position:relative;}
 .login-back{font-size:13px;color:#94A3B8;text-decoration:none;display:inline-block;margin-bottom:24px;}
 .login-back:hover{color:#6D0E6A;}
-.login-logo{width:64px;height:64px;border-radius:16px;overflow:hidden;background:linear-gradient(135deg,#6D0E6A,#41083F);display:flex;align-items:center;justify-content:center;color:#fff;font-size:28px;font-weight:800;margin:0 auto 24px;}
+.login-logo{width:72px;height:72px;border-radius:18px;overflow:hidden;background:#fff;display:flex;align-items:center;justify-content:center;color:#6D0E6A;font-size:28px;font-weight:800;margin:0 auto 24px;box-shadow:0 8px 28px rgba(109,14,106,.18);}
 .login-heading{font-size:26px;font-weight:800;text-align:center;color:#0F172A;margin-bottom:6px;}
 .login-sub{font-size:13px;color:#64748B;text-align:center;line-height:1.5;margin-bottom:32px;}
 .form-lbl{font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:8px;}
@@ -567,7 +567,7 @@ async function loadStatus(){
     const has=rows=>rows.some(r=>(r[2]||'').toLowerCase().trim()===em);
     const selData=sr.length>1&&(sr[0][2]||'').toLowerCase().includes('email')?sr.slice(1):sr;
     const placedNames=selData.filter(r=>r.some(v=>v)).map(r=>(r[2]||r[1]||r[3]||'').trim()).filter(Boolean);
-    STATUS[c.id]={reg:has(rr),int:has(ir),sel:has(sr),driveComplete:placedNames.length>0,placedNames};
+    STATUS[c.id]={reg:has(rr),int:has(ir),sel:has(sr),driveComplete:c.adminStatus.toLowerCase()==='completed',placedNames};
   }));
 }
 
@@ -931,11 +931,74 @@ function showUploadFallback(err){setRwBody(`${err?`<div class="rw-error">&#9888;
 <label class="rw-drop-zone" id="rw-drop"><div class="rw-drop-icon">&#128196;</div><div class="rw-drop-title">Upload Resume PDF</div><div class="rw-drop-hint">Click here or drag &amp; drop your PDF</div><div class="rw-drop-note">Processed locally — not uploaded to any server</div></label><input type="file" id="rw-file-inp" accept=".pdf" style="display:none"/>`);document.getElementById('rw-file-inp').onchange=e=>{if(e.target.files[0])handleResumeFile(e.target.files[0]);};const drop=document.getElementById('rw-drop');drop.addEventListener('click',()=>document.getElementById('rw-file-inp').click());drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('rw-drag-over');});drop.addEventListener('dragleave',()=>drop.classList.remove('rw-drag-over'));drop.addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('rw-drag-over');const f=e.dataTransfer.files[0];if(f&&f.type==='application/pdf')handleResumeFile(f);});}
 async function handleResumeFile(file){if(!file||file.type!=='application/pdf'){setRwBody('<div class="rw-error">&#10060; Please select a PDF file.</div>');return;}try{setLoading('Reading PDF…','Extracting text from your resume');const text=await extractTextFromPDF(file);setLoading('Formatting…','Applying placement cell template');const parsed=parseResumeText(text);if(typeof cleanParsedSections==='function')cleanParsedSections(parsed.sections,_gradeMode==='cgpa');const html=buildResumeHTML(parsed);_rwHtml=html;setRwBody(`<div class="rw-preview">${html}</div>`);document.getElementById('rw-dl-btn').style.display='block';}catch(err){setRwBody(`<div class="rw-error">&#10060; ${err.message||'Failed to read PDF.'}</div><div style="text-align:center;margin-top:16px;"><button style="padding:9px 20px;border:1.5px solid #6D0E6A;border-radius:8px;background:#fff;color:#6D0E6A;font-size:12.5px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;" onclick="showUploadFallback('')">&#8617; Upload Instead</button></div>`);}}
 async function startExtractAndFormat(){if(!ST||!ST.resume){showUploadFallback('No resume URL linked to your profile.');return;}if(typeof fetchResumeFile!=='function'){showUploadFallback('Drive connector not loaded — upload below.');return;}setLoading('Connecting to Google Drive…','Authenticating with your Google account');try{const file=await fetchResumeFile(ST.resume,(msg)=>setLoading('Fetching resume…',msg));await handleResumeFile(file);}catch(err){showUploadFallback(err.message||'Could not fetch from Google Drive.');}}
-async function extractTextFromPDF(file){const pdfjsLib=window['pdfjs-dist/build/pdf'];if(!pdfjsLib)throw new Error('PDF.js not loaded');pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';const buf=await file.arrayBuffer();const pdf=await pdfjsLib.getDocument({data:buf}).promise;let lines=[];for(let p=1;p<=pdf.numPages;p++){const page=await pdf.getPage(p);const tc=await page.getTextContent();const vp=page.getViewport({scale:1});const byY={};for(const item of tc.items){const y=Math.round(vp.height-item.transform[5]);if(!byY[y])byY[y]=[];byY[y].push(item.str);}const sorted=Object.keys(byY).sort((a,b)=>+a-+b);for(const y of sorted)lines.push(byY[y].join(' ').trim());}return lines.filter(l=>l.trim()).join('\n');}
+async function fixCharSpacing(s){
+  s=s.replace(/(?:^|(?<=\s))(?:[A-Za-z] ){2,}[A-Za-z](?=\s|$)/g,m=>m.replace(/ /g,''));
+  s=s.replace(/\b([A-Za-z]) ([a-z]{2,})\b/g,'$1$2');
+  return s;
+}
+async function extractTextFromPDF(file){
+  const pdfjsLib=window['pdfjs-dist/build/pdf'];
+  if(!pdfjsLib)throw new Error('PDF.js not loaded');
+  pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  const buf=await file.arrayBuffer();
+  const pdf=await pdfjsLib.getDocument({data:buf}).promise;
+  let lines=[];
+  for(let p=1;p<=pdf.numPages;p++){
+    const page=await pdf.getPage(p);
+    const tc=await page.getTextContent();
+    const vp=page.getViewport({scale:1});
+    const byY={};
+    for(const item of tc.items){
+      if(!item.str)continue;
+      const y=Math.round((vp.height-item.transform[5])*2)/2;
+      if(!byY[y])byY[y]=[];
+      byY[y].push({str:item.str,x:item.transform[4],w:item.width||0});
+    }
+    const sorted=Object.keys(byY).sort((a,b)=>+a-+b);
+    for(const y of sorted){
+      const row=byY[y].sort((a,b)=>a.x-b.x);
+      let line='';
+      for(let i=0;i<row.length;i++){
+        if(i===0){line=row[i].str;continue;}
+        const prev=row[i-1];
+        const expectedX=prev.x+prev.w;
+        const gap=row[i].x-expectedX;
+        line+=(gap>1?' ':'')+row[i].str;
+      }
+      line=fixCharSpacing(line).replace(/\s{2,}/g,' ').trim();
+      if(line)lines.push(line);
+    }
+  }
+  return lines.join('\n');
+}
+
 function xeR(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function cleanS(s){return String(s||'').replace(/\s+/g,' ').trim();}
 function stripEmoji(s){return String(s||'').replace(/[\u{1F300}-\u{1FFFF}]/gu,'').trim();}
-const OCR_CORRECTIONS=[[/\bC\s+s?EET\b/gi,'CSEET'],[/\bCS\s+EET\b/gi,'CSEET'],[/\bj\.\s*[Pp]\.\s*Morgan\b/g,'J.P. Morgan'],[/\bJ\.\s*[Pp]\.\s*Morgan\b/g,'J.P. Morgan'],[/\bcollege\s*-\s*[Ll]evel\b/gi,'college-level'],[/\bM\s+S\s+Word\b/gi,'MS Word'],[/\bM\s+S\s+Excel\b/gi,'MS Excel'],[/\bPower\s*Point\b/gi,'PowerPoint'],[/\bTally\s+Prime\b/gi,'Tally Prime'],[/\bG\s+S\s+T\b/gi,'GST'],[/\bT\s+D\s+S\b/gi,'TDS'],[/\(\s+([A-Za-z])/g,'($1'],[/([A-Za-z])\s+\)/g,'$1)']];
+const OCR_CORRECTIONS=[
+  [/\bC\s*S?\s*E\s*E\s*T\b/gi,'CSEET'],
+  [/\bj\.\s*[Pp]\.\s*Morgan\b/g,'J.P. Morgan'],
+  [/\bJ\.\s*[Pp]\.\s*Morgan\b/g,'J.P. Morgan'],
+  [/\bcollege\s*-\s*[Ll]evel\b/gi,'college-level'],
+  [/\bM\s*[Ss]\s+Word\b/gi,'MS Word'],
+  [/\bM\s*[Ss]\s+Excel\b/gi,'MS Excel'],
+  [/\bPower\s*Point\b/gi,'PowerPoint'],
+  [/\bTally\s+Prime\b/gi,'Tally Prime'],
+  [/\bG\s+S\s+T\b/gi,'GST'],
+  [/\bT\s+D\s+S\b/gi,'TDS'],
+  [/\bB\.?\s*\.?\s*Com\b/gi,'B.Com'],
+  [/\bP\s+U\s+College\b/gi,'PU College'],
+  [/\bPre\s*-\s*University\b/gi,'PreUniversity'],
+  [/\(\s+([A-Za-z])/g,'($1'],
+  [/([A-Za-z])\s+\)/g,'$1)'],
+  [/\bN\s+[Ss]\s*[Ss]\b/g,'NSS'],
+  [/\bI\s+C\s+S\s+I\b/g,'ICSI'],
+  [/\bI\s+C\s+A\s+I\b/g,'ICAI'],
+  [/\bN\s+I\s+S\s+M\b/g,'NISM'],
+  [/\bS\s+E\s+B\s+I\b/g,'SEBI'],
+  [/\bB\s+A\s+J\s+A\s+J\b/gi,'BAJAJ'],
+  [/J\s*\.\s*P\s*\./g,'J.P.'],
+];
 function applyOCR(text){for(const[rx,rep]of OCR_CORRECTIONS)text=text.replace(rx,rep);return text;}
 const INST_RX=/\b(college|school|university|institute|vidyavahini|polytechnic|academy)\b/i;
 const SEC_HDR={
@@ -953,8 +1016,7 @@ const PN=new Set(['Excel','Word','PowerPoint','Tally','Python','Java','Linux','W
 const SW=new Set(['a','an','the','and','but','or','for','in','on','at','to','by','of','up','as','is','are','was','with','from']);
 function toSC(str){if(!str)return str;return str.trim().split(/\s+/).map((w,i)=>{if(/^[A-Z](\.[A-Z])+\.?$/.test(w))return w;const b=w.replace(/[^a-zA-Z]/g,'');const U=b.toUpperCase();if(AU.has(U))return w.replace(b,U);if(PN.has(b))return w.replace(b,b.charAt(0).toUpperCase()+b.slice(1).toLowerCase());if(i===0)return w.charAt(0).toUpperCase()+w.slice(1).toLowerCase();if(SW.has(b.toLowerCase()))return w.toLowerCase();return w.charAt(0).toLowerCase()+w.slice(1);}).join(' ');}
 function rejoinBullets(lines){const BR=/^[•·●\-–*▪▸►]/;const result=[];for(let i=0;i<lines.length;i++){const cur=cleanS(lines[i]);const next=lines[i+1]?cleanS(lines[i+1]):null;if(!cur)continue;if(!/[.!?:)]$/.test(cur)&&next&&!BR.test(next)){lines[i+1]=cur+' '+next.replace(BR,'').trim();continue;}result.push(cur);}return result;}
-const WV=[[/\bwas responsible for\b/gi,'managed'],[/\bresponsible for\b/gi,'managed'],[/\bworked on\b/gi,'developed'],[/\bworked with\b/gi,'collaborated with'],[/\bwas part of\b/gi,'contributed to'],[/\bhelped (?:to |in )?/gi,'assisted in '],[/\bmade a\b/gi,'developed a'],[/\bmade the\b/gi,'developed the']];
-function procBullet(raw){let t=cleanS(raw).replace(/^[•·●\-–*▪▸►\s]+/,'');for(const[rx,rep]of WV)t=t.replace(rx,rep);t=toSC(t);t=t.replace(/\.\s*$/,'');return t;}
+const WV=[[/\bwas responsible for\b/gi,'managed'],[/\bresponsible for\b/gi,'managed'],[/\bworked on\b/gi,'developed'],[/\bworked with\b/gi,'collaborated with'],[/\bwas part of\b/gi,'contributed to'],[/\bhelped (?:to |in )?/gi,'assisted in '],[/\bmade a\b/gi,'developed a'],[/\bmade the\b/gi,'developed the']];function procBullet(raw){let t=cleanS(raw).replace(/^[•·●\-–*▪▸►\s]+/,'');for(const[rx,rep]of WV)t=t.replace(rx,rep);t=toSC(t);t=t.replace(/\.\s*$/,'');return t;}
 function cleanParsedSections(sections,wantCGPA){if(sections.summary&&sections.summary.length){let text=sections.summary.map(cleanS).join(' ');text=text.charAt(0).toUpperCase()+text.slice(1);if(!/[.!?]$/.test(text))text+='.';sections.summary=[text];}for(const sec of['projects','experience','awards','certifications']){if(!sections[sec]||!sections[sec].length)continue;sections[sec]=rejoinBullets(sections[sec]).map(procBullet).filter(Boolean);}if(sections.skills&&sections.skills.length)sections.skills=sections.skills.map(l=>applyOCR(cleanS(l).replace(/^[•·●\-–*▪▸►\s]+/,''))).filter(Boolean);return sections;}
 function buildEntries(lines){return rejoinBullets(lines).map(l=>{const t=procBullet(l);return t?`<li>${xeR(t)}</li>`:''}).filter(Boolean).join('');}
 function buildResumeHTML(parsed){const{name,email,phone,linkedin,github,sections}=parsed;let html='';if(name)html+=`<h1 class="rw-name">${xeR(stripEmoji(name))}</h1>`;const contacts=[];if(phone)contacts.push(stripEmoji(phone));if(email)contacts.push(email);if(linkedin)contacts.push(linkedin.replace(/^https?:\/\/(www\.)?/i,''));if(github)contacts.push(github.replace(/^https?:\/\/(www\.)?/i,''));if(contacts.length)html+=`<p class="rw-contact-line">${contacts.map(xeR).join(' &nbsp;&middot;&nbsp; ')}</p>`;html+=`<hr class="rw-header-rule">`;const sumL=(sections.summary||[]).filter(l=>cleanS(l).length>4);if(sumL.length){html+=`<h2 class="rw-section">ABOUT ME</h2><p class="rw-about">${xeR(sumL.join(' '))}</p><hr class="rw-rule">`;}const edu=sections.education||[];if(edu.length){html+=`<h2 class="rw-section">EDUCATION</h2>${buildEduHTML(edu,_gradeMode==='cgpa')}<hr class="rw-rule">`;}const proj=sections.projects||[];if(proj.length){html+=`<h2 class="rw-section">PROJECTS</h2><ul class="rw-list">${buildEntries(proj)}</ul><hr class="rw-rule">`;}const exp=sections.experience||[];if(exp.length){html+=`<h2 class="rw-section">WORK EXPERIENCE</h2><ul class="rw-list">${buildEntries(exp)}</ul><hr class="rw-rule">`;}const sk=sections.skills||[];if(sk.length){html+=`<h2 class="rw-section">SKILLS</h2><div class="rw-skills">`;for(const s of sk){const t=cleanS(s).replace(/^[•·●\-–*▪▸►\s]+/,'');if(t)html+=`<div class="rw-skill-item">${xeR(t)}</div>`;}html+=`</div><hr class="rw-rule">`;}const aw=[...(sections.awards||[]),...(sections.certifications||[])];if(aw.length)html+=`<h2 class="rw-section">AWARDS &amp; CERTIFICATIONS</h2><ul class="rw-list">${buildEntries(aw)}</ul>`;return html;}
