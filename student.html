@@ -32,7 +32,7 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
   text-decoration:none;font-weight:600;transition:color .15s;
 }
 .login-back:hover{color:#2563EB;}
-.login-logo{
+.login-logo{overflow:hidden;
   width:64px;height:64px;border-radius:18px;margin:0 auto 20px;
   background:linear-gradient(135deg,#2563EB,#7c3aed);
   display:flex;align-items:center;justify-content:center;
@@ -380,6 +380,14 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
 .btn-resume:hover{background:#EDE0EC;}
 .btn-rewrite{display:block;width:100%;padding:11px;border-radius:10px;border:none;background:linear-gradient(135deg,#570B54,#6D0E6A);color:#fff;font-size:13px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;transition:all .2s;}
 .btn-rewrite:hover{opacity:.9;transform:translateY(-1px);}
+
+/* ── Status badge on company cards ── */
+.status-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;
+  border-radius:999px;font-size:11.5px;font-weight:700;margin-bottom:10px;}
+.status-completed{background:#D1FAE5;color:#065F46;}
+.status-ongoing{background:#EFF6FF;color:#1D4ED8;}
+.status-registrations{background:#FEF9C3;color:#854D0E;}
+.status-default{background:#F1F5F9;color:#475569;}
 </style>
 </head>
 <body>
@@ -394,14 +402,14 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-fon
 <!-- \u2500\u2500 LOGIN PAGE \u2500\u2500 -->
 <div id="login-page" class="login-page">
   <div class="login-card">
-    <a href="index.html" class="login-back">\u2190 Home</a>
-    <div class="login-logo">V</div>
+    <a href="index.html" class="login-back">&larr; Home</a>
+    <div class="login-logo"><img src="logo.jpg" alt="V" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"/><span style="display:none;width:100%;height:100%;align-items:center;justify-content:center;font-size:28px;font-weight:800;color:#fff;">V</span></div>
     <h1 class="login-heading">Student Portal</h1>
-    <p class="login-sub">Vidyavahini First Grade Degree College<br>Placement Cell 2025\u201326</p>
+    <p class="login-sub">Vidyavahini First Grade Degree College<br>Placement Cell 2025&ndash;26</p>
     <label class="form-lbl" for="email-inp">REGISTERED EMAIL ADDRESS</label>
     <input id="email-inp" class="form-inp" type="email" placeholder="yourname@college.edu" autocomplete="email" autocapitalize="off"/>
     <div id="email-err" class="form-err"></div>
-    <button id="login-btn" class="btn-login" type="button">Login to Portal \u2192</button>
+    <button id="login-btn" class="btn-login" type="button">Login to Portal &rarr;</button>
   </div>
 </div>
 
@@ -570,7 +578,7 @@ function handleLogin(){
   if(!email.includes('@')){ errEl.textContent='Please enter a valid email.'; return; }
   const btn = document.getElementById('login-btn');
   btn.disabled = true; btn.textContent = 'Verifying\u2026';
-  doLogin(email).finally(()=>{ btn.disabled=false; btn.textContent='Login to Portal \u2192'; });
+  doLogin(email).finally(()=>{ btn.disabled=false; btn.textContent='Login to Portal &rarr;'; });
 }
 
 async function doLogin(email){
@@ -645,7 +653,7 @@ async function loadCompanyData(){
       id:idx+1,name,sheetId:sid,tabReg,tabInt,tabSel,
       regFormUrl:v(iForm)||'',
       website:'',interviewMode:'',registrationDate:'',driveDate:'',
-      roles:[],salary:'',location:'',notes:'',eligSummary:'',jdUrl:'',
+      roles:[],salary:'',location:'',notes:'',eligSummary:'',jdUrl:'',adminStatus:'',
     });
   });
 
@@ -659,33 +667,30 @@ async function loadCompanyData(){
       const iRo=col('role'),iN=col('note'),iSal=col('salary','package','ctc','stipend');
       const iLoc=col('location','loc'),iEl=col('elig');
       const _jd=col('jd'),_lk=col('link'); const iJd=_jd!==-1?_jd:_lk;
-      // Hardcoded column fallbacks for known ADMIN_MODE structure:
+      // Actual ADMIN_MODE columns (0-indexed):
       // 0:Company 1:Website 2:Interview Mode 3:Reg Date 4:Drive Date
-      // 5:POC Name 6:POC Desig 7:POC Email 8:POC Phone 9:Roles 10:Notes 11:JD Link
-      const iC2  =iC  !==-1?iC  :0;
-      const iW2  =iW  !==-1?iW  :1;
-      const iMo2 =iMo !==-1?iMo :2;
-      const iRD2 =iRD !==-1?iRD :3;
-      const iDD2 =iDD !==-1?iDD :4;
-      const iRo2 =iRo !==-1?iRo :9;
-      const iN2  =iN  !==-1?iN  :10;
-      const iJd2 =iJd !==-1?iJd :11;
+      // 5:POC Name 6:POC Desig 7:POC Email 8:POC Phone 9:Role 10:JD 11:Status
+      const iC2  = iC  !==-1 ? iC   : 0;
+      const iW2  = iW  !==-1 ? iW   : 1;
+      const iMo2 = iMo !==-1 ? iMo  : 2;
+      const iRD2 = iRD !==-1 ? iRD  : 3;
+      const iDD2 = iDD !==-1 ? iDD  : 4;
+      const iRo2 = iRo !==-1 ? iRo  : 9;
+      const iJd2 = col('jd') !==-1 ? col('jd') : 10;  // col 10 = JD link
+      const iSt2 = col('status') !==-1 ? col('status') : 11; // col 11 = Status
       const norm=s=>(s||'').toLowerCase().replace(/[\s'\u2018\u2019\u201C\u201D\-]/g,'');
       rows.slice(1).forEach(r=>{
         const nm=(r[iC2]||'').trim(); if(!nm)return;
         const c=COMPS.find(x=>norm(x.name)===norm(nm));
         if(!c){console.warn('[Portal] ADMIN no match:',JSON.stringify(nm));return;}
-        c.website      =(r[iW2] ||'').trim()||c.website;
-        c.interviewMode=(r[iMo2]||'').trim()||c.interviewMode;
-        c.driveDate    =(r[iDD2]||'').trim()||c.driveDate;
-        c.registrationDate=(r[iRD2]||'').trim()||c.registrationDate;
+        c.website       = (r[iW2] ||'').trim() || c.website;
+        c.interviewMode = (r[iMo2]||'').trim() || c.interviewMode;
+        c.driveDate     = (r[iDD2]||'').trim() || c.driveDate;
+        c.registrationDate = (r[iRD2]||'').trim() || c.registrationDate;
         const roles=(r[iRo2]||'').split(',').map(s=>s.trim()).filter(Boolean);
-        if(roles.length)c.roles=roles;
-        c.notes=(r[iN2]||'').trim()||c.notes;
-        if(iSal!==-1)c.salary   =(r[iSal]||'').trim()||c.salary;
-        if(iLoc!==-1)c.location =(r[iLoc]||'').trim()||c.location;
-        if(iEl !==-1)c.eligSummary=(r[iEl]||'').trim()||c.eligSummary;
-        c.jdUrl=(r[iJd2]||'').trim()||c.jdUrl;
+        if(roles.length) c.roles = roles;
+        c.jdUrl       = (r[iJd2]||'').trim() || c.jdUrl;
+        c.adminStatus = (r[iSt2]||'').trim() || c.adminStatus;
       });
     }
   }
@@ -840,11 +845,21 @@ function renderStatus(){
 }
 
 /* Available companies */
+
+function statusBadge(s){
+  if(!s)return'';
+  const lc=s.toLowerCase();
+  let cls='status-default',icon='&#9679;';
+  if(lc==='completed'){cls='status-completed';icon='&#10003;';}
+  else if(lc.includes('ongoing')){cls='status-ongoing';icon='&#9654;';}
+  else if(lc.includes('registration')){cls='status-registrations';icon='&#128221;';}
+  return`<div class="status-badge ${cls}">${icon} ${xe(s)}</div>`;
+}
 function renderAvailable(){
   const applied=new Set(COMPS.filter(c=>{const s=STATUS[c.id];return s&&(s.reg||s.int||s.sel);}).map(c=>c.id));
   const avail=COMPS.filter(c=>!applied.has(c.id));
-  const open=avail.filter(c=>!STATUS[c.id]?.driveComplete);
-  const done=avail.filter(c=>STATUS[c.id]?.driveComplete);
+  const open=avail.filter(c=>!STATUS[c.id]?.driveComplete && c.adminStatus.toLowerCase()!=='completed');
+  const done=avail.filter(c=>STATUS[c.id]?.driveComplete || c.adminStatus.toLowerCase()==='completed');
 
   if(!open.length&&!done.length){
     document.getElementById('avail-wrap').innerHTML=`
@@ -865,6 +880,7 @@ function renderAvailable(){
     ].filter(Boolean).join('');
     return`<div class="co-card" onclick="openCoModal(${c.id})">
       <div class="co-card-head">${logoHtml(c.name,c.website,c.id-1,52)}<div class="co-card-name">${xe(c.name)}</div></div>
+      ${c.adminStatus?statusBadge(c.adminStatus):''}
       <div class="co-chips">${chips||'<span class="chip-empty">Details coming soon</span>'}</div>
       ${c.eligSummary?`<div class="elig-sum">${xe(c.eligSummary)}</div>`:''}
       <button class="btn-apply-card" onclick="event.stopPropagation();openCoModal(${c.id})">View Details &amp; Apply \u2192</button>
@@ -924,6 +940,7 @@ function openCoModal(id){
       <div style="flex:1;min-width:0;">
         <div class="co-modal-name">${xe(c.name)}</div>
         <div class="co-modal-badges">
+          ${c.adminStatus?`<span class="badge-pill ${c.adminStatus.toLowerCase()==='completed'?'badge-done':c.adminStatus.toLowerCase().includes('ongoing')?'badge-ongoing':''}">${xe(c.adminStatus)}</span>`:''}
           ${c.interviewMode?`<span class="badge-pill">${xe(c.interviewMode)}</span>`:''}
           ${c.driveDate?`<span class="badge-pill badge-date">\ud83d\udcc5 ${fmtD(c.driveDate)}</span>`:''}
           ${c.website?`<a href="${xe(c.website)}" target="_blank" rel="noopener" class="badge-link">\ud83d\udd17 Website \u2197</a>`:''}
@@ -1068,9 +1085,16 @@ function stripEmoji(s){return String(s||'').replace(/[\u{1F300}-\u{1FFFF}]/gu,''
 const OCR_CORRECTIONS=[[/\bC\s+s?EET\b/gi,'CSEET'],[/\bCS\s+EET\b/gi,'CSEET'],[/\bj\.\s*[Pp]\.\s*Morgan\b/g,'J.P. Morgan'],[/\bJ\.\s*[Pp]\.\s*Morgan\b/g,'J.P. Morgan'],[/\bcollege\s*-\s*[Ll]evel\b/gi,'college-level'],[/\bM\s+S\s+Word\b/gi,'MS Word'],[/\bM\s+S\s+Excel\b/gi,'MS Excel'],[/\bPower\s*Point\b/gi,'PowerPoint'],[/\bTally\s+Prime\b/gi,'Tally Prime'],[/\bG\s+S\s+T\b/gi,'GST'],[/\bT\s+D\s+S\b/gi,'TDS'],[/\(\s+([A-Za-z])/g,'($1'],[/([A-Za-z])\s+\)/g,'$1)']];
 function applyOCR(text){for(const[rx,rep]of OCR_CORRECTIONS)text=text.replace(rx,rep);return text;}
 const INST_RX=/\b(college|school|university|institute|vidyavahini|polytechnic|academy)\b/i;
-const SEC_HDR={summary:/^(professional\s+(summary|profile|objective)|career\s+(summary|objective|goal)|personal\s+(statement|profile)|about(\s+m(e|yself))?|who\s+am\s+i|intro(duction)?|profile|summary|objective|overview|bio(graphy)?|self\s+(introduction|description)|myself)$/i,experience:/^(work\s+)?(experience|employment|internship|career\s+history)s?$/i,education:/^(academic\s+)?(education|qualification|academic\s+background)s?$/i,projects:/^(projects?|academic\s+projects?|personal\s+projects?|key\s+projects?)$/i,skills:/^(technical\s+)?(skills?|core\s+competencies|competencies|expertise)$/i,awards:/^(awards?|achievements?|certifications?|awards?\s+&\s+certifications?)$/i};
-function parseResumeText(rawText){let text=applyOCR(rawText);text=rawText.split('\n').map(l=>applyOCR(l)).join('\n');const lines=text.split('\n').map(l=>l.trim()).filter(Boolean);const emailRx=/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/;const phoneRx=/(\+91[\s\-]?)?[6-9]\d{9}/;const liRx=/(?:https?:\/\/)?(?:www\.)?linkedin\.com\/in\/[\w\-]+\/?/i;const ghRx=/(?:https?:\/\/)?(?:www\.)?github\.com\/[\w\-]+\/?/i;let name='',email='',phone='',linkedin='',github='';const cL=new Set();for(let i=0;i<Math.min(8,lines.length);i++){const l=lines[i];if(!name&&l.length>1&&l.length<60&&/^[A-Z][A-Z\s]+$/.test(l)){name=l;cL.add(i);}const em=l.match(emailRx);if(em&&!email){email=em[0];cL.add(i);}const ph=l.match(phoneRx);if(ph&&!phone){phone=ph[0];cL.add(i);}const li=l.match(liRx);if(li&&!linkedin){linkedin=li[0];cL.add(i);}const gh=l.match(ghRx);if(gh&&!github){github=gh[0];cL.add(i);}}const sections={summary:[],education:[],experience:[],projects:[],skills:[],awards:[],certifications:[]};let cur='_pre';const pre=[];for(let i=0;i<lines.length;i++){if(cL.has(i))continue;const l=lines[i];const lc=l.toLowerCase().trim();let m=false;for(const[sec,rx]of Object.entries(SEC_HDR)){if(rx.test(lc)){cur=sec;m=true;break;}}if(m)continue;if(cur==='_pre')pre.push(l);else sections[cur].push(l);}if(!sections.summary.length&&pre.length)sections.summary=pre.filter(l=>l.length>15&&!/^\d/.test(l));return{name,email,phone,linkedin,github,sections};}
-function buildEduHTML(lines,wantCGPA){const yRx=/\b(20\d{2}|19\d{2})\b/;const pRx=/(\d{1,3}(?:\.\d{1,2})?)%/g;const cRx=/(\d\.\d{1,2})\s*(?:CGPA|\/\s*10)?/gi;const coRx=/\b(B\.?\s*Com|BCA|B\.?\s*Sc|BBA|B\.?\s*Tech|MBA|M\.?\s*Com|MCA|PU\s*C?|SSLC|HSC|SSC|10th|12th|Diploma|PhD)\b/i;const entries=[];let cur={instLines:[],otherLines:[]};for(const raw of lines){const l=cleanS(raw);if(!l||l.length<2)continue;if(INST_RX.test(l)){if(cur.instLines.length||cur.otherLines.length)entries.push(cur);cur={instLines:[l],otherLines:[]};}else cur.otherLines.push(l);}if(cur.instLines.length||cur.otherLines.length)entries.push(cur);if(!entries.length&&lines.length)entries.push({instLines:[],otherLines:lines.map(cleanS).filter(Boolean)});let html='';for(const e of entries){const all=[...e.instLines,...e.otherLines];const j=all.join(' ');const pm=[...j.matchAll(pRx)].map(m=>parseFloat(m[1]));const cm=[...j.matchAll(cRx)].map(m=>parseFloat(m[1]));let grade='';if(wantCGPA){if(cm.length)grade=cm[0].toFixed(2)+' CGPA';else if(pm.length)grade=(pm[0]/9.5).toFixed(2)+' CGPA';}else{if(pm.length)grade=pm[0]+'%';else if(cm.length)grade=(cm[0]*9.5).toFixed(1)+'%';}const yr=j.match(yRx)?j.match(yRx)[0]:'';const com=j.match(coRx)?j.match(coRx)[0].trim():'';const inst=e.instLines.length?e.instLines[0].replace(pRx,'').replace(cRx,'').replace(yRx,'').replace(coRx,'').replace(/\s{2,}/g,' ').replace(/[,:\s]+$/,'').trim():'';if(inst)html+=`<p class="rw-edu-inst">${xeR(inst)}</p>`;const cy=[com,yr].filter(Boolean).join(', ');if(cy)html+=`<h3 class="rw-entry-role">${xeR(cy)}</h3>`;if(grade)html+=`<p class="rw-edu-grade">${xeR(grade)}</p>`;html+='<div class="rw-edu-gap"></div>';}return html;}
+const SEC_HDR={
+  summary:  /^(professional\s+(summary|profile|objective)|career\s+(summary|objective|goal)|personal\s+(statement|profile)|about(\s+m(e|yself))?|who\s+am\s+i|intro(duction)?|profile|summary|objective|overview|bio(graphy)?|self\s+(introduction|description)|myself)$/i,
+  experience:/^(work\s+)?(experience|employment|internship|career\s+history)s?$/i,
+  education: /^(academic\s+)?(education(al(\s+qualifications?)?)?|qualification|academic\s+background)s?$/i,
+  projects:  /^(projects?|academic\s+projects?|personal\s+projects?|key\s+projects?)$/i,
+  skills:    /^(technical(\s+and\s+soft)?\s+)?(skills?|core\s+competencies|competencies|expertise)$|^technical\s+and\s+soft\s+skills?$/i,
+  awards:    /^(awards?|achievements?|certifications?|awards?\s+&\s+certifications?|leadership\s+(&|and)\s+activities|extra\s*.?\s*curricular)$/i
+};
+function parseResumeText(rawText){let text=applyOCR(rawText);text=rawText.split('\n').map(l=>applyOCR(l)).join('\n');const lines=text.split('\n').map(l=>l.trim()).filter(Boolean);const emailRx=/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/;const phoneRx=/(\+91[\s\-]?)?[6-9]\d{9}/;const liRx=/(?:https?:\/\/)?(?:www\.)?linkedin\.com\/in\/[\w\-]+\/?/i;const ghRx=/(?:https?:\/\/)?(?:www\.)?github\.com\/[\w\-]+\/?/i;let name='',email='',phone='',linkedin='',github='';const cL=new Set();for(let i=0;i<Math.min(10,lines.length);i++){const l=lines[i];const lForMatch=l.replace(/[^\x00-\x7F]/g,' ');const lClean=lForMatch.replace(/^[^a-zA-Z0-9]+/,'').trim();if(!name&&lClean.length>1&&lClean.length<60&&/^[A-Z][A-Z\s]+$/.test(lClean)){name=lClean;cL.add(i);}const em=(lForMatch||l).match(emailRx);if(em&&!email){email=em[0];cL.add(i);}const ph=(lForMatch||l).match(phoneRx);if(ph&&!phone){phone=ph[0];cL.add(i);}const li=(lForMatch||l).match(liRx);if(li&&!linkedin){linkedin=li[0];cL.add(i);}const gh=(lForMatch||l).match(ghRx);if(gh&&!github){github=gh[0];cL.add(i);}}const sections={summary:[],education:[],experience:[],projects:[],skills:[],awards:[],certifications:[]};let cur='_pre';const pre=[];for(let i=0;i<lines.length;i++){if(cL.has(i))continue;const l=lines[i];const lc=l.toLowerCase().replace(/[^\x00-\x7F]/g,'').trim();if(!lc||/^[\ud83c-\udfff]{1,3}\s*(basavakalyan|karnataka|\d{6})/i.test(l))continue;let m=false;for(const[sec,rx]of Object.entries(SEC_HDR)){if(rx.test(lc)){cur=sec;m=true;break;}}if(m)continue;if(cur==='_pre')pre.push(l);else sections[cur].push(l);}if(!sections.summary.length&&pre.length)sections.summary=pre.filter(l=>l.length>15&&!/^\d/.test(l));return{name,email,phone,linkedin,github,sections};}
+function buildEduHTML(lines,wantCGPA){lines=lines.filter(l=>!/^(course|qualification|degree)\s+(institution|school|marks|year)/i.test(l.trim()));const yRx=/\b(20\d{2}|19\d{2})\b/;const pRx=/(\d{1,3}(?:\.\d{1,2})?)%/g;const cRx=/(\d\.\d{1,2})\s*(?:CGPA|\/\s*10)?/gi;const coRx=/\b(B\.?\s*Com|BCA|B\.?\s*Sc|BBA|B\.?\s*Tech|MBA|M\.?\s*Com|MCA|Pre[\-\s]?University|PU\s*C?|SSLC|HSC|SSC|10th|12th|Diploma|PhD)\b/i;const entries=[];let cur={instLines:[],otherLines:[]};for(const raw of lines){const l=cleanS(raw);if(!l||l.length<2)continue;if(INST_RX.test(l)){if(cur.instLines.length||cur.otherLines.length)entries.push(cur);cur={instLines:[l],otherLines:[]};}else cur.otherLines.push(l);}if(cur.instLines.length||cur.otherLines.length)entries.push(cur);if(!entries.length&&lines.length)entries.push({instLines:[],otherLines:lines.map(cleanS).filter(Boolean)});let html='';for(const e of entries){const all=[...e.instLines,...e.otherLines];const j=all.join(' ');const pm=[...j.matchAll(pRx)].map(m=>parseFloat(m[1]));const cm=[...j.matchAll(cRx)].map(m=>parseFloat(m[1]));let grade='';if(wantCGPA){if(cm.length)grade=cm[0].toFixed(2)+' CGPA';else if(pm.length)grade=(pm[0]/9.5).toFixed(2)+' CGPA';}else{if(pm.length)grade=pm[0]+'%';else if(cm.length)grade=(cm[0]*9.5).toFixed(1)+'%';}const yr=j.match(yRx)?j.match(yRx)[0]:'';const com=j.match(coRx)?j.match(coRx)[0].trim():'';const inst=e.instLines.length?e.instLines[0].replace(pRx,'').replace(cRx,'').replace(yRx,'').replace(coRx,'').replace(/\s{2,}/g,' ').replace(/[,:\s]+$/,'').trim():'';if(inst)html+=`<p class="rw-edu-inst">${xeR(inst)}</p>`;const cy=[com,yr].filter(Boolean).join(', ');if(cy)html+=`<h3 class="rw-entry-role">${xeR(cy)}</h3>`;if(grade)html+=`<p class="rw-edu-grade">${xeR(grade)}</p>`;html+='<div class="rw-edu-gap"></div>';}return html;}
 const AU=new Set(['GST','TDS','PAN','NSS','NCC','CGPA','GPA','MBA','BCA','BBA','BCom','MCom','MCA','BSc','MSc','BTech','MTech','PhD','PUC','SSLC','HSC','SSC','AI','ML','SQL','HTML','CSS','PHP','API','CRM','ERP','SAP','UI','UX','IT','HR','PR','SEBI','ICSI','NISM','ICAI','CA','CS','CSEET']);
 const PN=new Set(['Excel','Word','PowerPoint','Tally','Python','Java','Linux','Windows','Google','Microsoft','LinkedIn','GitHub','Canva','Figma','MySQL','MongoDB']);
 const SW=new Set(['a','an','the','and','but','or','for','in','on','at','to','by','of','up','as','is','are','was','with','from']);
