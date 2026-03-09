@@ -24,24 +24,17 @@ body{
   cursor:pointer;
 }
 .fixed-logo-img{
-  /* size driven by JS via --logo-sz custom property */
-  width:var(--logo-sz,54px);
-  height:var(--logo-sz,54px);
-  border-radius:calc(var(--logo-sz,54px) * 0.27);
+  /* width/height set entirely by JS rAF lerp — no CSS transition on size */
+  width:54px;height:54px;border-radius:15px;
   background:#fff;overflow:hidden;flex-shrink:0;
   box-shadow:0 4px 24px rgba(0,0,0,0.35),0 0 0 1px rgba(255,255,255,0.08);
-  transition:width .12s ease-out,
-             height .12s ease-out,
-             border-radius .12s ease-out,
-             box-shadow .2s ease;
+  transition:box-shadow .25s ease; /* only shadow transitions via CSS */
 }
 .fixed-logo-img img{width:100%;height:100%;object-fit:contain;display:block;}
 
-/* Slide-out VVFGC text — slides RIGHT from behind logo on hover */
+/* Slide-out VVFGC text */
 .fixed-logo-text{
-  max-width:0;
-  overflow:hidden;
-  opacity:0;
+  max-width:0;overflow:hidden;opacity:0;
   white-space:nowrap;
   font-size:15px;font-weight:900;letter-spacing:0.14em;
   color:rgba(255,255,255,0.92);
@@ -53,9 +46,7 @@ body{
   text-shadow:0 2px 10px rgba(0,0,0,0.50);
 }
 .fixed-logo-wrap:hover .fixed-logo-text{
-  max-width:140px;
-  opacity:1;
-  margin-left:13px;
+  max-width:140px;opacity:1;margin-left:13px;
 }
 .fixed-logo-wrap:hover .fixed-logo-img{
   box-shadow:0 8px 32px rgba(109,14,106,0.55),0 0 0 1.5px rgba(211,182,210,0.28);
@@ -64,7 +55,7 @@ body{
 /* ── SCROLLING NAV (not fixed) ── */
 .nav{
   position:relative;z-index:10;
-  padding:0 40px;height:62px;display:flex;align-items:center;justify-content:flex-end;
+  padding:0 40px;height:48px;display:flex;align-items:center;justify-content:flex-end;
 }
 .nav-brand{display:flex;align-items:center;gap:10px;text-decoration:none;}
 .nav-college{font-size:16px;font-weight:700;color:rgba(255,255,255,0.82);letter-spacing:-0.01em;}
@@ -73,7 +64,7 @@ body{
 /* ── HERO ── */
 .hero{
   position:relative;
-  min-height:100vh;
+  height:100vh;
   display:flex;flex-direction:column;
   justify-content:space-between;
   overflow:hidden;
@@ -89,12 +80,9 @@ body{
     radial-gradient(ellipse 90% 70% at 50% 100%,rgba(42,10,40,0.65) 0%,transparent 55%);
   pointer-events:none;
 }
-/* Cursor-following glow — position driven by JS */
+/* Cursor-following glow */
 .hero-cursor-glow{
   position:absolute;inset:0;pointer-events:none;z-index:0;
-  background:radial-gradient(ellipse 55% 45% at var(--cx,50%) var(--cy,50%),
-    rgba(139,40,135,0.32) 0%,transparent 65%);
-  transition:background .08s linear;
   will-change:background;
 }
 /* Grid lines */
@@ -115,77 +103,71 @@ body{
   text-align:center;padding:0 60px;
   position:relative;z-index:1;
 }
-  .hero-eyebrow{
-  display:inline-flex;align-items:center;gap:7px;
-  font-size:11.5px;font-weight:700;letter-spacing:0.10em;color:rgba(255,255,255,0.5);
-  padding:5px 14px;border-radius:999px;
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:10.5px;font-weight:700;letter-spacing:0.10em;color:rgba(255,255,255,0.5);
+  padding:4px 12px;border-radius:999px;
   background:rgba(109,14,106,0.18);border:1px solid rgba(211,182,210,0.20);
-  margin-bottom:14px;
+  margin-bottom:10px;
 }
-.eyebrow-dot{width:6px;height:6px;border-radius:50%;background:#22C55E;box-shadow:0 0 6px #22C55E;animation:pulse 2s ease-in-out infinite;}
+.eyebrow-dot{width:5px;height:5px;border-radius:50%;background:#22C55E;box-shadow:0 0 6px #22C55E;animation:pulse 2s ease-in-out infinite;}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
 
 .hero-title{
-  font-size:clamp(32px,5.5vw,60px);font-weight:900;line-height:1.08;
-  letter-spacing:-0.04em;margin-bottom:10px;
+  font-size:clamp(24px,4vw,46px);font-weight:900;line-height:1.08;
+  letter-spacing:-0.04em;margin-bottom:8px;
 }
 .hero-title .accent{
   background:linear-gradient(135deg,#A76EA5,#8B3D89,#6D0E6A);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
 }
-.hero-sub{font-size:16px;color:rgba(255,255,255,0.55);font-weight:500;line-height:1.6;margin-bottom:24px;max-width:480px;margin-left:auto;margin-right:auto;}
+.hero-sub{font-size:13.5px;color:rgba(255,255,255,0.55);font-weight:500;line-height:1.5;margin-bottom:16px;max-width:420px;margin-left:auto;margin-right:auto;}
 
 /* ── STAT TILES ── */
 .stat-row{
-  display:grid;grid-template-columns:repeat(4,1fr);gap:10px;
-  max-width:700px;width:100%;margin:0 auto 20px;
+  display:grid;grid-template-columns:repeat(4,1fr);gap:8px;
+  max-width:620px;width:100%;margin:0 auto 14px;
 }
 .stat-tile{
   background:rgba(109,14,106,0.10);border:1px solid rgba(211,182,210,0.14);
-  border-radius:14px;padding:14px 16px;text-align:left;
+  border-radius:12px;padding:10px 12px;text-align:left;
   transition:all .2s;cursor:default;backdrop-filter:blur(6px);
 }
 .stat-tile:hover{background:rgba(109,14,106,0.18);border-color:rgba(211,182,210,0.28);}
-.stat-icon{font-size:16px;margin-bottom:8px;opacity:.7;}
+.stat-icon{font-size:13px;margin-bottom:5px;opacity:.7;}
 .stat-num{
-  font-size:28px;font-weight:900;line-height:1;letter-spacing:-0.04em;
-  margin-bottom:4px;color:#fff;
-  transition:color .3s;
+  font-size:22px;font-weight:900;line-height:1;letter-spacing:-0.04em;
+  margin-bottom:3px;color:#fff;transition:color .3s;
 }
 .stat-num.loaded{color:#fff;}
-.stat-lbl{font-size:11px;font-weight:700;letter-spacing:0.06em;color:rgba(255,255,255,0.45);}
-.stat-dot{display:inline-flex;gap:4px;margin-top:2px;}
-.stat-dot span{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,0.35);animation:blink 1.4s ease-in-out infinite;}
+.stat-lbl{font-size:9.5px;font-weight:700;letter-spacing:0.06em;color:rgba(255,255,255,0.45);}
+.stat-dot{display:inline-flex;gap:3px;margin-top:2px;}
+.stat-dot span{width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,0.35);animation:blink 1.4s ease-in-out infinite;}
 .stat-dot span:nth-child(2){animation-delay:.2s;}
 .stat-dot span:nth-child(3){animation-delay:.4s;}
 @keyframes blink{0%,80%,100%{opacity:.2;}40%{opacity:1;}}
 
 /* ── PORTAL BUTTONS ── */
 .portal-buttons{
-  display:flex;
-  gap:20px;
-  justify-content:center;
-  flex-wrap:wrap;
-  max-width:1200px;
-  margin:0 auto;
+  display:flex;gap:14px;justify-content:center;
+  flex-wrap:wrap;max-width:900px;margin:0 auto;
 }
 .portal-btn{
-  flex:1;min-width:200px;
-  padding:18px 28px;border-radius:14px;
-  font-size:15px;font-weight:700;letter-spacing:-0.01em;
-  display:flex;align-items:center;gap:12px;
+  flex:1;min-width:160px;
+  padding:12px 20px;border-radius:12px;
+  font-size:13px;font-weight:700;letter-spacing:-0.01em;
+  display:flex;align-items:center;gap:10px;
   text-decoration:none;transition:all .22s;
   cursor:pointer;border:none;
 }
 .portal-btn-icon{
-  width:52px;height:52px;border-radius:12px;
+  width:38px;height:38px;border-radius:10px;
   display:flex;align-items:center;justify-content:center;
-  font-size:26px;
-  flex-shrink:0;
+  font-size:20px;flex-shrink:0;
 }
 .portal-btn-text{display:flex;flex-direction:column;text-align:left;}
-.portal-btn-label{font-size:18px;font-weight:800;line-height:1.2;}
-.portal-btn-sub{font-size:13.5px;font-weight:500;opacity:.65;margin-top:3px;}
+.portal-btn-label{font-size:14px;font-weight:800;line-height:1.2;}
+.portal-btn-sub{font-size:11px;font-weight:500;opacity:.65;margin-top:2px;}
 
 /* Both cards identical and neutral by default */
 .btn-student,
@@ -224,16 +206,15 @@ body{
 /* ── COMPANIES CAROUSEL (anchored to hero bottom) ── */
 .companies-section{
   position:relative;z-index:1;
-  padding:20px 0 28px;
+  padding:14px 0 18px;
   display:none;
   width:100%;
-  /* fade-in separator from main content */
   border-top:1px solid rgba(211,182,210,0.07);
   background:linear-gradient(to bottom,transparent,rgba(26,5,25,0.30));
 }
 .companies-label{
   display:flex;align-items:center;justify-content:center;
-  gap:16px;margin-bottom:16px;
+  gap:16px;margin-bottom:12px;
 }
 .companies-label-line{
   height:1px;width:80px;
@@ -429,38 +410,55 @@ body{
 <script src="shared.js"></script>
 <script>
 /* ═══════════════════════════════════════════
-   LOGO — proportional scroll grow + slide text
+   LOGO — smooth rAF lerp grow + slide text
 ═══════════════════════════════════════════ */
 (function(){
   const wrap = document.getElementById('fixed-logo-wrap');
   const img  = document.getElementById('fixed-logo-img');
   if(!wrap || !img) return;
 
-  const MIN_SZ = 54;   // px at scroll=0
-  const MAX_SZ = 76;   // px at full grow
-  const SCROLL_RANGE = 220; // px of scroll to go from min→max
+  const MIN_SZ = 54;
+  const MAX_SZ = 76;
+  const SCROLL_RANGE = 200;
 
-  function updateLogoSize(){
+  let currentSz = MIN_SZ;
+  let targetSz  = MIN_SZ;
+  let rafId     = null;
+
+  function getTargetSize(){
     const t = Math.min(window.scrollY / SCROLL_RANGE, 1);
-    // ease-out curve
     const ease = 1 - Math.pow(1 - t, 2);
-    const sz = MIN_SZ + (MAX_SZ - MIN_SZ) * ease;
-    img.style.setProperty('--logo-sz', sz.toFixed(1)+'px');
-    // also set directly so the transition fires smoothly
-    img.style.width  = sz.toFixed(1)+'px';
-    img.style.height = sz.toFixed(1)+'px';
-    img.style.borderRadius = (sz * 0.27).toFixed(1)+'px';
-    // shadow grows too
-    const glow = (ease * 0.45).toFixed(2);
-    img.style.boxShadow = `0 ${4+ease*10}px ${24+ease*20}px rgba(0,0,0,0.35),`
-                        + `0 0 0 ${(1+ease*0.5).toFixed(1)}px rgba(255,255,255,0.09),`
-                        + `0 0 ${ease*32}px rgba(109,14,106,${glow})`;
+    return MIN_SZ + (MAX_SZ - MIN_SZ) * ease;
   }
 
-  window.addEventListener('scroll', updateLogoSize, {passive:true});
-  updateLogoSize(); // run once on load
+  function applySize(sz){
+    img.style.width        = sz.toFixed(2) + 'px';
+    img.style.height       = sz.toFixed(2) + 'px';
+    img.style.borderRadius = (sz * 0.27).toFixed(2) + 'px';
+    const p = (sz - MIN_SZ) / (MAX_SZ - MIN_SZ);
+    img.style.boxShadow =
+      `0 ${(4+p*10).toFixed(1)}px ${(24+p*20).toFixed(1)}px rgba(0,0,0,0.35),`+
+      `0 0 0 ${(1+p*0.5).toFixed(2)}px rgba(255,255,255,0.09),`+
+      `0 0 ${(p*32).toFixed(1)}px rgba(109,14,106,${(p*0.45).toFixed(2)})`;
+  }
 
-  // Click → smooth scroll to top, no reload
+  function tick(){
+    rafId = null;
+    currentSz += (targetSz - currentSz) * 0.14; // lerp 14% per frame
+    applySize(currentSz);
+    if(Math.abs(targetSz - currentSz) > 0.05){
+      rafId = requestAnimationFrame(tick);
+    }
+  }
+
+  function scheduleUpdate(){
+    targetSz = getTargetSize();
+    if(!rafId) rafId = requestAnimationFrame(tick);
+  }
+
+  window.addEventListener('scroll', scheduleUpdate, {passive:true});
+  applySize(MIN_SZ);
+
   wrap.addEventListener('click', function(e){
     e.preventDefault();
     window.scrollTo({top:0, behavior:'smooth'});
