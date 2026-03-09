@@ -52,16 +52,16 @@ body{
   box-shadow:0 8px 32px rgba(109,14,106,0.55),0 0 0 1.5px rgba(211,182,210,0.28);
 }
 
-/* ── SCROLLING NAV (not fixed) ── */
+/* ── NAV — floats over hero gradient, no background of its own ── */
 .nav{
-  position:relative;z-index:10;
+  position:absolute;top:0;right:0;left:0;z-index:10;
   padding:0 40px;height:48px;display:flex;align-items:center;justify-content:flex-end;
 }
 .nav-brand{display:flex;align-items:center;gap:10px;text-decoration:none;}
 .nav-college{font-size:16px;font-weight:700;color:rgba(255,255,255,0.82);letter-spacing:-0.01em;}
 .nav-year{font-size:13px;font-weight:600;color:rgba(211,182,210,0.90);padding:3px 10px;border-radius:999px;background:rgba(109,14,106,0.22);border:1px solid rgba(211,182,210,0.22);margin-left:8px;}
 
-/* ── HERO ── */
+/* ── HERO — full viewport, nav is absolute so hero owns the whole space ── */
 .hero{
   position:relative;
   height:100vh;
@@ -70,7 +70,7 @@ body{
   overflow:hidden;
 }
 
-/* Mesh background — wider spread, more balanced */
+/* Mesh background — extends behind nav and carousel */
 .hero::before{
   content:'';position:absolute;inset:0;
   background:
@@ -150,7 +150,7 @@ body{
 /* ── PORTAL BUTTONS ── */
 .portal-buttons{
   display:flex;gap:14px;justify-content:center;
-  flex-wrap:wrap;max-width:900px;margin:0 auto;
+  flex-wrap:wrap;max-width:900px;margin:16px auto 0;
 }
 .portal-btn{
   flex:1;min-width:160px;
@@ -195,18 +195,17 @@ body{
 }
 .btn-placement:hover .portal-btn-icon{background:rgba(255,255,255,0.16);}
 
-/* ── FOOTER ── */
+/* ── FOOTER — merged into hero bottom, no border ── */
 .footer{
-  position:relative;z-index:1;
-  text-align:center;padding:24px 40px;
-  font-size:12px;color:rgba(255,255,255,0.25);
-  border-top:1px solid rgba(109,14,106,0.25);
+  text-align:center;padding:10px 40px 14px;
+  font-size:10.5px;color:rgba(255,255,255,0.18);
+  letter-spacing:0.05em;
 }
 
 /* ── COMPANIES CAROUSEL (anchored to hero bottom) ── */
 .companies-section{
   position:relative;z-index:1;
-  padding:14px 0 18px;
+  padding:14px 0 0;
   display:none;
   width:100%;
   border-top:1px solid rgba(211,182,210,0.07);
@@ -319,15 +318,15 @@ body{
   <span class="fixed-logo-text">VVFGC</span>
 </div>
 
-<!-- ── SCROLLING NAV (name + year only) ── -->
-<nav class="nav">
-  <span class="nav-college">Vidyavahini First Grade Degree College</span>
-  <span class="nav-year">2025–26</span>
-</nav>
-
-<!-- ── HERO ── -->
+<!-- ── HERO — full viewport canvas including nav ── -->
 <section class="hero" id="hero">
   <div class="hero-cursor-glow" id="hero-cursor-glow"></div>
+
+  <!-- Nav lives inside hero so it shares the gradient -->
+  <nav class="nav">
+    <span class="nav-college">Vidyavahini First Grade Degree College</span>
+    <span class="nav-year">2025–26</span>
+  </nav>
 
   <!-- Central content -->
   <div class="hero-content">
@@ -399,13 +398,11 @@ body{
     </div>
     <div id="ticker-row-1-wrap" class="ticker-wrap"></div>
     <div id="ticker-row-2-wrap" class="ticker-wrap"></div>
+    <!-- Footer merged into hero bottom -->
+    <div class="footer">Vidyavahini First Grade Degree College · Placement Cell · 2025–26</div>
   </div>
 
 </section>
-
-<footer class="footer">
-  Vidyavahini First Grade Degree College · Placement Cell · 2025–26
-</footer>
 
 <script src="shared.js"></script>
 <script>
