@@ -122,6 +122,7 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;}
 .status-ongoing{background:#EFF6FF;color:#1D4ED8;}
 .status-registrations{background:#FEF9C3;color:#854D0E;}
 .status-default{background:#F1F5F9;color:#475569;}
+.status-upcoming{background:#F0FDF4;color:#15803D;}
 
 /* ── STATUS ROWS ── */
 .status-group{margin-bottom:16px;}
@@ -703,11 +704,12 @@ function renderStatus(){
 /* Available companies */
 
 function statusBadge(s){
-  if(!s)return'';
+  if(!s)return'<div class="status-badge status-upcoming">&#128337; Upcoming</div>';
   const lc=s.toLowerCase();
   let cls='status-default',icon='&#9679;';
   if(lc==='completed'){cls='status-completed';icon='&#10003;';}
   else if(lc.includes('ongoing')){cls='status-ongoing';icon='&#9654;';}
+  else if(lc==='registrations started'){cls='status-completed';icon='&#128994;';}
   else if(lc.includes('registration')){cls='status-registrations';icon='&#128221;';}
   return`<div class="status-badge ${cls}">${icon} ${xe(s)}</div>`;
 }
@@ -716,8 +718,8 @@ function renderAvailable(){
   const avail=COMPS.filter(c=>!applied.has(c.id));
   const stLc=c=>c.adminStatus.toLowerCase().trim();
   const isCompleted=c=>stLc(c)==='completed';
-  const isUpcoming=c=>stLc(c)==='registrations done';
-  const isOpen=c=>!isCompleted(c)&&!isUpcoming(c); // default = open
+  const isUpcoming=c=>stLc(c)===''||stLc(c)==='registrations done';
+  const isOpen=c=>!isCompleted(c)&&!isUpcoming(c);
   const open=avail.filter(isOpen);
   const upcoming=avail.filter(isUpcoming);
   const done=avail.filter(isCompleted);
@@ -835,7 +837,7 @@ function openCoModal(id){
     </div>
     <div class="co-modal-body">
       <div class="mf-grid">${rows}</div>
-      ${c.notes?`<div class="jd-box"><div class="jd-box-title">\ud83d\udccb JOB DESCRIPTION</div><div class="jd-box-text">${xe(c.notes).split('\n').join('<br/>')}</div></div>`:''}
+      
     </div>`;
 
   const applySlot=document.getElementById('modal-apply-slot');
@@ -963,7 +965,7 @@ function showUploadFallback(err){setRwBody(`${err?`<div class="rw-error">&#9888;
 <label class="rw-drop-zone" id="rw-drop"><div class="rw-drop-icon">&#128196;</div><div class="rw-drop-title">Upload Resume PDF</div><div class="rw-drop-hint">Click here or drag &amp; drop your PDF</div><div class="rw-drop-note">Processed locally — not uploaded to any server</div></label><input type="file" id="rw-file-inp" accept=".pdf" style="display:none"/>`);document.getElementById('rw-file-inp').onchange=e=>{if(e.target.files[0])handleResumeFile(e.target.files[0]);};const drop=document.getElementById('rw-drop');drop.addEventListener('click',()=>document.getElementById('rw-file-inp').click());drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('rw-drag-over');});drop.addEventListener('dragleave',()=>drop.classList.remove('rw-drag-over'));drop.addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('rw-drag-over');const f=e.dataTransfer.files[0];if(f&&f.type==='application/pdf')handleResumeFile(f);});}
 async function handleResumeFile(file){if(!file||file.type!=='application/pdf'){setRwBody('<div class="rw-error">&#10060; Please select a PDF file.</div>');return;}try{setLoading('Reading PDF…','Extracting text from your resume');const text=await extractTextFromPDF(file);setLoading('Formatting…','Applying placement cell template');const parsed=parseResumeText(text);if(typeof cleanParsedSections==='function')cleanParsedSections(parsed.sections,_gradeMode==='cgpa');const html=buildResumeHTML(parsed);_rwHtml=html;setRwBody(`<div class="rw-preview">${html}</div>`);document.getElementById('rw-dl-btn').style.display='block';}catch(err){setRwBody(`<div class="rw-error">&#10060; ${err.message||'Failed to read PDF.'}</div><div style="text-align:center;margin-top:16px;"><button style="padding:9px 20px;border:1.5px solid #6D0E6A;border-radius:8px;background:#fff;color:#6D0E6A;font-size:12.5px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;" onclick="showUploadFallback('')">&#8617; Upload Instead</button></div>`);}}
 async function startExtractAndFormat(){if(!ST||!ST.resume){showUploadFallback('No resume URL linked to your profile.');return;}if(typeof fetchResumeFile!=='function'){showUploadFallback('Drive connector not loaded — upload below.');return;}setLoading('Connecting to Google Drive…','Authenticating with your Google account');try{const file=await fetchResumeFile(ST.resume,(msg)=>setLoading('Fetching resume…',msg));await handleResumeFile(file);}catch(err){showUploadFallback(err.message||'Could not fetch from Google Drive.');}}
-async function fixCharSpacing(s){
+function fixCharSpacing(s){
   if(typeof s!=='string')return String(s||'');
   // Collapse "A c c o u n t i n g" style char-spaced words (no lookbehind — broad browser support)
   s=s.replace(/((?:[A-Za-z] ){2,}[A-Za-z])(?=\s|$)/g,m=>m.replace(/ /g,''));
