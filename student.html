@@ -597,7 +597,7 @@ async function loadStatus(){
     };
     const [rr,ir,sr]=await Promise.all([fetchTab(c.tabReg),fetchTab(c.tabInt),fetchTab(c.tabSel)]);
     const has=rows=>rows.some(r=>(r[2]||'').toLowerCase().trim()===em);
-    const selData=sr.length>1?sr.slice(1):sr;
+    const selData=sr; // jsonToRows already excludes header — do not slice
     const isHdrRow=r=>r.some(v=>(v||'').toLowerCase().includes('name')||(v||'').toLowerCase().includes('email'));
     const placedNames=selData.filter(r=>r.some(v=>v)&&!isHdrRow(r))
       .map(r=>{
@@ -750,14 +750,17 @@ function statusBadge(s){
 function renderAvailable(){
   const applied=new Set(COMPS.filter(c=>{const s=STATUS[c.id];return s&&(s.reg||s.int||s.sel);}).map(c=>c.id));
   const stLc=c=>c.adminStatus.toLowerCase().trim();
-  const isOpen    =c=>stLc(c)==='registrations started'||stLc(c)==='ongoing';
+  const isOpen     =c=>stLc(c)==='registrations started'||stLc(c)==='ongoing';
   const isCompleted=c=>stLc(c)==='completed'||stLc(c)==='closed';
-  const isUpcoming =c=>!isOpen(c)&&!isCompleted(c); // blank + anything else
-  // Completed drives always show (even if student already applied/placed)
-  // Available + Upcoming: hide companies the student has already applied to
-  const open    = COMPS.filter(c=>!applied.has(c.id)&&isOpen(c));
-  const upcoming= COMPS.filter(c=>!applied.has(c.id)&&isUpcoming(c));
-  const done    = COMPS.filter(isCompleted);
+  const isUpcoming =c=>!isOpen(c)&&!isCompleted(c);
+  // studentSelected: student was placed — treat as completed regardless of status
+  const studentSel =c=>!!(STATUS[c.id]?.sel);
+  // done = status completed/closed OR student was selected in that drive
+  const done    = COMPS.filter(c=>isCompleted(c)||studentSel(c));
+  const doneIds = new Set(done.map(c=>c.id));
+  // open/upcoming: exclude applied AND exclude already-in-done
+  const open    = COMPS.filter(c=>!applied.has(c.id)&&!doneIds.has(c.id)&&isOpen(c));
+  const upcoming= COMPS.filter(c=>!applied.has(c.id)&&!doneIds.has(c.id)&&isUpcoming(c));
 
   if(!open.length&&!upcoming.length&&!done.length){
     document.getElementById('avail-wrap').innerHTML=`
