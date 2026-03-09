@@ -496,16 +496,21 @@ async function loadCompanyData(){
   const iForm=ci('form','apply')!== -1?ci('form','apply'):5;
 
   COMPS=[];
+  console.log('[Portal] CONFIG_TAB rows:', (cfgTable.rows||[]).length);
   (cfgTable.rows||[]).forEach((row,idx)=>{
     const cells=row.c||[];
     const v=i=>(cells[i]&&cells[i].v!=null)?String(cells[i].v).trim():'';
-    const name=v(iComp); if(!name||name.toLowerCase()==='company')return;
-    const sid=extractSid(v(iSheet)); if(!sid)return;
+    const name=v(iComp);
+    if(!name||name.toLowerCase()==='company'){console.log('[Portal] CONFIG skip (no name) row',idx);return;}
+    const rawSheet=v(iSheet);
+    const sid=extractSid(rawSheet);
+    if(!sid){console.warn('[Portal] CONFIG skip (no sheetId) name='+JSON.stringify(name)+' rawSheet='+JSON.stringify(rawSheet));return;}
     const tabReg=v(iReg)||'Registered Students';
     let tabInt=v(iInt)||null, tabSel=v(iSel)||null;
     if(tabInt&&tabInt.toLowerCase()===tabReg.toLowerCase())tabInt=null;
     if(tabSel&&tabSel.toLowerCase()===tabReg.toLowerCase())tabSel=null;
     if(tabInt&&tabSel&&tabInt.toLowerCase()===tabSel.toLowerCase())tabSel=null;
+    console.log('[Portal] CONFIG loaded:',name,'sid='+sid,'reg='+tabReg,'int='+tabInt,'sel='+tabSel);
     COMPS.push({
       id:idx+1,name,sheetId:sid,tabReg,tabInt,tabSel,
       regFormUrl:v(iForm)||'',
@@ -513,6 +518,7 @@ async function loadCompanyData(){
       roles:[],salary:'',location:'',notes:'',eligSummary:'',jdUrl:'',adminStatus:'',
     });
   });
+  console.log('[Portal] COMPS total:', COMPS.length, COMPS.map(x=>x.name));
 
   // Parse admin data (JSON format — columns detected by header label)
   if(adminJ){
