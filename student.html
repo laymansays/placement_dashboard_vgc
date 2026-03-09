@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Student Portal \u00b7 Vidyavahini Placement</title>
+<title>Student Portal · Vidyavahini Placement</title>
+<link rel="icon" type="image/jpeg" href="logo.jpg"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
@@ -37,9 +38,9 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;}
 .btn-login:disabled{opacity:.6;cursor:not-allowed;}
 
 /* ── NAV ── */
-.sp-nav{height:56px;background:linear-gradient(90deg,#2A0A28,#6D0E6A);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:200;}
+.sp-nav{height:64px;background:linear-gradient(90deg,#2A0A28,#6D0E6A);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:200;}
 .sp-nav-brand{display:flex;align-items:center;gap:12px;text-decoration:none;}
-.sp-nav-logo{width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;color:#fff;font-size:17px;font-weight:800;}
+.sp-nav-logo{width:38px;height:38px;border-radius:9px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;color:#fff;font-size:17px;font-weight:800;overflow:hidden;}
 .sp-nav-title{color:#fff;font-size:15px;font-weight:700;}
 .sp-nav-right{display:flex;align-items:center;gap:14px;}
 .sp-nav-name{color:rgba(255,255,255,.85);font-size:13.5px;font-weight:600;}
@@ -47,7 +48,7 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;}
 .btn-logout:hover{background:rgba(255,255,255,.15);}
 
 /* ── LAYOUT ── */
-.sp-body{display:flex;height:calc(100vh - 56px);}
+.sp-body{display:flex;height:calc(100vh - 64px);}
 .sp-sidebar{width:var(--sidebar-w);flex-shrink:0;padding:32px 24px 40px;overflow-y:auto;border-right:1.5px solid #E2E8F0;background:#fff;}
 .sp-resizer{width:6px;flex-shrink:0;cursor:col-resize;background:transparent;position:relative;transition:background .15s;}
 .sp-resizer::after{content:'';position:absolute;inset:0 1px;background:#E2E8F0;border-radius:3px;transition:background .15s;}
@@ -279,7 +280,7 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;}
   <!-- Nav -->
   <nav class="sp-nav">
     <a href="index.html" class="sp-nav-brand">
-      <div class="sp-nav-logo">V</div>
+      <div class="sp-nav-logo"><img src="logo.jpg" alt="VG" style="width:100%;height:100%;object-fit:contain;border-radius:9px;display:block;" onerror="this.style.display='none';this.parentElement.textContent='V';"/></div>
       <span class="sp-nav-title">Placement Portal</span>
     </a>
     <div class="sp-nav-right">
@@ -1302,7 +1303,7 @@ const _wmPng=await new Promise(resolve=>{
       const cvs=document.createElement('canvas');
       cvs.width=500;cvs.height=500;
       const ctx=cvs.getContext('2d');
-      ctx.globalAlpha=0.10;
+      ctx.globalAlpha=0.22;
       ctx.drawImage(img,0,0,500,500);
       resolve(cvs.toDataURL('image/png'));
     }catch(e){resolve(null);}
