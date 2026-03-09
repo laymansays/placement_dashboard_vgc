@@ -68,7 +68,7 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;}
 .profile-fields{width:100%;display:flex;flex-direction:column;margin-bottom:16px;}
 .pf-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #F1F5F9;gap:8px;}
 .pf-k{font-size:12px;font-weight:600;color:#64748B;white-space:nowrap;flex-shrink:0;}
-.pf-v{font-size:12.5px;color:#1E293B;font-weight:500;text-align:right;max-width:180px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.pf-v{font-size:12.5px;color:#1E293B;font-weight:500;text-align:left;flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
 .pf-v.pf-email{overflow:hidden;text-overflow:clip;}
 .pf-v.pf-email .pf-scroll{display:inline-block;white-space:nowrap;padding-right:20px;}
 .pf-v.pf-email .pf-scroll.is-scrolling{animation:marquee-scroll 7s linear infinite;}
@@ -106,8 +106,10 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;}
 .co-card:hover{border-color:#A76EA5;box-shadow:0 6px 20px rgba(109,14,106,.12);transform:translateY(-2px);}
 .co-card-head{display:flex;align-items:center;gap:14px;margin-bottom:14px;}
 .co-card-name{font-size:15px;font-weight:800;color:#0F172A;}
-.co-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
-.chip{display:flex;align-items:center;gap:5px;padding:4px 10px;background:#F7F0F7;border:1px solid #D3B6D2;border-radius:999px;font-size:12px;color:#6D0E6A;font-weight:600;}
+.co-chips{display:flex;flex-direction:column;gap:4px;margin:8px 0 10px;}
+.chip{display:flex;align-items:center;gap:0;font-size:12.5px;}
+.chip-label{font-size:11px;font-weight:700;color:#6D0E6A;text-transform:uppercase;letter-spacing:.04em;min-width:72px;flex-shrink:0;}
+.chip-txt{color:#1E293B;font-weight:500;}
 .chip-empty{font-size:12px;color:#94A3B8;font-style:italic;}
 .elig-sum{font-size:11.5px;color:#64748B;margin-bottom:10px;}
 .btn-apply-card{width:100%;padding:10px;border-radius:10px;border:none;background:linear-gradient(135deg,#570B54,#6D0E6A);color:#fff;font-size:13px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;transition:all .2s;}
@@ -332,8 +334,8 @@ function extractSid(raw){
 }
 function drivePhoto(url){
   if(!url)return'';
-  const m=url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/); if(m)return`https://drive.google.com/uc?export=view&id=${m[1]}`;
-  const m2=url.match(/[?&]id=([a-zA-Z0-9_-]+)/); if(m2)return`https://drive.google.com/uc?export=view&id=${m2[1]}`;
+  const m=url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/); if(m)return`https://drive.google.com/thumbnail?id=${m[1]}&sz=w200`;
+  const m2=url.match(/[?&]id=([a-zA-Z0-9_-]+)/); if(m2)return`https://drive.google.com/thumbnail?id=${m2[1]}&sz=w200`;
   return url;
 }
 const GRADS=[['#1e40af','#7c3aed'],['#0369a1','#0e7490'],['#065f46','#0891b2'],['#7c2d12','#b45309'],['#6b21a8','#db2777'],['#991b1b','#ea580c'],['#0f4c3a','#065f46'],['#3730a3','#1e40af']];
@@ -649,8 +651,9 @@ function renderPortal(){
 /* Profile */
 function renderProfile(elig){
   const s=ST;
+  const driveImg=url=>{if(!url)return'';const m=url.match(/\/d\/([a-zA-Z0-9_-]{20,})/);return m?`https://drive.google.com/uc?export=view&id=${m[1]}`:url;};
   const photoHtml=s.photoUrl
-    ?`<img class="profile-photo" src="${xe(s.photoUrl)}" alt="${xe(s.name)}" onerror="this.style.display='none';document.getElementById('ph-ini').style.display='flex';"/><div id="ph-ini" class="profile-ini" style="display:none">${ini(s.name)}</div>`
+    ?`<img class="profile-photo" src="${xe(driveImg(s.photoUrl))}" alt="${xe(s.name)}" onerror="this.style.display='none';document.getElementById('ph-ini').style.display='flex';"/><div id="ph-ini" class="profile-ini" style="display:none">${ini(s.name)}</div>`
     :`<div id="ph-ini" class="profile-ini">${ini(s.name)}</div>`;
 
   const pfRow=(k,v,isEmail)=>{
@@ -774,11 +777,9 @@ function renderAvailable(){
 
   const openCards=open.map(c=>{
     const chips=[
-      c.roles.length  ?mkChip('\ud83d\udcbc',c.roles.join(', ')):null,
-      c.salary        ?mkChip('\ud83d\udcb0',c.salary):null,
-      c.location      ?mkChip('\ud83d\udccd',c.location):null,
-      c.driveDate     ?mkChip('\ud83d\udcc5',fmtD(c.driveDate)):null,
-      c.interviewMode ?mkChip('\ud83d\udda5\ufe0f',c.interviewMode):null,
+      c.roles.length  ?mkChip('Role',c.roles.join(', ')):null,
+      c.driveDate     ?mkChip('Drive Date',fmtD(c.driveDate)):null,
+      c.interviewMode ?mkChip('Mode',c.interviewMode):null,
     ].filter(Boolean).join('');
     return`<div class="co-card" onclick="openCoModal(${c.id})">
       <div class="co-card-head">${logoHtml(c.name,c.website,c.id-1,52)}<div class="co-card-name">${xe(c.name)}</div></div>
@@ -812,9 +813,9 @@ function renderAvailable(){
   // Upcoming cards
   const upcomingCards=upcoming.map(c=>{
     const chips=[
-      c.roles.length   ?mkChip('&#128188;',c.roles.join(', ')):null,
-      c.driveDate      ?mkChip('&#128197;',fmtD(c.driveDate)):null,
-      c.interviewMode  ?mkChip('&#128187;',c.interviewMode):null,
+      c.roles.length   ?mkChip('Role',c.roles.join(', ')):null,
+      c.driveDate      ?mkChip('Drive Date',fmtD(c.driveDate)):null,
+      c.interviewMode  ?mkChip('Mode',c.interviewMode):null,
     ].filter(Boolean).join('');
     return`<div class="co-card co-card-upcoming" onclick="openCoModal(${c.id})">
       <div class="co-card-head">${logoHtml(c.name,c.website,c.id-1,52)}<div class="co-card-name">${xe(c.name)}</div></div>
@@ -832,15 +833,15 @@ function renderAvailable(){
   document.getElementById('avail-wrap').innerHTML=`
     <div class="sp-section">
       <div class="sp-sec-head">
-        <span class="sp-sec-title">&#127962; Companies for Placements</span>
+        <span class="sp-sec-title">&#128188; Companies for Placements</span>
         ${open.length?`<span style="background:#F7F0F7;color:#6D0E6A;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;">${open.length} open</span>`:''}
       </div>
       ${openSec}${gap(open.length&&(upcoming.length||done.length))}${upcomSec}${gap(upcoming.length&&done.length)}${doneSec}
     </div>`;
 }
 
-function mkChip(icon,text){
-  return`<div class="chip"><span>${icon}</span><span>${xe(text)}</span></div>`;
+function mkChip(label,text){
+  return`<div class="chip"><span class="chip-label">${xe(label)}</span><span class="chip-txt">${xe(text)}</span></div>`;
 }
 
 /* \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
