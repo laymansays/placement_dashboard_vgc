@@ -694,7 +694,7 @@ body.admin-mode .modal{border-top:3px solid var(--admin);}
     <h1 class="pl-heading">Placement Cell</h1>
     <p class="pl-sub">Enter the 4-digit passkey to access<br>the Placement Dashboard.</p>
     <label class="pl-label" for="placement-pin">PASSKEY</label>
-    <input id="placement-pin" type="tel" maxlength="4" inputmode="numeric" placeholder="••••" autocomplete="off"/>
+    <input id="placement-pin" type="tel" maxlength="4" inputmode="numeric" placeholder="••••" autocomplete="off" autofocus/>
     <p id="pin-error"></p>
     <button class="pl-btn" onclick="checkPlacementPin()">Access Dashboard →</button>
     <a href="index.html" class="pl-back">← Home</a>
@@ -2389,6 +2389,11 @@ function checkPlacementPin(){
 
 document.getElementById('placement-pin').addEventListener('keydown', function(e){
   if(e.key === 'Enter') checkPlacementPin();
+});
+
+/* Auto-focus passkey field on page load */
+window.addEventListener('DOMContentLoaded', function(){
+  setTimeout(function(){ document.getElementById('placement-pin')?.focus(); }, 100);
 });
 
 
