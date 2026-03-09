@@ -99,9 +99,9 @@ body{
 /* Center content block */
 .hero-content{
   flex:1;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
-  text-align:center;padding:0 60px;
-  gap:12px;
+  align-items:center;justify-content:space-between;
+  text-align:center;
+  padding:32px 60px 28px;
   position:relative;z-index:1;
 }
 .hero-eyebrow{
@@ -109,7 +109,10 @@ body{
   font-size:10.5px;font-weight:700;letter-spacing:0.10em;color:rgba(255,255,255,0.5);
   padding:4px 12px;border-radius:999px;
   background:rgba(109,14,106,0.18);border:1px solid rgba(211,182,210,0.20);
-  /* no margin — gap handles spacing */
+}
+/* Group 1 — tight internal spacing */
+.hero-top{
+  display:flex;flex-direction:column;align-items:center;gap:10px;
 }
 .eyebrow-dot{width:5px;height:5px;border-radius:50%;background:#22C55E;box-shadow:0 0 6px #22C55E;animation:pulse 2s ease-in-out infinite;}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
@@ -332,21 +335,22 @@ body{
   <!-- Central content -->
   <div class="hero-content">
 
-    <div class="hero-eyebrow">
-      <span class="eyebrow-dot"></span>
-      PLACEMENT SEASON 2025–26
+    <!-- Group 1: eyebrow + title + subtitle -->
+    <div class="hero-top">
+      <div class="hero-eyebrow">
+        <span class="eyebrow-dot"></span>
+        PLACEMENT SEASON 2025–26
+      </div>
+      <h1 class="hero-title">
+        Campus<br><span class="accent">Placement</span> Dashboard
+      </h1>
+      <p class="hero-sub">
+        Track company drives, registrations, and placements for
+        Vidyavahini First Grade Degree College.
+      </p>
     </div>
 
-    <h1 class="hero-title">
-      Campus<br><span class="accent">Placement</span> Dashboard
-    </h1>
-
-    <p class="hero-sub">
-      Track company drives, registrations, and placements for
-      Vidyavahini First Grade Degree College.
-    </p>
-
-    <!-- Stat tiles -->
+    <!-- Group 2: stat tiles -->
     <div class="stat-row">
       <div class="stat-tile" id="tile-companies">
         <div class="stat-icon">🏢</div>
@@ -370,7 +374,7 @@ body{
       </div>
     </div>
 
-    <!-- Portal buttons -->
+    <!-- Group 3: portal buttons -->
     <div class="portal-buttons">
       <a class="portal-btn btn-student" href="student.html">
         <div class="portal-btn-icon">🎓</div>
@@ -574,11 +578,11 @@ function _makeChip(c){
   </div>`;
 }
 
-/* Probe a URL: resolves true only if image loads AND has real pixels (>4×4) */
+/* Probe a URL: resolves true only if image loads AND has real pixels (>4×4).
+   No crossOrigin — favicons don't serve CORS headers and we don't need pixel data. */
 function _probeImg(url){
   return new Promise(resolve=>{
     const img=new Image();
-    img.crossOrigin='anonymous';
     img.onload=function(){resolve(this.naturalWidth>4 && this.naturalHeight>4);};
     img.onerror=()=>resolve(false);
     setTimeout(()=>resolve(false), 6000);
