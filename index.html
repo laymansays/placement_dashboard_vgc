@@ -101,6 +101,7 @@ body{
   flex:1;display:flex;flex-direction:column;
   align-items:center;justify-content:center;
   text-align:center;padding:0 60px;
+  gap:12px;
   position:relative;z-index:1;
 }
 .hero-eyebrow{
@@ -108,25 +109,25 @@ body{
   font-size:10.5px;font-weight:700;letter-spacing:0.10em;color:rgba(255,255,255,0.5);
   padding:4px 12px;border-radius:999px;
   background:rgba(109,14,106,0.18);border:1px solid rgba(211,182,210,0.20);
-  margin-bottom:10px;
+  /* no margin — gap handles spacing */
 }
 .eyebrow-dot{width:5px;height:5px;border-radius:50%;background:#22C55E;box-shadow:0 0 6px #22C55E;animation:pulse 2s ease-in-out infinite;}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
 
 .hero-title{
   font-size:clamp(24px,4vw,46px);font-weight:900;line-height:1.08;
-  letter-spacing:-0.04em;margin-bottom:8px;
+  letter-spacing:-0.04em;
 }
 .hero-title .accent{
   background:linear-gradient(135deg,#A76EA5,#8B3D89,#6D0E6A);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
 }
-.hero-sub{font-size:13.5px;color:rgba(255,255,255,0.55);font-weight:500;line-height:1.5;margin-bottom:16px;max-width:420px;margin-left:auto;margin-right:auto;}
+.hero-sub{font-size:13.5px;color:rgba(255,255,255,0.55);font-weight:500;line-height:1.5;max-width:420px;margin-left:auto;margin-right:auto;}
 
 /* ── STAT TILES ── */
 .stat-row{
   display:grid;grid-template-columns:repeat(4,1fr);gap:8px;
-  max-width:620px;width:100%;margin:0 auto 14px;
+  max-width:620px;width:100%;
 }
 .stat-tile{
   background:rgba(109,14,106,0.10);border:1px solid rgba(211,182,210,0.14);
@@ -150,7 +151,7 @@ body{
 /* ── PORTAL BUTTONS ── */
 .portal-buttons{
   display:flex;gap:14px;justify-content:center;
-  flex-wrap:wrap;max-width:900px;margin:16px auto 0;
+  flex-wrap:wrap;max-width:900px;width:100%;
 }
 .portal-btn{
   flex:1;min-width:160px;
@@ -559,19 +560,11 @@ async function _mergeAdminWebsites(companies){
 }
 
 function _makeChip(c){
-  const d=_chipDomain(c.name,c.website);
-  const cb=`https://logo.clearbit.com/${d}?size=80`;
-  const wf=`https://${d}/favicon.ico`;
-  const gf=`https://www.google.com/s2/favicons?domain=${d}&sz=64`;
   const g=_chipGrad(c.id-1);
   const letters=_chipIni(c.name);
-  const gEsc=g.replace(/'/g,"\\'");
-  // _logoLoad: checks if Google favicon returned a blank 1×1 pixel
+  // Start with gradient initials — logo swapped in asynchronously after verification
   return `<div class="co-chip">
-    <div class="co-chip-logo" id="cl-${c.id}">
-      <img src="${cb}" style="width:100%;height:100%;object-fit:contain;padding:4px;"
-        onerror="if(this.dataset.fb==='2'){var p=this.parentElement;this.remove();p.style.background='${gEsc}';p.style.display='flex';p.style.alignItems='center';p.style.justifyContent='center';p.style.color='#fff';p.style.fontWeight='800';p.style.fontSize='13px';p.textContent='${letters}';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.onload=function(){if(this.naturalWidth<=2){this.onerror();}};this.src='${gf}';}else{this.dataset.fb='1';this.src='${wf}';}"/>
-    </div>
+    <div class="co-chip-logo" data-chip-logo="${c.id}" style="background:${g};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px;">${letters}</div>
     <div class="co-chip-info">
       <span class="co-chip-name">${c.name}</span>
       <span class="co-chip-status s-upcoming" data-chip-id="${c.id}">
@@ -579,6 +572,44 @@ function _makeChip(c){
       </span>
     </div>
   </div>`;
+}
+
+/* Probe a URL: resolves true only if image loads AND has real pixels (>4×4) */
+function _probeImg(url){
+  return new Promise(resolve=>{
+    const img=new Image();
+    img.crossOrigin='anonymous';
+    img.onload=function(){resolve(this.naturalWidth>4 && this.naturalHeight>4);};
+    img.onerror=()=>resolve(false);
+    setTimeout(()=>resolve(false), 6000);
+    img.src=url;
+  });
+}
+
+/* Try sources in order, verified pixel-by-pixel, then apply to all matching chips */
+async function _resolveChipLogo(c){
+  const d=_chipDomain(c.name,c.website);
+  const sources=[
+    `https://logo.clearbit.com/${d}?size=80`,
+    `https://${d}/favicon.ico`,
+    `https://www.google.com/s2/favicons?domain=${d}&sz=64`,
+  ];
+  for(const src of sources){
+    const ok=await _probeImg(src);
+    if(ok){
+      document.querySelectorAll(`[data-chip-logo="${c.id}"]`).forEach(cell=>{
+        // Clear initials styling, insert verified image
+        cell.removeAttribute('style');
+        cell.textContent='';
+        const img=document.createElement('img');
+        img.src=src;
+        img.style.cssText='width:100%;height:100%;object-fit:contain;padding:4px;';
+        cell.appendChild(img);
+      });
+      return;
+    }
+  }
+  // All sources failed — gradient initials remain, no change needed
 }
 
 function _setTickerSpeed(rowEl, pxPerSec){
@@ -606,6 +637,9 @@ function buildCarousel(companies){
   if(row2.length) buildRow(row2, 'dir-right', 'ticker-row-2-wrap');
   else document.getElementById('ticker-row-2-wrap').style.display='none';
   sec.style.display = 'block';
+
+  // After DOM is rendered, probe and verify logos for every company concurrently
+  companies.forEach(c => _resolveChipLogo(c));
 }
 
 function updateChipStatus(id, key){
