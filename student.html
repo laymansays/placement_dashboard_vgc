@@ -547,6 +547,29 @@ async function loadCompanyData(){
       co.adminStatus    = gv(cells[aSt2]) || co.adminStatus;
       console.log('[Portal] ADMIN matched:',nm,'status='+co.adminStatus,'jd='+co.jdUrl);
     });
+
+    // ── Create stub entries for ADMIN_MODE companies missing from CONFIG_TAB ──
+    let nextId = COMPS.length ? Math.max(...COMPS.map(x=>x.id)) + 1 : 1;
+    (tbl.rows||[]).forEach(row=>{
+      const cells=row.c||[];
+      const nm=gv(cells[aC2]); if(!nm)return;
+      if(COMPS.find(x=>norm(x.name)===norm(nm)))return; // already exists
+      const stub={
+        id:nextId++, name:nm, sheetId:null, tabReg:null, tabInt:null, tabSel:null,
+        regFormUrl:'', website:'', interviewMode:'', registrationDate:'', driveDate:'',
+        roles:[], salary:'', location:'', notes:'', eligSummary:'', jdUrl:'', adminStatus:'',
+      };
+      stub.website        = gv(cells[aW2]);
+      stub.interviewMode  = gv(cells[aMo2]);
+      stub.registrationDate = gv(cells[aRD2]);
+      stub.driveDate      = gv(cells[aDD2]);
+      const roles=gv(cells[aRo2]).split(',').map(s=>s.trim()).filter(Boolean);
+      if(roles.length) stub.roles=roles;
+      stub.jdUrl          = gv(cells[aJd2]);
+      stub.adminStatus    = gv(cells[aSt2]);
+      COMPS.push(stub);
+      console.log('[Portal] ADMIN stub created:',nm,'status='+stub.adminStatus);
+    });
   } else {
     console.warn('[Portal] ADMIN_MODE returned null — all companies will show as Upcoming');
   }
@@ -560,7 +583,7 @@ async function loadStatus(){
   STATUS = {};
   await Promise.all(COMPS.map(async c=>{
     const fetchTab = async tab=>{
-      if(!tab)return[];
+      if(!tab||!c.sheetId)return[];
       try{
         const j=await apiFetch(c.sheetId,tab,'json');
         return jsonToRows(j);
