@@ -479,9 +479,9 @@ async function doLogin(email){
    LOAD COMPANY DATA
 \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 */
 async function loadCompanyData(){
-  const [configJ, adminCsv] = await Promise.all([
+  const [configJ, adminJ] = await Promise.all([
     apiFetch(CONFIG_SHEET_ID, CONFIG_TAB_NAME, 'json'),
-    apiFetch(CONFIG_SHEET_ID, ADMIN_TAB_NAME,  'csv').catch(()=>''),
+    apiFetch(CONFIG_SHEET_ID, ADMIN_TAB_NAME,  'json').catch(e=>{ console.error('[Portal] ADMIN_MODE fetch failed:',e.message); return null; }),
   ]);
 
   // Parse config
@@ -514,42 +514,41 @@ async function loadCompanyData(){
     });
   });
 
-  // Parse admin data
-  if(adminCsv){
-    const rows=parseCSV(adminCsv);
-    if(rows.length>=2){
-      const hdr=rows[0].map(h=>h.toLowerCase().replace(/[^a-z0-9]/g,''));
-      const col=(...ks)=>{for(const k of ks){const i=hdr.findIndex(h=>(h||'').toLowerCase().includes(k.toLowerCase()));if(i!==-1)return i;}return -1;};
-      const iC=col('company'),iW=col('website'),iMo=col('interview'),iDD=col('drive'),iRD=col('reg');
-      const iRo=col('role'),iN=col('note'),iSal=col('salary','package','ctc','stipend');
-      const iLoc=col('location','loc'),iEl=col('elig');
-      const _jd=col('jd'),_lk=col('link'); const iJd=_jd!==-1?_jd:_lk;
-      // Actual ADMIN_MODE columns (0-indexed):
-      // 0:Company 1:Website 2:Interview Mode 3:Reg Date 4:Drive Date
-      // 5:POC Name 6:POC Desig 7:POC Email 8:POC Phone 9:Role 10:JD 11:Status
-      const iC2  = iC  !==-1 ? iC   : 0;
-      const iW2  = iW  !==-1 ? iW   : 1;
-      const iMo2 = iMo !==-1 ? iMo  : 2;
-      const iRD2 = iRD !==-1 ? iRD  : 3;
-      const iDD2 = iDD !==-1 ? iDD  : 4;
-      const iRo2 = iRo !==-1 ? iRo  : 9;
-      const iJd2 = col('jd') !==-1 ? col('jd') : 10;  // col 10 = JD link
-      const iSt2 = col('status') !==-1 ? col('status') : 11; // col 11 = Status
-      const norm=s=>(s||'').toLowerCase().replace(/[\s'\u2018\u2019\u201C\u201D\-]/g,'');
-      rows.slice(1).forEach(r=>{
-        const nm=(r[iC2]||'').trim(); if(!nm)return;
-        const c=COMPS.find(x=>norm(x.name)===norm(nm));
-        if(!c){console.warn('[Portal] ADMIN no match:',JSON.stringify(nm));return;}
-        c.website       = (r[iW2] ||'').trim() || c.website;
-        c.interviewMode = (r[iMo2]||'').trim() || c.interviewMode;
-        c.driveDate     = (r[iDD2]||'').trim() || c.driveDate;
-        c.registrationDate = (r[iRD2]||'').trim() || c.registrationDate;
-        const roles=(r[iRo2]||'').split(',').map(s=>s.trim()).filter(Boolean);
-        if(roles.length) c.roles = roles;
-        c.jdUrl       = (r[iJd2]||'').trim() || c.jdUrl;
-        c.adminStatus = (r[iSt2]||'').trim() || c.adminStatus;
-      });
-    }
+  // Parse admin data (JSON format — columns detected by header label)
+  if(adminJ){
+    const tbl=adminJ.table||{};
+    // Build header map: col index → label (lowercased, stripped)
+    const aHdrs=(tbl.cols||[]).map(col=>(col.label||col.id||'').toLowerCase().replace(/[^a-z0-9]/g,''));
+    const aC=(...ks)=>{for(const k of ks){const i=aHdrs.findIndex(h=>h.includes(k.toLowerCase()));if(i!==-1)return i;}return -1;};
+    const aC2  = aC('company') !==-1 ? aC('company') : 0;
+    const aW2  = aC('website') !==-1 ? aC('website') : 1;
+    const aMo2 = aC('interview')!==-1 ? aC('interview'): 2;
+    const aRD2 = aC('reg')     !==-1 ? aC('reg')     : 3;
+    const aDD2 = aC('drive')   !==-1 ? aC('drive')   : 4;
+    const aRo2 = aC('role')    !==-1 ? aC('role')    : 9;
+    const aJd2 = aC('jd')      !==-1 ? aC('jd')      : 10;
+    const aSt2 = aC('status')  !==-1 ? aC('status')  : 11;
+    console.log('[Portal] ADMIN_MODE headers:', aHdrs);
+    console.log('[Portal] ADMIN_MODE col map: company='+aC2+' role='+aRo2+' jd='+aJd2+' status='+aSt2);
+    const norm=s=>(s||'').toLowerCase().replace(/[\s'\u2018\u2019\u201C\u201D\-]/g,'');
+    const gv=cell=>cell&&cell.v!=null?String(cell.v).trim():'';
+    (tbl.rows||[]).forEach(row=>{
+      const cells=row.c||[];
+      const nm=gv(cells[aC2]); if(!nm)return;
+      const co=COMPS.find(x=>norm(x.name)===norm(nm));
+      if(!co){console.warn('[Portal] ADMIN no match:',JSON.stringify(nm));return;}
+      co.website        = gv(cells[aW2])  || co.website;
+      co.interviewMode  = gv(cells[aMo2]) || co.interviewMode;
+      co.registrationDate = gv(cells[aRD2]) || co.registrationDate;
+      co.driveDate      = gv(cells[aDD2]) || co.driveDate;
+      const roles=gv(cells[aRo2]).split(',').map(s=>s.trim()).filter(Boolean);
+      if(roles.length) co.roles=roles;
+      co.jdUrl          = gv(cells[aJd2]) || co.jdUrl;
+      co.adminStatus    = gv(cells[aSt2]) || co.adminStatus;
+      console.log('[Portal] ADMIN matched:',nm,'status='+co.adminStatus,'jd='+co.jdUrl);
+    });
+  } else {
+    console.warn('[Portal] ADMIN_MODE returned null — all companies will show as Upcoming');
   }
 }
 
@@ -569,9 +568,15 @@ async function loadStatus(){
     };
     const [rr,ir,sr]=await Promise.all([fetchTab(c.tabReg),fetchTab(c.tabInt),fetchTab(c.tabSel)]);
     const has=rows=>rows.some(r=>(r[2]||'').toLowerCase().trim()===em);
-    const selData=sr.length>1&&(sr[0][2]||'').toLowerCase().includes('email')?sr.slice(1):sr;
-    const placedNames=selData.filter(r=>r.some(v=>v)).map(r=>(r[2]||r[1]||r[3]||'').trim()).filter(Boolean);
-    STATUS[c.id]={reg:has(rr),int:has(ir),sel:has(sr),driveComplete:c.adminStatus.toLowerCase()==='completed',placedNames};
+    const selData=sr.length>1?sr.slice(1):sr;
+    const isHdrRow=r=>r.some(v=>(v||'').toLowerCase().includes('name')||(v||'').toLowerCase().includes('email'));
+    const placedNames=selData.filter(r=>r.some(v=>v)&&!isHdrRow(r))
+      .map(r=>{
+        // prefer a cell that looks like a name (no @ no digits-only)
+        const nameCell=r.find(v=>v&&!v.includes('@')&&!/^\d/.test(v)&&v.trim().length>1);
+        return (nameCell||r[2]||r[1]||r[3]||'').trim();
+      }).filter(Boolean);
+    STATUS[c.id]={reg:has(rr),int:has(ir),sel:has(sr),driveComplete:['completed','closed'].includes(c.adminStatus.toLowerCase().trim()),placedNames};
   }));
 }
 
