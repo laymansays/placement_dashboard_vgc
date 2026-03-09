@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<link rel="icon" type="image/jpeg" href="logo.jpg"/>
 <title>Placement Dashboard · Vidyavahini First Grade Degree College</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -1344,6 +1345,7 @@ function getLogoDomain(c){
 function companyLogoHtml(c,size,extraCss){
   const sz=size||48; const domain=getLogoDomain(c);
   const clearbit='https://logo.clearbit.com/'+domain+'?size='+sz*2;
+  const wfav='https://'+domain+'/favicon.ico';
   const gfav='https://www.google.com/s2/favicons?domain='+domain+'&sz=128';
   const grad=avgr(c.id-1);
   const pad=sz>56?8:6; const fsz=Math.round(sz*0.30);
@@ -1351,7 +1353,10 @@ function companyLogoHtml(c,size,extraCss){
     +'<img class="co-logo-a" src="'+clearbit+'" '
     +'onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\';" '
     +'style="width:100%;height:100%;object-fit:contain;padding:'+pad+'px;display:block;" />'
-    +'<img class="co-logo-b" src="'+gfav+'" '
+    +'<img class="co-logo-b" src="'+wfav+'" '
+    +'onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\';" '
+    +'style="width:100%;height:100%;object-fit:contain;padding:'+(pad+2)+'px;display:none;" />'
+    +'<img class="co-logo-c" src="'+gfav+'" '
     +'onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';" '
     +'style="width:100%;height:100%;object-fit:contain;padding:'+(pad+2)+'px;display:none;" />'
     +'<span class="co-ini" style="background:'+grad+';font-size:'+fsz+'px;">'+ini(c.name)+'</span>'
