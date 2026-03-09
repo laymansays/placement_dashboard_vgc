@@ -885,7 +885,7 @@ function openCoModal(id){
   if(c.regFormUrl)parts.push(`<button class="btn-modal-apply" style="flex:1;" onclick="applyNow('${xe(c.regFormUrl)}')">Apply Now \u2192</button>`);
   else parts.push(`<span class="no-form-txt">Registration form not yet available</span>`);
   applySlot.innerHTML=parts.join('');
-  document.getElementById('co-modal').classList.add('show');
+  document.getElementById('co-modal').classList.add('show');document.body.style.overflow='hidden';
 }
 
 function openPlacedModal(id){
@@ -903,9 +903,9 @@ function openPlacedModal(id){
       <div style="display:flex;flex-direction:column;gap:6px;">${names.map((n,i)=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#F8FAFC;border-radius:8px;"><span style="font-size:11px;font-weight:700;color:#94A3B8;min-width:18px;">${i+1}</span><span style="font-size:13.5px;font-weight:600;color:#1A0519;">${xe(n)}</span></div>`).join('')||'<div style="color:#94A3B8;font-size:13px;">No data available</div>'}</div>
     </div>`;
   document.getElementById('modal-apply-slot').innerHTML='';
-  document.getElementById('co-modal').classList.add('show');
+  document.getElementById('co-modal').classList.add('show');document.body.style.overflow='hidden';
 }
-function closeModal(){ document.getElementById('co-modal').classList.remove('show'); }
+function closeModal(){ document.getElementById('co-modal').classList.remove('show');document.body.style.overflow=''; }
 function applyNow(url){ window.open(url,'_blank','noopener'); }
 
 /* \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
