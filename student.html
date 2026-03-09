@@ -753,10 +753,11 @@ function renderAvailable(){
   const isOpen     =c=>stLc(c)==='registrations started'||stLc(c)==='ongoing';
   const isCompleted=c=>stLc(c)==='completed'||stLc(c)==='closed';
   const isUpcoming =c=>!isOpen(c)&&!isCompleted(c);
-  // studentSelected: student was placed — treat as completed regardless of status
-  const studentSel =c=>!!(STATUS[c.id]?.sel);
-  // done = status completed/closed OR student was selected in that drive
-  const done    = COMPS.filter(c=>isCompleted(c)||studentSel(c));
+  // hasPlacements: ANY student placed in this drive → it's a completed drive
+  const hasPlacements=c=>(STATUS[c.id]?.placedNames?.length||0)>0;
+  const studentSel   =c=>!!(STATUS[c.id]?.sel);
+  // done = status Completed/Closed OR drive has placed students OR this student was placed
+  const done    = COMPS.filter(c=>isCompleted(c)||hasPlacements(c)||studentSel(c));
   const doneIds = new Set(done.map(c=>c.id));
   // open/upcoming: exclude applied AND exclude already-in-done
   const open    = COMPS.filter(c=>!applied.has(c.id)&&!doneIds.has(c.id)&&isOpen(c));
