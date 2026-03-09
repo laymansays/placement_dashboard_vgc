@@ -1088,14 +1088,20 @@ const SEC_HDR={
 };
 function parseResumeText(rawText){let text=applyOCR(rawText);text=rawText.split('\n').map(l=>applyOCR(l)).join('\n');const lines=text.split('\n').map(l=>l.trim()).filter(Boolean);const emailRx=/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/;const phoneRx=/(\+91[\s\-]?)?[6-9]\d{9}/;const liRx=/(?:https?:\/\/)?(?:www\.)?linkedin\.com\/in\/[\w\-]+\/?/i;const ghRx=/(?:https?:\/\/)?(?:www\.)?github\.com\/[\w\-]+\/?/i;let name='',email='',phone='',linkedin='',github='';const cL=new Set();for(let i=0;i<Math.min(10,lines.length);i++){const l=lines[i];const lForMatch=l.replace(/[^\x00-\x7F]/g,' ');const lClean=lForMatch.replace(/^[^a-zA-Z0-9]+/,'').trim();if(!name&&lClean.length>1&&lClean.length<60&&/^[A-Z][A-Z\s]+$/.test(lClean)){name=lClean;cL.add(i);}const em=(lForMatch||l).match(emailRx);if(em&&!email){email=em[0];cL.add(i);}const ph=(lForMatch||l).match(phoneRx);if(ph&&!phone){phone=ph[0];cL.add(i);}const li=(lForMatch||l).match(liRx);if(li&&!linkedin){linkedin=li[0];cL.add(i);}const gh=(lForMatch||l).match(ghRx);if(gh&&!github){github=gh[0];cL.add(i);}}const sections={summary:[],education:[],experience:[],projects:[],skills:[],awards:[],certifications:[]};let cur='_pre';const pre=[];for(let i=0;i<lines.length;i++){if(cL.has(i))continue;const l=lines[i];const lc=l.toLowerCase().replace(/[^\x00-\x7F]/g,'').trim();if(!lc||/^[\ud83c-\udfff]{1,3}\s*(basavakalyan|karnataka|\d{6})/i.test(l))continue;let m=false;for(const[sec,rx]of Object.entries(SEC_HDR)){if(rx.test(lc)){cur=sec;m=true;break;}}if(m)continue;if(cur==='_pre')pre.push(l);else sections[cur].push(l);}if(!sections.summary.length&&pre.length)sections.summary=pre.filter(l=>l.length>15&&!/^\d/.test(l));return{name,email,phone,linkedin,github,sections};}
 function cleanEduToken(s){
-  return s
+  s=s
     .replace(/\([^)]*\)/g,'')           // remove (anything in brackets)
     .replace(/\[[^\]]*\]/g,'')          // remove [anything in square brackets]
     .replace(/[()\[\]{}]/g,'')           // remove any leftover bracket chars
+    .replace(/\bCGPA\b/gi,'')            // strip stray 'CGPA' word
+    .replace(/\bGPA\b/gi,'')             // strip stray 'GPA' word
     .replace(/[:\-–,|]+/g,' ')            // separators to space
     .replace(/\s{2,}/g,' ')               // collapse spaces
     .replace(/^[^a-zA-Z0-9]+|[^a-zA-Z0-9]+$/g,'') // trim non-alphanumeric ends
     .trim();
+  // Add comma between institution name and trailing city/place word
+  // e.g. 'Vidyavahini First Grade Degree College Tumkur' → '...College, Tumkur'
+  s=s.replace(/\b(College|School|Institute|University|Academy|Polytechnic)\b\s+(\w+)$/i,'$1, $2');
+  return s;
 }
 function buildEduHTML(lines,wantCGPA){
   lines=lines.filter(l=>!/^(course|qualification|degree)\s+(institution|school|marks|year)/i.test(l.trim()));
@@ -1108,23 +1114,55 @@ const yRx=/\b(20\d{2}|19\d{2})\b/;const pRx=/(\d{1,3}(?:\.\d{1,2})?)%/g;const cR
 const AU=new Set(['GST','TDS','PAN','NSS','NCC','CGPA','GPA','MBA','BCA','BBA','BCom','MCom','MCA','BSc','MSc','BTech','MTech','PhD','PUC','SSLC','HSC','SSC','AI','ML','SQL','HTML','CSS','PHP','API','CRM','ERP','SAP','UI','UX','IT','HR','PR','SEBI','ICSI','NISM','ICAI','CA','CS','CSEET']);
 const PN=new Set(['Excel','Word','PowerPoint','Tally','Python','Java','Linux','Windows','Google','Microsoft','LinkedIn','GitHub','Canva','Figma','MySQL','MongoDB']);
 const SW=new Set(['a','an','the','and','but','or','for','in','on','at','to','by','of','up','as','is','are','was','with','from']);
-function toSC(str){if(!str)return str;return str.trim().split(/\s+/).map((w,i)=>{if(/^[A-Z](\.[A-Z])+\.?$/.test(w))return w;const b=w.replace(/[^a-zA-Z]/g,'');const U=b.toUpperCase();if(AU.has(U))return w.replace(b,U);if(PN.has(b))return w.replace(b,b.charAt(0).toUpperCase()+b.slice(1).toLowerCase());if(i===0)return w.charAt(0).toUpperCase()+w.slice(1).toLowerCase();if(SW.has(b.toLowerCase()))return w.toLowerCase();return w.charAt(0).toLowerCase()+w.slice(1);}).join(' ');}
+function toSC(str){if(!str)return str;
+return str.trim().split(/\s+/).map((w,i)=>{
+  // Handle hyphenated words: process each part
+  if(w.includes('-')){
+    return w.split('-').map((part,pi)=>{
+      const b=part.replace(/[^a-zA-Z]/g,'');
+      const U=b.toUpperCase();
+      if(AU.has(U))return part.replace(b,U);
+      if(PN.has(b))return part.replace(b,b.charAt(0).toUpperCase()+b.slice(1).toLowerCase());
+      if(i===0&&pi===0)return part.charAt(0).toUpperCase()+part.slice(1).toLowerCase();
+      if(SW.has(b.toLowerCase()))return part.toLowerCase();
+      return part.charAt(0).toLowerCase()+part.slice(1).toLowerCase();
+    }).join('-');
+  }
+  if(/^[A-Z](\.[A-Z])+\.?$/.test(w))return w;
+  const b=w.replace(/[^a-zA-Z]/g,'');
+  const U=b.toUpperCase();
+  if(AU.has(U))return w.replace(b,U);
+  if(PN.has(b))return w.replace(b,b.charAt(0).toUpperCase()+b.slice(1).toLowerCase());
+  if(i===0)return w.charAt(0).toUpperCase()+w.slice(1).toLowerCase();
+  if(SW.has(b.toLowerCase()))return w.toLowerCase();
+  return w.charAt(0).toLowerCase()+w.slice(1);
+}).join(' ');}
 function rejoinBullets(lines){const BR=/^[•·●\-–*▪▸►]/;const result=[];for(let i=0;i<lines.length;i++){const cur=cleanS(lines[i]);const next=lines[i+1]?cleanS(lines[i+1]):null;if(!cur)continue;if(!/[.!?:)]$/.test(cur)&&next&&!BR.test(next)){lines[i+1]=cur+' '+next.replace(BR,'').trim();continue;}result.push(cur);}return result;}
 const WV=[[/\bwas responsible for\b/gi,'managed'],[/\bresponsible for\b/gi,'managed'],[/\bworked on\b/gi,'developed'],[/\bworked with\b/gi,'collaborated with'],[/\bwas part of\b/gi,'contributed to'],[/\bhelped (?:to |in )?/gi,'assisted in '],[/\bmade a\b/gi,'developed a'],[/\bmade the\b/gi,'developed the']];function splitLongBullet(t,maxChars){
   if(t.length<=maxChars)return[t];
-  // Try to split at sentence boundary (. ! ?)
+  const mid=Math.floor(t.length/2);
+  // 1. Try sentence boundary (. ! ?)
   const sentRx=/([^.!?]{20,}[.!?])\s+([A-Z])/;
   const sm=t.match(sentRx);
   if(sm){
     const cut=t.indexOf(sm[0]);
     const p1=t.slice(0,cut+sm[1].length).trim();
     const p2=t.slice(cut+sm[1].length).trim();
-    if(p1.length>20&&p2.length>20){
-      return[p1,p2.charAt(0).toUpperCase()+p2.slice(1)];
+    if(p1.length>15&&p2.length>15)return[p1,p2.charAt(0).toUpperCase()+p2.slice(1)];
+  }
+  // 2. Verb-boundary split — try BEFORE comma for activity-style bullets
+  const verbRx=/\s+(contributed|developed|participated|created|managed|built|designed|led|handled|implemented|assisted|coordinated|organised|organized|prepared|delivered|achieved|improved|supported|trained|analyzed|analysed|conducted|performed|conceptualized|conceptualised)\b/gi;
+  const vMatches=[...t.matchAll(verbRx)];
+  if(vMatches.length){
+    const vBest=vMatches.reduce((a,b)=>Math.abs(b.index-mid)<Math.abs(a.index-mid)?b:a);
+    if(vBest.index>20&&vBest.index<t.length-20){
+      const p1=t.slice(0,vBest.index).trim();
+      const p2=t.slice(vBest.index+1).trim();
+      const p2cap=p2.charAt(0).toUpperCase()+p2.slice(1);
+      if(p1.length>15&&p2cap.length>15)return[p1,p2cap];
     }
   }
-  // Try comma/semicolon near middle
-  const mid=Math.floor(t.length/2);
+  // 3. Comma/semicolon near middle
   let best=-1,bestDist=t.length;
   for(let i=0;i<t.length;i++){
     if(t[i]===','||t[i]===';'){
@@ -1137,29 +1175,14 @@ const WV=[[/\bwas responsible for\b/gi,'managed'],[/\bresponsible for\b/gi,'mana
     const p2=t.slice(best+1).trim();
     return[p1,p2.charAt(0).toUpperCase()+p2.slice(1)];
   }
-  // Try verb-boundary split: split BEFORE an action verb that starts a new clause
-  // Matches ' verb ' where verb is a common past/present tense action word
-  const verbRx=/\s+(contributed|developed|participated|created|managed|built|designed|led|handled|implemented|assisted|coordinated|organised|organized|prepared|delivered|achieved|improved|supported|trained|analyzed|analysed|conducted|performed)\s/gi;
-  const vMatches=[...t.matchAll(verbRx)];
-  if(vMatches.length){
-    // Pick the verb match closest to the middle
-    const vBest=vMatches.reduce((a,b)=>Math.abs(b.index-mid)<Math.abs(a.index-mid)?b:a);
-    if(vBest.index>25&&vBest.index<t.length-25){
-      const p1=t.slice(0,vBest.index).trim();
-      const p2=t.slice(vBest.index+1).trim();
-      const p2cap=p2.charAt(0).toUpperCase()+p2.slice(1);
-      if(p1.length>20&&p2cap.length>20)return[p1,p2cap];
-    }
-  }
-  // Fallback: split at word boundary near middle
+  // 4. Fallback: word boundary near middle
   const cut=t.lastIndexOf(' ',mid+20);
   if(cut>20){
-    const fa=t.slice(0,cut).trim();
-    const fb=t.slice(cut+1).trim();
-    return[fa, fb.charAt(0).toUpperCase()+fb.slice(1)];
+    return[t.slice(0,cut).trim(),t.slice(cut+1).trim().replace(/^./,c=>c.toUpperCase())];
   }
   return[t];
 }
+
 function wrapBullet(t,maxChars){
   // If text fits in maxChars, return as-is
   if(t.length<=maxChars)return t;
@@ -1199,7 +1222,7 @@ function fixAboutMe(raw){
   // Lowercase everything
   t=t.toLowerCase();
   // Restore protected tokens
-  t=t.replace(/__K(\d+)__/g,(m,i)=>{let v=KEEP[+i];if(/^BCom$/i.test(v))v='B.Com';if(/^BCA$/i.test(v))v='BCA';return v;});
+  t=t.replace(/__[Kk](\d+)__/gi,(m,i)=>{let v=KEEP[+i];if(/^B\.?Com$/i.test(v))v='B.Com';if(/^BCA$/i.test(v))v='BCA';return v;});
   // Fix spacing around punctuation
   t=t.replace(/\s+([,\.!?;:])/g,'$1').replace(/([,;:])(?=[^\s])/g,'$1 ');
   // Capitalise first letter of each sentence
@@ -1207,13 +1230,19 @@ function fixAboutMe(raw){
   // Capitalise standalone i
   t=t.replace(/\bi\b/g,'I');
   // Capitalise subject/domain names
-  t=t.replace(/\b(financial accounting|business operations|stock market|accounting|finance|economics|commerce|management|marketing|taxation|auditing|banking)\b/gi,m=>m.charAt(0).toUpperCase()+m.slice(1).toLowerCase());
+  t=t.replace(/\b(financial accounting|business operations|stock market|accounting|finance|economics|commerce|management|marketing|taxation|auditing|banking)\b/gi,m=>m.split(' ').map(w=>w.charAt(0).toUpperCase()+w.slice(1).toLowerCase()).join(' '));
   // Pluralise skill after compound list
   t=t.replace(/\b(skill|ability|competency|quality|trait|technique|knowledge)(?=\s*[.,;]|\s*$)/gi,(m,word,offset,str)=>{
     const before=str.slice(Math.max(0,offset-120),offset);
     if(/[,]|(and|&)/i.test(before))return word.replace(/s$/i,'')+'s';
     return m;
   });
+  // Add article 'A' before degree abbreviation at start
+  t=t.replace(/^(B\.Com|BCA|BBA|B\.Sc|MBA|MCA|M\.Com|MCom)\b/,(m)=>'A '+m);
+  // Fix sentence-starting conjunctions: 'And passionate' → 'I am passionate'
+  t=t.replace(/([.!?]\s+)And\s+(passionate|interested|seeking|eager|driven|looking|aiming)/gi,(m,sep,w)=>sep+'I am '+w.toLowerCase()+' ');
+  // Remove stray 'And' at very start of text
+  t=t.replace(/^And\s+(passionate|interested|seeking|eager|driven|looking)/i,(m,w)=>'I am '+w.toLowerCase()+' ');
   if(t&&!/[.!?]$/.test(t))t+='.';
   const sentences=t.match(/[^.!?]+[.!?]+/g)||[t];
   return sentences.map(s=>s.trim()).map(s=>s.charAt(0).toUpperCase()+s.slice(1)).join(' ');
@@ -1222,30 +1251,43 @@ function cleanParsedSections(sections,wantCGPA){if(sections.summary&&sections.su
   sections.skills=sections.skills.flatMap(l=>{
     const raw=cleanS(l);
     const parts=raw.split(/[•·●▪▸►]/).map(p=>applyOCR(p.replace(/^[\-–*\s]+/,'').trim())).filter(Boolean);
-    return parts.length>1?parts:[applyOCR(raw.replace(/^[•·●\-–*▪▸►\s]+/,''))];
+    const items=parts.length>1?parts:[applyOCR(raw.replace(/^[•·●\-–*▪▸►\s]+/,''))];
+    // Title-case each skill item word-by-word (except known acronyms)
+    return items.map(sk=>sk.split(' ').map((w,i)=>{
+      const b=w.replace(/[^a-zA-Z]/g,'');
+      const U=b.toUpperCase();
+      if(AU.has(U))return w.replace(b,U); // keep acronyms
+      if(PN.has(b))return w.replace(b,b.charAt(0).toUpperCase()+b.slice(1).toLowerCase());
+      // Capitalise every word in skills (title case)
+      return w.charAt(0).toUpperCase()+w.slice(1).toLowerCase();
+    }).join(' '));
   }).filter(Boolean);
 }return sections;}
 function buildEntries(lines){return rejoinBullets(lines).map(l=>{const t=procBullet(l);return t?`<li>${xeR(t)}</li>`:''}).filter(Boolean).join('');}
 function buildResumeHTML(parsed){const{name,email,phone,linkedin,github,sections}=parsed;let html='';if(name)html+=`<h1 class="rw-name">${xeR(stripEmoji(name))}</h1>`;const contacts=[];if(phone)contacts.push(stripEmoji(phone));if(email)contacts.push(email);if(linkedin)contacts.push(linkedin.replace(/^https?:\/\/(www\.)?/i,''));if(github)contacts.push(github.replace(/^https?:\/\/(www\.)?/i,''));if(contacts.length)html+=`<p class="rw-contact-line">${contacts.map(xeR).join(' &nbsp;&middot;&nbsp; ')}</p>`;html+=`<hr class="rw-header-rule">`;const sumL=(sections.summary||[]).filter(l=>cleanS(l).length>4);if(sumL.length){html+=`<h2 class="rw-section">ABOUT ME</h2><p class="rw-about">${xeR(sumL.join(' ').replace(/\s{2,}/g,' ').trim())}</p><hr class="rw-rule">`;}const edu=sections.education||[];if(edu.length){html+=`<h2 class="rw-section">EDUCATION</h2>${buildEduHTML(edu,_gradeMode==='cgpa')}<hr class="rw-rule">`;}const proj=sections.projects||[];if(proj.length){html+=`<h2 class="rw-section">PROJECTS</h2><ul class="rw-list">${buildEntries(proj)}</ul><hr class="rw-rule">`;}const exp=sections.experience||[];if(exp.length){html+=`<h2 class="rw-section">WORK EXPERIENCE</h2><ul class="rw-list">${buildEntries(exp)}</ul><hr class="rw-rule">`;}const sk=sections.skills||[];if(sk.length){html+=`<h2 class="rw-section">SKILLS</h2><div class="rw-skills">`;for(const s of sk){const rawSk=cleanS(s);rawSk.split(/[•·●▪▸►]/).map(p=>p.replace(/^[\s\-–*]+|[\s\-–*]+$/g,'').trim()).filter(Boolean).forEach(p=>{html+=`<div class="rw-skill-item">${xeR(p)}</div>`;});}html+=`</div><hr class="rw-rule">`;}const aw=[...(sections.awards||[]),...(sections.certifications||[])];if(aw.length)html+=`<h2 class="rw-section">AWARDS &amp; CERTIFICATIONS</h2><ul class="rw-list">${buildEntries(aw)}</ul>`;return html;}
-function downloadRewrittenPDF(){if(!_rwHtml)return;try{
+async function downloadRewrittenPDF(){if(!_rwHtml)return;try{
 const{jsPDF}=window.jspdf;
 const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
 const PW=210,PH=297,ML=20,MR=20,MT=20,MB=24,TW=170;
 let y=MT;
 
-/* ── Pre-build watermark PNG synchronously from base64 ── */
+/* ── Pre-build watermark PNG via img.onload (guarantees decode) ── */
 const _VGB64='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';
-let _wmPng=null;
-try{
-  const _wImg=new Image();
-  _wImg.src='data:image/jpeg;base64,'+_VGB64;
-  const _wCvs=document.createElement('canvas');
-  _wCvs.width=500;_wCvs.height=500;
-  const _wCtx=_wCvs.getContext('2d');
-  _wCtx.globalAlpha=0.10;
-  _wCtx.drawImage(_wImg,0,0,500,500);
-  _wmPng=_wCvs.toDataURL('image/png');
-}catch(e){console.warn('WM prebuild:',e.message);}
+const _wmPng=await new Promise(resolve=>{
+  const img=new Image();
+  img.onload=()=>{
+    try{
+      const cvs=document.createElement('canvas');
+      cvs.width=500;cvs.height=500;
+      const ctx=cvs.getContext('2d');
+      ctx.globalAlpha=0.10;
+      ctx.drawImage(img,0,0,500,500);
+      resolve(cvs.toDataURL('image/png'));
+    }catch(e){resolve(null);}
+  };
+  img.onerror=()=>resolve(null);
+  img.src='data:image/jpeg;base64,'+_VGB64;
+});
 
 /* ── helpers ── */
 function addWatermark(){
