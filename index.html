@@ -17,17 +17,46 @@ body{
   -webkit-font-smoothing:antialiased;overflow-x:hidden;
 }
 
-/* ── FLOATING FIXED LOGO ── */
-.fixed-logo{
+/* ── FLOATING FIXED LOGO + SLIDE TEXT ── */
+.fixed-logo-wrap{
   position:fixed;top:20px;left:24px;z-index:500;
-  width:54px;height:54px;border-radius:15px;
-  background:#fff;overflow:hidden;
-  box-shadow:0 4px 24px rgba(0,0,0,0.35),0 0 0 1px rgba(255,255,255,0.08);
-  transition:transform .2s,box-shadow .2s;
-  text-decoration:none;display:block;
+  display:flex;align-items:center;
+  cursor:pointer;
+  text-decoration:none;
 }
-.fixed-logo:hover{transform:scale(1.08);box-shadow:0 8px 32px rgba(109,14,106,0.45);}
-.fixed-logo img{width:100%;height:100%;object-fit:contain;display:block;}
+.fixed-logo-img{
+  width:54px;height:54px;border-radius:15px;
+  background:#fff;overflow:hidden;flex-shrink:0;
+  box-shadow:0 4px 24px rgba(0,0,0,0.35),0 0 0 1px rgba(255,255,255,0.08);
+  transition:width .35s cubic-bezier(.4,0,.2,1),
+             height .35s cubic-bezier(.4,0,.2,1),
+             border-radius .35s,
+             box-shadow .25s;
+}
+.fixed-logo-img img{width:100%;height:100%;object-fit:contain;display:block;}
+.fixed-logo-wrap.scrolled .fixed-logo-img{
+  width:66px;height:66px;border-radius:18px;
+  box-shadow:0 8px 36px rgba(109,14,106,0.50),0 0 0 1.5px rgba(211,182,210,0.18);
+}
+/* Slide-out text */
+.fixed-logo-text{
+  max-width:0;overflow:hidden;opacity:0;
+  white-space:nowrap;
+  font-size:15px;font-weight:900;letter-spacing:0.12em;
+  color:rgba(255,255,255,0.90);
+  margin-left:0;
+  transition:max-width .38s cubic-bezier(.4,0,.2,1),
+             opacity .28s ease,
+             margin-left .38s cubic-bezier(.4,0,.2,1);
+  pointer-events:none;
+  text-shadow:0 2px 8px rgba(0,0,0,0.40);
+}
+.fixed-logo-wrap:hover .fixed-logo-text{
+  max-width:120px;opacity:1;margin-left:12px;
+}
+.fixed-logo-wrap:hover .fixed-logo-img{
+  box-shadow:0 8px 32px rgba(109,14,106,0.50),0 0 0 1.5px rgba(211,182,210,0.22);
+}
 
 /* ── SCROLLING NAV (not fixed) ── */
 .nav{
@@ -35,8 +64,8 @@ body{
   padding:0 40px;height:62px;display:flex;align-items:center;justify-content:flex-end;
 }
 .nav-brand{display:flex;align-items:center;gap:10px;text-decoration:none;}
-.nav-college{font-size:13.5px;font-weight:700;color:rgba(255,255,255,0.7);letter-spacing:-0.01em;}
-.nav-year{font-size:11px;font-weight:600;color:rgba(211,182,210,0.80);padding:2px 8px;border-radius:999px;background:rgba(109,14,106,0.18);border:1px solid rgba(211,182,210,0.18);}
+.nav-college{font-size:16px;font-weight:700;color:rgba(255,255,255,0.82);letter-spacing:-0.01em;}
+.nav-year{font-size:13px;font-weight:600;color:rgba(211,182,210,0.90);padding:3px 10px;border-radius:999px;background:rgba(109,14,106,0.22);border:1px solid rgba(211,182,210,0.22);margin-left:8px;}
 
 /* ── HERO ── */
 .hero{
@@ -272,7 +301,9 @@ body{
 /* ── RESPONSIVE ── */
 @media(max-width:700px){
   .nav{padding:0 20px;}
-  .fixed-logo{width:44px;height:44px;top:14px;left:16px;}
+  .fixed-logo-wrap{top:14px;left:16px;}
+  .fixed-logo-img{width:44px;height:44px;border-radius:11px;}
+  .fixed-logo-wrap.scrolled .fixed-logo-img{width:54px;height:54px;}
   .hero-content{padding:0 24px;}
   .stat-row{grid-template-columns:repeat(2,1fr);}
   .portal-buttons{flex-direction:column;}
@@ -289,9 +320,13 @@ body{
 <body>
 
 <!-- ── FIXED FLOATING LOGO ── -->
-<a class="fixed-logo" href="index.html">
-  <img src="logo.jpg" alt="Vidyavahini" onerror="this.style.display='none';this.parentElement.style.background='#6D0E6A';this.parentElement.textContent='V';"/>
-</a>
+<div class="fixed-logo-wrap" id="fixed-logo-wrap">
+  <div class="fixed-logo-img" id="fixed-logo-img">
+    <img src="logo.jpg" alt="Vidyavahini"
+      onerror="this.style.display='none';var p=this.parentElement;p.style.background='linear-gradient(135deg,#570B54,#6D0E6A)';p.style.display='flex';p.style.alignItems='center';p.style.justifyContent='center';p.style.color='#fff';p.style.fontWeight='900';p.style.fontSize='22px';p.textContent='V';"/>
+  </div>
+  <span class="fixed-logo-text">VVFGC</span>
+</div>
 
 <!-- ── SCROLLING NAV (name + year only) ── -->
 <nav class="nav">
@@ -383,8 +418,34 @@ body{
 <script src="shared.js"></script>
 <script>
 /* ═══════════════════════════════════════════
+   LOGO — scroll grow + slide text + no-refresh
+═══════════════════════════════════════════ */
+(function(){
+  const wrap = document.getElementById('fixed-logo-wrap');
+  if(!wrap) return;
+
+  // Grow on scroll, stay grown
+  let grown = false;
+  window.addEventListener('scroll', function(){
+    if(!grown && window.scrollY > 30){
+      grown = true;
+      wrap.classList.add('scrolled');
+    }
+  }, {passive:true});
+
+  // Clicking logo scrolls to top without reload
+  wrap.addEventListener('click', function(e){
+    e.preventDefault();
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+})();
+
+/* ═══════════════════════════════════════════
    COMPANY CAROUSEL
 ═══════════════════════════════════════════ */
+const CONFIG_SHEET_ID_IDX = '1Mb9jrzZMSta5NYs28i3STS2tYNqhMtabj3wktvHiYmw';
+const ADMIN_TAB_IDX       = 'ADMIN_MODE';
+
 const _CHIP_GRADS=[
   ['#1e40af','#7c3aed'],['#0369a1','#0e7490'],['#065f46','#0891b2'],
   ['#7c2d12','#b45309'],['#6b21a8','#db2777'],['#991b1b','#ea580c'],
@@ -398,7 +459,9 @@ const _CHIP_HINTS={
   'interns elite':'internselite.com','genz':'genzeducatewing.com',
   'cloud unicorn':'cloudunicorn.in','idea infinity':'ideainfinity.in',
   'deloitte':'deloitte.com','kpmg':'kpmg.com','ibm':'ibm.com',
-  'oracle':'oracle.com','zoho':'zoho.com','freshworks':'freshworks.com'
+  'oracle':'oracle.com','zoho':'zoho.com','freshworks':'freshworks.com',
+  'masters union':'mastersunion.org','master\'s union':'mastersunion.org',
+  'prop times':'proptimes.in','proptimes':'proptimes.in'
 };
 function _chipGrad(i){const p=_CHIP_GRADS[i%_CHIP_GRADS.length];return`linear-gradient(135deg,${p[0]},${p[1]})`;}
 function _chipIni(n){return(n||'?').split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]||'').join('').toUpperCase()||'?';}
@@ -409,6 +472,32 @@ function _chipDomain(name,web){
   return n.replace(/[^a-z0-9]/g,'')+'.com';
 }
 
+/* Fetch ADMIN_MODE and merge website URLs into companies array */
+async function _mergeAdminWebsites(companies){
+  try{
+    const url=`https://docs.google.com/spreadsheets/d/${CONFIG_SHEET_ID_IDX}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(ADMIN_TAB_IDX)}`;
+    const res=await fetchWithTimeout(url,8000);
+    const text=await res.text();
+    if(text.trimStart().startsWith('<'))return;
+    const json=JSON.parse(text.replace(/^[^(]*\(/,'').replace(/\);\s*$/,''));
+    if(json.status==='error')return;
+    const cols=(json.table?.cols||[]).map(c=>(c.label||'').toLowerCase());
+    const iName=cols.findIndex(h=>h.includes('company')||h.includes('name'));
+    const iWeb =cols.findIndex(h=>h.includes('website')||h.includes('web')||h.includes('url'));
+    const nIdx=iName>=0?iName:0;
+    const wIdx=iWeb >=0?iWeb :1; // default col B
+    const gv=cell=>(cell&&cell.v!=null)?String(cell.v).trim():'';
+    for(const row of (json.table?.rows||[])){
+      const cells=row.c||[];
+      const nm=gv(cells[nIdx]);
+      const web=gv(cells[wIdx]);
+      if(!nm||!web)continue;
+      const match=companies.find(c=>c.name.toLowerCase().trim()===nm.toLowerCase().trim());
+      if(match)match.website=match.website||web; // don't overwrite existing
+    }
+  }catch(e){console.warn('[carousel] ADMIN_MODE merge failed:',e.message);}
+}
+
 function _makeChip(c){
   const d=_chipDomain(c.name,c.website);
   const cb=`https://logo.clearbit.com/${d}?size=80`;
@@ -416,12 +505,12 @@ function _makeChip(c){
   const gf=`https://www.google.com/s2/favicons?domain=${d}&sz=64`;
   const g=_chipGrad(c.id-1);
   const letters=_chipIni(c.name);
-  // Escape for inline onerror attribute
   const gEsc=g.replace(/'/g,"\\'");
+  // _logoLoad: checks if Google favicon returned a blank 1×1 pixel
   return `<div class="co-chip">
-    <div class="co-chip-logo">
+    <div class="co-chip-logo" id="cl-${c.id}">
       <img src="${cb}" style="width:100%;height:100%;object-fit:contain;padding:4px;"
-        onerror="if(this.dataset.fb==='2'){this.remove();this.parentElement.style.background='${gEsc}';this.parentElement.style.color='#fff';this.parentElement.textContent='${letters}';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='${gf}';}else{this.dataset.fb='1';this.src='${wf}';}"/>
+        onerror="if(this.dataset.fb==='2'){var p=this.parentElement;this.remove();p.style.background='${gEsc}';p.style.display='flex';p.style.alignItems='center';p.style.justifyContent='center';p.style.color='#fff';p.style.fontWeight='800';p.style.fontSize='13px';p.textContent='${letters}';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.onload=function(){if(this.naturalWidth<=2){this.onerror();}};this.src='${gf}';}else{this.dataset.fb='1';this.src='${wf}';}"/>
     </div>
     <div class="co-chip-info">
       <span class="co-chip-name">${c.name}</span>
@@ -433,7 +522,6 @@ function _makeChip(c){
 }
 
 function _setTickerSpeed(rowEl, pxPerSec){
-  // scrollWidth is 2× content because items are doubled
   const w = rowEl.scrollWidth / 2;
   rowEl.style.animationDuration = (w / pxPerSec).toFixed(1) + 's';
 }
@@ -442,27 +530,21 @@ function buildCarousel(companies){
   if(!companies||!companies.length) return;
   const sec = document.getElementById('companies-section');
   if(!sec) return;
-
-  // Split into two rows (alternate company by index)
   const row1 = companies.filter((_,i)=>i%2===0);
   const row2 = companies.filter((_,i)=>i%2!==0);
-
   function buildRow(list, dir, wrapId){
     if(!list.length) return;
     const html = list.map(_makeChip).join('');
     const row  = document.createElement('div');
     row.className = `ticker-row ${dir}`;
-    row.innerHTML  = html + html; // duplicate for seamless loop
+    row.innerHTML  = html + html;
     const wrap = document.getElementById(wrapId);
     if(wrap){ wrap.innerHTML=''; wrap.appendChild(row); }
-    // Set speed after DOM insertion so scrollWidth is valid
     requestAnimationFrame(()=>_setTickerSpeed(row, dir==='dir-left' ? 45 : 36));
   }
-
   buildRow(row1, 'dir-left',  'ticker-row-1-wrap');
   if(row2.length) buildRow(row2, 'dir-right', 'ticker-row-2-wrap');
   else document.getElementById('ticker-row-2-wrap').style.display='none';
-
   sec.style.display = 'block';
 }
 
@@ -490,8 +572,6 @@ const setNum = (id, val) => {
   el.textContent = val;
 };
 
-// Count valid student rows from a GViz JSON response using the same
-// column-detection + name/email filter that the placement dashboard uses.
 function countValidRows(json){
   const table = json && json.table;
   if(!table || !table.rows) return 0;
@@ -509,8 +589,10 @@ async function loadIndexStats(){
   let companies = [], totalReg = 0, drivesDone = 0, totalSel = 0;
   try{
     companies = await loadConfig();
+    // ← Fetch ADMIN_MODE websites BEFORE building carousel so logos are correct
+    await _mergeAdminWebsites(companies);
     setNum('st-companies', companies.length);
-    buildCarousel(companies); // ← build carousel as soon as names are known
+    buildCarousel(companies);
   }catch(e){
     setNum('st-companies', '—');
     setNum('st-reg', '—');
@@ -520,7 +602,6 @@ async function loadIndexStats(){
     return;
   }
 
-  // Fetch company sheets in parallel — mirrors placement dashboard logic exactly
   await Promise.allSettled(companies.map(async c => {
     try{
       const fetchTab = async (tab) => {
@@ -531,38 +612,31 @@ async function loadIndexStats(){
         if(text.trimStart().startsWith('<')) return 0;
         const json = JSON.parse(text.replace(/^[^(]*\(/,'').replace(/\);?\s*$/,''));
         if(json.status === 'error') return 0;
-        return countValidRows(json);   // ← same filter as dashboard
+        return countValidRows(json);
       };
       const [reg, int_, sel] = await Promise.all([
         fetchTab(c.tabReg),
-        fetchTab(c.tabInt),   // ← also fetch interviewed tab
+        fetchTab(c.tabInt),
         fetchTab(c.tabSel),
       ]);
       totalReg += reg;
       totalSel += sel;
-      // Mirror dashboard: drive is "done" when sel > 0 OR int > 0
       if(sel > 0 || int_ > 0) drivesDone++;
-
-      // ← Update this company's chip status in the carousel
       const statusKey = sel > 0 ? 'placed' : int_ > 0 ? 'ongoing' : reg > 0 ? 'active' : 'upcoming';
       updateChipStatus(c.id, statusKey);
     }catch(e){
       console.warn('[stats] company', c.name, e.message);
     }
-
-    // Update incrementally as each company resolves
     setNum('st-reg',    totalReg);
     setNum('st-drives', drivesDone);
     setNum('st-placed', totalSel);
   }));
 
-  // Final update
   setNum('st-reg',    totalReg);
   setNum('st-drives', drivesDone);
   setNum('st-placed', totalSel);
 }
 
-// Animated counter for smooth number updates
 function animateCount(id, target){
   const el = document.getElementById(id);
   if(!el || isNaN(target)) return;
