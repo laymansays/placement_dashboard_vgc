@@ -354,13 +354,14 @@ function logoDomain(name,web){
 function logoHtml(name,web,idx,sz){
   const size=sz||48;const d=logoDomain(name,web);
   const cb=`https://logo.clearbit.com/${d}?size=${size*2}`;
+  const wf=`https://${d}/favicon.ico`;
   const gf=`https://www.google.com/s2/favicons?domain=${d}&sz=128`;
   const g=grad(idx||0);const pad=size>56?8:6;const fsz=Math.round(size*.32);
   const br=Math.round(size*.21);
   return `<div class="co-av" style="width:${size}px;height:${size}px;border-radius:${br}px;">
     <div class="co-av-ini" style="background:${g};font-size:${fsz}px;">${ini(name)}</div>
     <img src="${cb}" style="padding:${pad}px;"
-      onerror="if(this.dataset.fb){this.style.display='none';this.parentElement.classList.add('no-logo');}else{this.dataset.fb='1';this.src='${gf}';this.style.padding='${pad+2}px';}"/>
+      onerror="if(this.dataset.fb==='2'){this.style.display='none';this.parentElement.classList.add('no-logo');}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='${gf}';this.style.padding='${pad+2}px';}else{this.dataset.fb='1';this.src='${wf}';this.style.padding='${pad+2}px';}"/>
   </div>`;
 }
 
