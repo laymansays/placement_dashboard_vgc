@@ -743,14 +743,15 @@ function statusBadge(s){
 }
 function renderAvailable(){
   const applied=new Set(COMPS.filter(c=>{const s=STATUS[c.id];return s&&(s.reg||s.int||s.sel);}).map(c=>c.id));
-  const avail=COMPS.filter(c=>!applied.has(c.id));
   const stLc=c=>c.adminStatus.toLowerCase().trim();
   const isOpen    =c=>stLc(c)==='registrations started'||stLc(c)==='ongoing';
   const isCompleted=c=>stLc(c)==='completed'||stLc(c)==='closed';
   const isUpcoming =c=>!isOpen(c)&&!isCompleted(c); // blank + anything else
-  const open=avail.filter(isOpen);
-  const upcoming=avail.filter(isUpcoming);
-  const done=avail.filter(isCompleted);
+  // Completed drives always show (even if student already applied/placed)
+  // Available + Upcoming: hide companies the student has already applied to
+  const open    = COMPS.filter(c=>!applied.has(c.id)&&isOpen(c));
+  const upcoming= COMPS.filter(c=>!applied.has(c.id)&&isUpcoming(c));
+  const done    = COMPS.filter(isCompleted);
 
   if(!open.length&&!upcoming.length&&!done.length){
     document.getElementById('avail-wrap').innerHTML=`
