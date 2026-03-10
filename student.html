@@ -564,7 +564,7 @@ async function loadCompanyData(){
   const iComp=ci('company')!== -1?ci('company'):0;
   const iSheet=ci('sheet')!== -1?ci('sheet'):1;
   const iReg=ci('reg')!== -1?ci('reg'):2;
-  const iInt=ci('int','shortlist')!== -1?ci('int','shortlist'):3;
+  const iInt=ci('int','attended')!== -1?ci('int','attended'):3;
   const iSel=ci('sel','select')!== -1?ci('sel','select'):4;
   const iForm=ci('form','apply')!== -1?ci('form','apply'):5;
 
@@ -826,7 +826,7 @@ function renderStatus(){
   };
 
   const content=total
-    ?`<div>${makeGroup('\ud83c\udf89','Selected',sel,'shdr-sel','spill-sel')}${makeGroup('\u2b50','Shortlisted',intv,'shdr-int','spill-int')}${makeGroup('\ud83d\udccb','Registered',reg,'shdr-reg','spill-reg')}</div>`
+    ?`<div>${makeGroup('\ud83c\udf89','Selected',sel,'shdr-sel','spill-sel')}${makeGroup('\u2b50','Attended',intv,'shdr-int','spill-int')}${makeGroup('\ud83d\udccb','Registered',reg,'shdr-reg','spill-reg')}</div>`
     :`<div class="empty-state"><div class="empty-icon">\ud83d\udced</div><p>No applications yet.<br>Browse available companies below to apply.</p></div>`;
 
   document.getElementById('status-wrap').innerHTML=`
