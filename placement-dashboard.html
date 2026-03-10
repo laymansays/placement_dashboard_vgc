@@ -1246,6 +1246,7 @@ async function init(){
       adminMode=true; document.body.classList.add('admin-mode');
     }
     go('home');
+    if(pcMode) setTimeout(scrollToPCPanel, 600);
 
     // 5. Fetch all student data in background
     loadAllStudents();
@@ -1314,11 +1315,16 @@ function renderNav(){
     const c=COMPANIES.find(x=>x.id===cId);
     right=`<nav class="nav-crumb"><span class="crumb" id="n-h">Home</span><span class="crumb-sep">/</span><span class="crumb" id="n-d">Companies</span><span class="crumb-sep">/</span><span class="crumb-active">${c?xe(c.name):''}</span></nav>`;
   }
-  nb.innerHTML=`<div class="navbar"><a class="nav-brand" id="n-brand"><div class="nav-logo"><img src="logo.jpg" alt="VG" style="width:100%;height:100%;object-fit:contain;border-radius:10px;display:block;"/></div><div class="nav-name"><span>Vidyavahini</span><span>First Grade Degree College</span></div></a><div class="nav-right"><a href="index.html" class="btn-nav-home-pd" title="Home">←</a><button class="btn-icon" id="n-theme">🌙</button>${right}</div></div>`;
+  const adminBtnStyle = adminMode
+    ? 'background:#6D0E6A;color:#fff;border:none;border-radius:8px;padding:6px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:.02em;'
+    : 'background:none;border:1.5px solid #D3B6D2;color:#570B54;border-radius:8px;padding:6px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:.02em;';
+  const adminBtnLabel = adminMode ? '🛡️ Admin On' : '🛡️ Admin';
+  nb.innerHTML=`<div class="navbar"><a class="nav-brand" id="n-brand"><div class="nav-logo"><img src="logo.jpg" alt="VG" style="width:100%;height:100%;object-fit:contain;border-radius:10px;display:block;"/></div><div class="nav-name"><span>Vidyavahini</span><span>First Grade Degree College</span></div></a><div class="nav-right"><a href="index.html" class="btn-nav-home-pd" title="Home">←</a><button id="n-admin" style="${adminBtnStyle}">${adminBtnLabel}</button><button class="btn-icon" id="n-theme">🌙</button>${right}</div></div>`;
   const g=id=>document.getElementById(id);
   g('n-brand').onclick=()=>{ window.location.href='index.html'; };
   g('n-theme').onclick=toggleTheme;
   updateThemeIcon();
+  if(g('n-admin')) g('n-admin').onclick=handleAdmin;
   if(g('n-home'))  g('n-home').onclick=()=>go('home');
   if(g('n-h'))     g('n-h').onclick=()=>go('home');
   if(g('n-d'))     g('n-d').onclick=()=>go('dashboard');
@@ -1353,18 +1359,18 @@ function renderPCBar(){
    ADMIN PIN
 ════════════════════════════════════════════════════ */
 function handleAdmin(){
-  if(adminMode){ adminMode=false; document.body.classList.remove('admin-mode'); go(view,cId); return; }
+  if(adminMode){ adminMode=false; document.body.classList.remove('admin-mode'); sessionStorage.removeItem('placementAdmin'); go(view,cId); toast('Admin Mode off','info','🔒'); return; }
   let pin='';
   const upd=(err=false)=>{
     document.querySelectorAll('.pin-cell').forEach((el,i)=>{ el.value=pin[i]||''; if(i===pin.length)el.focus(); });
     document.getElementById('pe').textContent=err?'Incorrect PIN. Try again.':'';
   };
   const chk=()=>{
-    if(pin===ADMIN_PIN){ closeModal(); adminMode=true; document.body.classList.add('admin-mode'); go(view,cId); toast('Admin Mode enabled','success','🛡️'); }
-    else if(pin===JOIN_PIN){ closeModal(); pcMode=true; go(view,cId); toast('Placement Cell Mode enabled','success','🔐'); setTimeout(scrollToPCPanel,300); }
+    if(pin===ADMIN_PIN){ closeModal(); adminMode=true; document.body.classList.add('admin-mode'); sessionStorage.setItem('placementAdmin','1'); go(view,cId); toast('Admin Mode enabled — you can now edit student data','success','🛡️'); }
+    else if(pin===JOIN_PIN){ closeModal(); pcMode=true; go(view,cId); toast('Placement Cell Mode enabled','success','🔐'); setTimeout(scrollToPCPanel,400); }
     else{ upd(true); setTimeout(()=>{ pin=''; upd(false); },800); }
   };
-  openModal('Admin Access',`<p style="font-size:13px;color:var(--text3);margin-bottom:16px;text-align:center;">Enter PIN to enable admin mode</p><div class="pin-row">${[0,1,2,3].map(i=>`<input class="pin-cell" id="pc${i}" maxlength="1" inputmode="numeric" pattern="[0-9]"/>`).join('')}</div><div class="pin-error" id="pe"></div>`);
+  openModal('Access PIN',`<p style="font-size:13px;color:var(--text3);margin-bottom:4px;text-align:center;">Enter PIN to enable a mode</p><p style="font-size:11px;color:var(--text4);margin-bottom:16px;text-align:center;">Admin Mode (edit) &nbsp;·&nbsp; Placement Cell Mode (tracker)</p><div class="pin-row">${[0,1,2,3].map(i=>`<input class="pin-cell" id="pc${i}" maxlength="1" inputmode="numeric" pattern="[0-9]"/>`).join('')}</div><div class="pin-error" id="pe"></div>`);
   setTimeout(()=>{ document.getElementById('pc0')?.focus(); },50);
   const onKey=e=>{
     if(e.key>='0'&&e.key<='9'&&pin.length<4){ pin+=e.key; upd(); if(pin.length===4)chk(); }
@@ -2477,8 +2483,11 @@ function checkPlacementPin(){
   var errEl = document.getElementById('pin-error');
   errEl.textContent = '';
   if(pin.length < 4){ errEl.textContent = 'Please enter the 4-digit passkey.'; return; }
-  if(pin === '2525'){
+  if(pin === '2525' || pin === ADMIN_PIN || pin === JOIN_PIN){
     document.getElementById('placement-login').classList.add('hidden');
+    // Pre-activate modes based on which PIN was used
+    if(pin === ADMIN_PIN){ adminMode=true; document.body.classList.add('admin-mode'); sessionStorage.setItem('placementAdmin','1'); }
+    if(pin === JOIN_PIN){ pcMode=true; }
     init();
   } else {
     errEl.textContent = 'Incorrect Passkey. Please try again.';
@@ -2522,8 +2531,8 @@ function saveJoinStatus(js){ sessionStorage.setItem('joinStatus',JSON.stringify(
 
 function exitPCMode(){
   pcMode=false;
-  renderPCBar();
-  // remove panel from DOM if visible
+  renderAdminBar();
+  renderNav();
   const p=document.getElementById('pc-panel');
   if(p)p.remove();
   toast('Placement Cell Mode off','info','🔒');
