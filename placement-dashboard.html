@@ -724,6 +724,23 @@ body.admin-mode .modal{border-top:3px solid var(--admin);}
 .student-section-head[style*="cursor:pointer"]:hover{background:var(--bg2);border-radius:10px;}
 .join-btn:hover    {opacity:.8;transform:scale(1.03);}
 .join-cycle-hint   {font-size:10px;color:var(--text3);margin-top:3px;text-align:right;}
+
+/* ─── CELL LOGIN OVERLAY ─── */
+#cell-login{
+  position:fixed;inset:0;z-index:2100;
+  display:none;align-items:center;justify-content:center;
+  background:linear-gradient(150deg,#0F172A 0%,#1A1030 50%,#5C1259 100%);
+  padding:24px;
+}
+#cell-login.open{display:flex;}
+#cell-pin-field{
+  width:100%;padding:12px 16px;border:1.5px solid #E2E8F0;border-radius:10px;
+  font-family:inherit;font-size:22px;font-weight:700;text-align:center;
+  color:#0F172A;background:#F8FAFC;outline:none;
+  letter-spacing:0.25em;transition:all .15s;
+  -webkit-text-security:disc;
+}
+#cell-pin-field:focus{border-color:#570B54;background:#fff;box-shadow:0 0 0 3px rgba(109,14,106,0.12);}
 </style>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -748,6 +765,20 @@ body.admin-mode .modal{border-top:3px solid var(--admin);}
 
 
 <div id="toast-root"></div>
+
+<!-- ── CELL LOGIN OVERLAY ── -->
+<div id="cell-login">
+  <div class="pl-card">
+    <div class="pl-logo"><img src="logo.jpg" alt="VG" style="width:100%;height:100%;object-fit:contain;display:block;border-radius:16px;"/></div>
+    <h1 class="pl-heading">Placement Cell</h1>
+    <p class="pl-sub">Enter the 4-digit passkey to access<br>Placement Cell Mode.</p>
+    <label class="pl-label" for="cell-pin-field">PASSKEY</label>
+    <input id="cell-pin-field" type="password" maxlength="4" inputmode="numeric" placeholder="••••" autocomplete="off"/>
+    <p id="cell-pin-err" style="min-height:20px;font-size:12.5px;color:#EF4444;font-weight:600;margin:8px 0 0;text-align:left;"></p>
+    <button class="pl-btn" onclick="checkCellPin()">Enter →</button>
+    <a href="#" class="pl-back" onclick="closeCellLogin();return false;">← Cancel</a>
+  </div>
+</div>
 
 <!-- LOADING SCREEN -->
 <div id="loading-screen">
@@ -806,6 +837,7 @@ const ADMIN_DATA_TAB  = 'ADMIN_MODE';   // Admin overrides tab — tab renamed b
 const ADMIN_PIN       = '1234';
 const JOIN_PIN        = '2007';   // Placement Cell Mode
 const CACHE_TTL       = 60000;          // 60s per company
+const _WEBAPP         = 'https://script.google.com/macros/s/AKfycbzeh9Op-cDApwuN1XenvtMJGKZUyPbwCX1tj6M3Bel4DkEDLFWhzrme0bD9ktsaEgxe/exec';
 
 /* ════════════════════════════════════════════════════
    STATE
@@ -865,6 +897,14 @@ function closeModal(){ document.getElementById('modal-overlay').classList.remove
 document.getElementById('modal-close').onclick=closeModal;
 document.getElementById('modal-overlay').onclick=e=>{ if(e.target===document.getElementById('modal-overlay'))closeModal(); };
 document.addEventListener('keydown',e=>{ if(e.key==='Escape')closeModal(); });
+// Cell login Enter key
+document.addEventListener('keydown',e=>{
+  const ov=document.getElementById('cell-login');
+  if(ov&&ov.classList.contains('open')){
+    if(e.key==='Enter') checkCellPin();
+    if(e.key==='Escape') closeCellLogin();
+  }
+});
 
 /* ════════════════════════════════════════════════════
    FETCH helpers
@@ -1094,13 +1134,15 @@ function parseStudentTab(csv){
   const iPhone  = detect(['phone','mobile','contact','ph']);
   const iClass  = detect(['class','section','branch','course','dept']);
   const iStatus = detect(['status','join','joined']);
+  const iOffer  = detect(['offer','letter','offerlink','offer letter']);
   return rows.slice(1).map((r,i) => ({
     id: `#${String(i+1).padStart(3,'0')}`,
-    name:       (iName   !== -1 ? r[iName]   : '') || '',
-    email:      (iEmail  !== -1 ? r[iEmail]  : '') || '',
-    phone:      (iPhone  !== -1 ? r[iPhone]  : '') || '',
-    class:      (iClass  !== -1 ? r[iClass]  : '') || '',
-    joinStatus: (iStatus !== -1 ? r[iStatus] : '') || 'Pending',
+    name:        (iName   !== -1 ? r[iName]   : '') || '',
+    email:       (iEmail  !== -1 ? r[iEmail]  : '') || '',
+    phone:       (iPhone  !== -1 ? r[iPhone]  : '') || '',
+    class:       (iClass  !== -1 ? r[iClass]  : '') || '',
+    joinStatus:  (iStatus !== -1 ? r[iStatus] : '') || 'Pending',
+    offerLetter: (iOffer  !== -1 ? r[iOffer]  : '') || '',
   })).filter(s => s.name || s.email);
 }
 
@@ -1117,6 +1159,7 @@ function parseStudentFromJSON(json){
   const iPhone  = detect(['phone','mobile','contact','ph']);
   const iClass  = detect(['class','section','branch','course','dept']);
   const iStatus = detect(['status','join','joined']);
+  const iOffer  = detect(['offer','letter','offerlink','offer letter']);
 
   const val = (row, i) => {
     if(i === -1 || !row.c || !row.c[i]) return '';
@@ -1125,12 +1168,13 @@ function parseStudentFromJSON(json){
   };
 
   return table.rows.map((row, i) => ({
-    id:         `#${String(i+1).padStart(3,'0')}`,
-    name:       val(row, iName),
-    email:      val(row, iEmail),
-    phone:      val(row, iPhone),
-    class:      val(row, iClass),
-    joinStatus: val(row, iStatus) || 'Pending',
+    id:          `#${String(i+1).padStart(3,'0')}`,
+    name:        val(row, iName),
+    email:       val(row, iEmail),
+    phone:       val(row, iPhone),
+    class:       val(row, iClass),
+    joinStatus:  val(row, iStatus) || 'Pending',
+    offerLetter: val(row, iOffer) || '',
   })).filter(s => s.name || s.email);
 }
 
@@ -1541,6 +1585,7 @@ function buildHome(){
   const ints=COMPANIES.reduce((s,c)=>s+c.studentsInterviewed.length,0);
   const sel=COMPANIES.reduce((s,c)=>s+c.studentsSelected.length,0);
   const done=COMPANIES.filter(c=>c.studentsSelected.length>0||c.studentsInterviewed.length>0).length;
+  const uniquePlaced=getUniquePlaced().length;
   const recent=[...COMPANIES].sort((a,b)=>b.studentsRegistered.length-a.studentsRegistered.length).slice(0,5);
 
   document.getElementById('main').innerHTML=`
@@ -1577,8 +1622,9 @@ function buildHome(){
         <div class="stat-tile" onclick="showStatModal('placed')">
           <button class="tile-pdf-btn" onclick="event.stopPropagation();exportPDF('placed')" title="Download PDF">⬇ PDF</button>
           <div class="stat-tile-icon">🎉</div>
-          <div class="stat-tile-num">${sel}</div>
-          <div class="stat-tile-lbl">Placed</div>
+          <div class="stat-tile-num">${uniquePlaced}</div>
+          <div class="stat-tile-lbl">Unique Placed</div>
+          <div style="font-size:10.5px;color:var(--text4);margin-top:3px;">${sel} total selections</div>
           <div class="stat-tile-hint">Click to view ↗</div>
         </div>
       </div>
@@ -2012,6 +2058,57 @@ function joinStatusColor(st){
   return 'color:#64748B;background:var(--bg2);border-color:var(--border)';
 }
 
+function offerLetterCell(s, i, companyId){
+  const url = s.offerLetter || '';
+  const emailOrName = (s.email||s.name||'').replace(/'/g,"\\'");
+  if(url){
+    // Has offer letter — show view link + re-upload if pcMode/adminMode
+    const viewBtn = `<a href="${xe(url)}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:16px;background:#DCFCE7;color:#166534;font-size:11px;font-weight:700;text-decoration:none;border:1px solid #86EFAC;">📎 View</a>`;
+    const reupBtn = (pcMode||adminMode) ? `<label style="cursor:pointer;display:inline-flex;align-items:center;gap:3px;padding:3px 8px;border-radius:16px;background:var(--bg2);color:var(--text3);font-size:10px;font-weight:600;border:1px solid var(--border);margin-left:4px;" title="Replace offer letter"><input type="file" accept=".pdf,image/*" style="display:none" onchange="uploadOfferLetter(${companyId},${i},'${emailOrName}',this)">↑ Re-upload</label>` : '';
+    return `<td style="white-space:nowrap;">${viewBtn}${reupBtn}</td>`;
+  }
+  // No offer letter
+  if(pcMode||adminMode){
+    return `<td><label style="cursor:pointer;display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:16px;background:var(--bg2);color:var(--text3);font-size:11px;font-weight:600;border:1px solid var(--border);white-space:nowrap;" title="Upload offer letter PDF"><input type="file" accept=".pdf,image/*" style="display:none" onchange="uploadOfferLetter(${companyId},${i},'${emailOrName}',this)">📤 Upload</label></td>`;
+  }
+  return `<td style="color:var(--text4);font-size:11px;">—</td>`;
+}
+
+async function uploadOfferLetter(companyId, studentIdx, emailOrName, fileInput){
+  const co = COMPANIES.find(x=>x.id===companyId);
+  if(!co||!fileInput.files[0]) return;
+  const file = fileInput.files[0];
+  const MAX = 8*1024*1024; // 8MB
+  if(file.size > MAX){ toast('File too large (max 8 MB)','error','⚠️'); return; }
+
+  toast('Uploading offer letter…','info','⏳');
+  const b64 = await new Promise(res=>{ const fr=new FileReader(); fr.onload=()=>res(fr.result.split(',')[1]); fr.readAsDataURL(file); });
+  const safeName = (emailOrName||'student').replace(/[^a-zA-Z0-9_.-]/g,'_');
+  const filename = `OfferLetter_${xe(co.name).replace(/[^a-zA-Z0-9]/g,'_')}_${safeName}_${Date.now()}.${file.name.split('.').pop()}`;
+
+  try {
+    const payload = {
+      action: 'uploadOfferLetter',
+      sheetId: co.sheetId,
+      tabName: co.tabSel,
+      emailOrName: emailOrName,
+      fileBase64: b64,
+      filename: filename,
+      mimeType: file.type || 'application/octet-stream'
+    };
+    const res  = await fetch(_WEBAPP, { method:'POST', body: JSON.stringify(payload) });
+    const data = await res.json();
+    if(!data.ok) throw new Error(data.error||'Unknown');
+    // Update in-memory
+    if(co.studentsSelected[studentIdx]) co.studentsSelected[studentIdx].offerLetter = data.url;
+    toast('Offer letter uploaded ✓','success','📎');
+    // Re-render detail to show updated link
+    go(view, cId);
+  } catch(e){
+    toast('Upload failed: '+e.message,'error','⚠️');
+  }
+}
+
 function buildStudentSection(title,students,anchorId,companyId){
   const isSelected = anchorId === 'dss-full';
   const collapsible = !isSelected; // Registered and Interviewed collapse; Selected is open
@@ -2058,14 +2155,16 @@ function buildStudentSection(title,students,anchorId,companyId){
     return `<td><span style="${stl};border:1.5px solid;border-radius:20px;padding:3px 10px;font-size:11.5px;font-weight:700;white-space:nowrap;">${st==='Pending'?'⏳':st==='Joined'?'✅':'❌'} ${xe(st)}</span></td>`;
   };
 
+  const hasOffer = isSelected && students.some(s=>s.offerLetter);
   const table = `<table class="student-table">
-      <thead><tr><th>#</th><th>Name</th>${hasEmail?'<th>Email</th>':''}${hasBranch?'<th>Class</th>':''}${hasPhone?'<th>Phone</th>':''}${isSelected&&(pcMode||adminMode)?'<th>Status</th>':''}</tr></thead>
+      <thead><tr><th>#</th><th>Name</th>${hasEmail?'<th>Email</th>':''}${hasBranch?'<th>Class</th>':''}${hasPhone?'<th>Phone</th>':''}${isSelected&&(pcMode||adminMode)?'<th>Status</th>':''}${isSelected?'<th>Offer Letter</th>':''}</tr></thead>
       <tbody>${students.map((s,i)=>`<tr>
         <td>${xe(s.id)}</td><td>${xe(s.name||'—')}</td>
         ${hasEmail?`<td>${xe(s.email||'—')}</td>`:''}
         ${hasBranch?`<td>${xe(s.class||'—')}</td>`:''}
         ${hasPhone?`<td>${xe(s.phone||'—')}</td>`:''}
         ${statusCell(s,i)}
+        ${isSelected?offerLetterCell(s,i,companyId):''}
       </tr>`).join('')}</tbody>
     </table>`;
 
@@ -2522,50 +2621,32 @@ async function showDiagnostics(){
    PLACEMENT CELL LOGIN GATE
 ════════════════════════════════════════════════════ */
 function openCellPrompt(){
-  openModal('🔐 Placement Cell Access',
-    '<p style="font-size:13px;color:var(--text3);margin-bottom:20px;text-align:center;">Enter the 4-digit passkey</p>' +
-    '<div style="display:flex;justify-content:center;gap:12px;margin-bottom:20px;" id="cell-dots">' +
-      [0,1,2,3].map(i=>'<div id="cdot'+i+'" style="width:16px;height:16px;border-radius:50%;background:var(--bg3);border:2px solid var(--border2);transition:all .15s;"></div>').join('') +
-    '</div>' +
-    '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:200px;margin:0 auto;">' +
-      [1,2,3,4,5,6,7,8,9,'',0,'⌫'].map(k=>`<button onclick="cellPadPress('${k}')" style="padding:14px 0;font-size:17px;font-weight:700;border-radius:10px;border:1.5px solid var(--border2);background:var(--bg2);color:var(--text1);cursor:pointer;font-family:inherit;transition:all .12s;" onmousedown="this.style.background='var(--bg3)'" onmouseup="this.style.background='var(--bg2)'">${k}</button>`).join('') +
-    '</div>' +
-    '<p id="cell-pin-err" style="text-align:center;font-size:12px;color:var(--red);margin-top:12px;min-height:18px;"></p>',
-    '<button class="btn btn-outline btn-sm" onclick="closeModal()">Cancel</button>'
-  );
-  window._cellPin = '';
+  const ov=document.getElementById('cell-login');
+  if(ov){ ov.classList.add('open'); }
+  const inp=document.getElementById('cell-pin-field');
+  if(inp){ inp.value=''; inp.focus(); }
+  const err=document.getElementById('cell-pin-err');
+  if(err) err.textContent='';
 }
-
-function cellPadPress(k){
-  if(k==='') return;
-  if(k==='⌫'){ window._cellPin=(window._cellPin||'').slice(0,-1); }
-  else if((window._cellPin||'').length<4){ window._cellPin=(window._cellPin||'')+k; }
-  // update dots
-  const pin=window._cellPin||'';
-  [0,1,2,3].forEach(i=>{
-    const d=document.getElementById('cdot'+i);
-    if(d) d.style.background = i<pin.length ? 'var(--text1)' : 'var(--bg3)';
-  });
-  if(pin.length===4) setTimeout(checkCellPin,120);
+function closeCellLogin(){
+  const ov=document.getElementById('cell-login');
+  if(ov) ov.classList.remove('open');
 }
-
 function checkCellPin(){
-  const val = (window._cellPin||'').trim();
-  const err = document.getElementById('cell-pin-err');
-  if(val !== '2007'){
-    if(err) err.textContent = 'Incorrect passkey. Please try again.';
-    window._cellPin='';
-    [0,1,2,3].forEach(i=>{ const d=document.getElementById('cdot'+i); if(d)d.style.background='var(--bg3)'; });
-    // shake dots
-    const dots=document.getElementById('cell-dots');
-    if(dots){ dots.style.animation='shake .3s'; setTimeout(()=>{ if(dots)dots.style.animation=''; },350); }
+  const inp=document.getElementById('cell-pin-field');
+  const val=(inp?.value||'').trim();
+  const err=document.getElementById('cell-pin-err');
+  if(val!=='2007'){
+    if(err) err.textContent='Incorrect passkey. Please try again.';
+    if(inp){ inp.value=''; inp.focus(); }
+    const card=document.querySelector('#cell-login .pl-card');
+    if(card){ card.style.animation='shake .3s'; setTimeout(()=>{ if(card)card.style.animation=''; },350); }
     return;
   }
-  window._cellPin='';
-  closeModal();
-  pcMode = true;
+  closeCellLogin();
+  pcMode=true;
   renderAdminBar();
-  go(view, cId);
+  go(view,cId);
   toast('Placement Cell Mode active — join status editing enabled','success','🔐');
 }
 
@@ -2970,9 +3051,9 @@ async function downloadAnalyticsPDF(companyId){
   });
 
   /* — Funnel bar chart — */
-  const chartX=20, chartY=205, chartW=PW*0.55-30, chartH=200;
+  const chartX=20, chartY=215, chartW=PW*0.55-30, chartH=192;
   roundRect(chartX,chartY,chartW,chartH,12,'#f8fafc','#e2e8f0');
-  txt('Placement Funnel',chartX+16,chartY+26,'#1e1b2e',13,'700');
+  txt('Placement Funnel',chartX+16,chartY+24,'#1e1b2e',13,'700');
 
   const fStages=[
     {n:reg,c:'#7C3AED',l:'Registered'},
@@ -2981,7 +3062,7 @@ async function downloadAnalyticsPDF(companyId){
     {n:jnd,c:'#16A34A',l:'Joined'},
   ];
   const fMaxN=Math.max(...fStages.map(s=>s.n),1);
-  const fPL=chartX+16, fPR=chartX+chartW-16, fPT=chartY+40, fPB=chartY+chartH-28;
+  const fPL=chartX+16, fPR=chartX+chartW-16, fPT=chartY+54, fPB=chartY+chartH-26;
   const fCW=fPR-fPL, fCH=fPB-fPT;
   const fBW=Math.floor(fCW/fStages.length), fGap=Math.floor(fBW*.25), fbw=fBW-fGap;
 
@@ -3009,7 +3090,7 @@ async function downloadAnalyticsPDF(companyId){
   X.beginPath(); X.moveTo(fPL,fPB); X.lineTo(fPR,fPB); X.stroke();
 
   /* — Conversion metrics panel — */
-  const mX=PW*0.55, mY=205, mW=PW-mX-20, mH=chartH;
+  const mX=PW*0.55, mY=215, mW=PW-mX-20, mH=chartH;
   roundRect(mX,mY,mW,mH,12,'#f8fafc','#e2e8f0');
   txt('Conversion Metrics',mX+16,mY+26,'#1e1b2e',13,'700');
 
