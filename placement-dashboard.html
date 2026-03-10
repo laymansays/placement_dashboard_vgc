@@ -719,6 +719,8 @@ body.admin-mode .modal{border-top:3px solid var(--admin);}
 .join-btn.joined   {background:#DCFCE7;border-color:#86EFAC;color:#166534;}
 .join-btn.not-joined{background:#FEF2F2;border-color:#FCA5A5;color:#991B1B;}
 .join-btn.pending  {background:var(--bg2);border-color:var(--border);color:var(--text3);}
+.student-section-chevron{display:inline-block;font-size:10px;color:var(--text4);margin-right:7px;transition:transform .2s;width:10px;text-align:center;}
+.student-section-head[style*="cursor:pointer"]:hover{background:var(--bg2);border-radius:10px;}
 .join-btn:hover    {opacity:.8;transform:scale(1.03);}
 .join-cycle-hint   {font-size:10px;color:var(--text3);margin-top:3px;text-align:right;}
 </style>
@@ -2010,16 +2012,32 @@ function joinStatusColor(st){
 }
 
 function buildStudentSection(title,students,anchorId,companyId){
-  if(!students.length)return`<div id="${anchorId}" class="student-section"><div class="student-section-head"><span class="student-section-title">${title}</span><span class="student-count">0</span></div><div class="no-data">📭 No records yet</div></div>`;
+  const isSelected = anchorId === 'dss-full';
+  const collapsible = !isSelected; // Registered and Interviewed collapse; Selected is open
+  const toggleId = anchorId + '-toggle';
+
+  if(!students.length){
+    const emptyHead = collapsible
+      ? `<div class="student-section-head" onclick="toggleSection('${anchorId}')" style="cursor:pointer;">
+           <div class="student-section-head-left">
+             <span class="student-section-chevron" id="${toggleId}">▶</span>
+             <span class="student-section-title">${title}</span>
+             <span class="student-count">0</span>
+           </div>
+         </div>
+         <div id="${anchorId}-body" style="display:none;"><div class="no-data">📭 No records yet</div></div>`
+      : `<div class="student-section-head"><div class="student-section-head-left"><span class="student-section-title">${title}</span><span class="student-count">0</span></div></div><div class="no-data">📭 No records yet</div>`;
+    return `<div id="${anchorId}" class="student-section">${emptyHead}</div>`;
+  }
+
   const hasBranch=students.some(s=>s.class);
   const hasPhone=students.some(s=>s.phone);
   const hasEmail=students.some(s=>s.email);
-  const isSelected = anchorId === 'dss-full';
   const pdfBtn = isSelected && students.length
-    ? `<button class="btn-pdf-download" onclick="downloadPlacedPDF('${anchorId}')">⬇ PDF</button>`
+    ? `<button class="btn-pdf-download" onclick="event.stopPropagation();downloadPlacedPDF('${anchorId}')">⬇ PDF</button>`
     : '';
   const analyticBtn = isSelected && students.length
-    ? `<button class="btn-pdf-download" style="background:linear-gradient(135deg,#570B54,#3A0838);color:#fff;border:none;" onclick="openCompanyAnalytics(${companyId})">📊 Analytics</button>`
+    ? `<button class="btn-pdf-download" style="background:linear-gradient(135deg,#570B54,#3A0838);color:#fff;border:none;" onclick="event.stopPropagation();openCompanyAnalytics(${companyId})">📊 Analytics</button>`
     : '';
 
   const statusCell = (s, i) => {
@@ -2039,12 +2057,7 @@ function buildStudentSection(title,students,anchorId,companyId){
     return `<td><span style="${stl};border:1.5px solid;border-radius:20px;padding:3px 10px;font-size:11.5px;font-weight:700;white-space:nowrap;">${st==='Pending'?'⏳':st==='Joined'?'✅':'❌'} ${xe(st)}</span></td>`;
   };
 
-  return`<div id="${anchorId}" class="student-section">
-    <div class="student-section-head">
-      <div class="student-section-head-left"><span class="student-section-title">${title}</span><span class="student-count">${students.length}</span></div>
-      <div style="display:flex;gap:8px;">${analyticBtn}${pdfBtn}</div>
-    </div>
-    <table class="student-table">
+  const table = `<table class="student-table">
       <thead><tr><th>#</th><th>Name</th>${hasEmail?'<th>Email</th>':''}${hasBranch?'<th>Class</th>':''}${hasPhone?'<th>Phone</th>':''}${isSelected&&(pcMode||adminMode)?'<th>Status</th>':''}</tr></thead>
       <tbody>${students.map((s,i)=>`<tr>
         <td>${xe(s.id)}</td><td>${xe(s.name||'—')}</td>
@@ -2053,8 +2066,44 @@ function buildStudentSection(title,students,anchorId,companyId){
         ${hasPhone?`<td>${xe(s.phone||'—')}</td>`:''}
         ${statusCell(s,i)}
       </tr>`).join('')}</tbody>
-    </table>
+    </table>`;
+
+  if(collapsible){
+    return`<div id="${anchorId}" class="student-section">
+      <div class="student-section-head" onclick="toggleSection('${anchorId}')" style="cursor:pointer;">
+        <div class="student-section-head-left">
+          <span class="student-section-chevron" id="${toggleId}">▶</span>
+          <span class="student-section-title">${title}</span>
+          <span class="student-count">${students.length}</span>
+        </div>
+        <div style="font-size:11px;color:var(--text4);padding-right:4px;">click to expand</div>
+      </div>
+      <div id="${anchorId}-body" style="display:none;">${table}</div>
+    </div>`;
+  }
+
+  return`<div id="${anchorId}" class="student-section">
+    <div class="student-section-head">
+      <div class="student-section-head-left"><span class="student-section-title">${title}</span><span class="student-count">${students.length}</span></div>
+      <div style="display:flex;gap:8px;">${analyticBtn}${pdfBtn}</div>
+    </div>
+    ${table}
   </div>`;
+}
+
+function toggleSection(anchorId){
+  const body = document.getElementById(anchorId+'-body');
+  const chevron = document.getElementById(anchorId+'-toggle');
+  if(!body) return;
+  const isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : '';
+  if(chevron) chevron.textContent = isOpen ? '▶' : '▼';
+  // Update hint text
+  const head = document.getElementById(anchorId)?.querySelector('.student-section-head');
+  if(head){
+    const hint = head.querySelector('div[style*="font-size:11px"]');
+    if(hint) hint.textContent = isOpen ? 'click to expand' : 'click to collapse';
+  }
 }
 
 /* ── Shared PDF builder ── */
