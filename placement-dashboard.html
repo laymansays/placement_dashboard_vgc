@@ -2729,346 +2729,331 @@ function openCompanyAnalytics(companyId){
   const co = COMPANIES.find(x=>x.id===companyId);
   if(!co) return;
 
-  const reg    = co.studentsRegistered.length;
-  const att    = co.studentsInterviewed.length;
-  const sel    = co.studentsSelected.length;
-  const joined    = co.studentsSelected.filter(s=>s.joinStatus==='Joined').length;
-  const notJoined = co.studentsSelected.filter(s=>s.joinStatus==='Not Joined').length;
-  const pending   = sel - joined - notJoined;
-  const pct = (n,d) => d>0 ? Math.round(n/d*100)+'%' : '—';
+  const reg  = co.studentsRegistered.length;
+  const att  = co.studentsInterviewed.length;
+  const sel  = co.studentsSelected.length;
+  const jnd  = co.studentsSelected.filter(s=>s.joinStatus==='Joined').length;
+  const njnd = co.studentsSelected.filter(s=>s.joinStatus==='Not Joined').length;
+  const pend = sel - jnd - njnd;
 
-  const maxN = Math.max(reg, att, sel, joined, 1);
+  const pct  = (n,d) => d>0 ? Math.round(n/d*100) : 0;
+  const pctS = (n,d) => d>0 ? Math.round(n/d*100)+'%' : '—';
 
-  // Pure HTML funnel bars — no canvas, no timing issues
-  function bar(n, color, label, prevN){
-    const pct100 = Math.round(n / maxN * 100);
-    const convLabel = (prevN != null && prevN > 0)
-      ? `<span style="font-size:10px;color:#fff;opacity:.8;margin-left:6px;">${Math.round(n/prevN*100)}%</span>`
-      : '';
-    return `<div style="display:flex;flex-direction:column;align-items:center;flex:1;gap:4px;">
-      <div style="font-size:13px;font-weight:800;color:var(--text1);">${n}</div>
-      <div style="width:100%;background:var(--bg3);border-radius:8px;overflow:hidden;height:120px;display:flex;align-items:flex-end;">
-        <div style="width:100%;height:${pct100}%;background:${color};border-radius:6px 6px 0 0;min-height:${n>0?4:0}px;transition:height .4s;display:flex;align-items:flex-start;justify-content:center;padding-top:6px;">
-          ${n>0 && pct100>18 ? `<span style="font-size:11px;font-weight:700;color:#fff;">${pct100}%</span>` : ''}
+  /* colour by performance */
+  const rateColor = (p) =>
+    p>=70 ? '#16A34A' : p>=40 ? '#D97706' : p>0 ? '#DC2626' : '#94A3B8';
+
+  /* ── Funnel pipeline bar ── */
+  const maxN = Math.max(reg,att,sel,jnd,1);
+  const pipe = (n,col,lbl,sub) => {
+    const w = Math.round(n/maxN*100);
+    return `<div style="flex:1;min-width:0;">
+      <div style="font-size:22px;font-weight:900;color:${col};line-height:1;margin-bottom:3px;">${n}</div>
+      <div style="height:8px;background:var(--bg3);border-radius:99px;margin-bottom:5px;overflow:hidden;">
+        <div style="height:100%;width:${w}%;background:${col};border-radius:99px;"></div>
+      </div>
+      <div style="font-size:12px;font-weight:700;color:var(--text1);">${lbl}</div>
+      ${sub ? `<div style="font-size:11px;color:var(--text3);">${sub}</div>` : ''}
+    </div>`;
+  };
+
+  const chevron = (pctVal,label) => {
+    const col = rateColor(pctVal);
+    return `<div style="display:flex;flex-direction:column;align-items:center;gap:2px;flex-shrink:0;padding-top:4px;">
+      <div style="font-size:18px;color:var(--text4);">›</div>
+      <div style="font-size:11px;font-weight:800;color:${col};">${pctVal}%</div>
+      <div style="font-size:9px;color:var(--text4);white-space:nowrap;">${label}</div>
+    </div>`;
+  };
+
+  /* ── Big metric card ── */
+  const metCard = (label, n, d, col, sub) => {
+    const p = pct(n,d);
+    const col2 = rateColor(p);
+    const arc = d>0 ? Math.round(n/d*100) : 0;
+    /* simple arc using conic-gradient */
+    return `<div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px 18px;position:relative;overflow:hidden;">
+      <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${col2};"></div>
+      <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">${label}</div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div style="width:56px;height:56px;border-radius:50%;background:conic-gradient(${col2} ${arc*3.6}deg, var(--bg3) 0deg);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <div style="width:40px;height:40px;border-radius:50%;background:var(--bg2);display:flex;align-items:center;justify-content:center;">
+            <span style="font-size:14px;font-weight:900;color:${col2};">${d>0?arc+'%':'—'}</span>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:var(--text1);">${n} <span style="font-size:11px;font-weight:400;color:var(--text3);">of ${d}</span></div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px;">${sub}</div>
         </div>
       </div>
-      <div style="font-size:11px;color:var(--text3);text-align:center;line-height:1.3;">${label}${convLabel}</div>
     </div>`;
-  }
+  };
 
-  function arrow(){
-    return `<div style="display:flex;align-items:center;padding-bottom:28px;color:var(--text4);font-size:18px;flex-shrink:0;">→</div>`;
-  }
+  /* ── Joining donut ── */
+  const total3 = jnd+njnd+pend||1;
+  const jPct  = Math.round(jnd/total3*100);
+  const njPct = Math.round(njnd/total3*100);
+  const pPct  = 100-jPct-njPct;
+  const jArc  = jPct*3.6, njArc=njPct*3.6;
+  const donut = sel>0
+    ? `conic-gradient(#16A34A 0deg ${jArc}deg, #DC2626 ${jArc}deg ${jArc+njArc}deg, #D97706 ${jArc+njArc}deg 360deg)`
+    : `var(--bg3)`;
 
-  const funnelHtml = `
-    <div style="display:flex;align-items:flex-end;gap:6px;padding:12px 0 4px;">
-      ${bar(reg,'#6D0E6A','Registered', null)}
-      ${arrow()}
-      ${bar(att,'#1D4ED8','Attended', reg)}
-      ${arrow()}
-      ${bar(sel,'#059669','Selected', att)}
-      ${arrow()}
-      ${bar(joined,'#16A34A','Joined', sel)}
-    </div>`;
-
-  const ratioRows = [
-    ['Reg → Attended',        pct(att,reg)],
-    ['Attended → Selected',   pct(sel,att)],
-    ['Selected → Joined',     pct(joined,sel)],
-    ['Overall (Reg → Sel)',   pct(sel,reg)],
-  ].map(([k,v])=>`
-    <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:12.5px;">
-      <span style="color:var(--text2)">${k}</span>
-      <span style="font-weight:700;color:var(--text1)">${v}</span>
-    </div>`).join('');
-
-  const joinRows = [
-    ['✅ Joined',     joined,    '#16A34A'],
-    ['❌ Not Joined', notJoined, '#DC2626'],
-    ['⏳ Pending',   pending,   '#D97706'],
-  ].map(([k,v,col])=>`
-    <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:12.5px;">
-      <span style="color:var(--text2)">${k}</span>
-      <span style="font-weight:700;color:${col}">${v}</span>
-    </div>`).join('');
-
-  openModal(`📊 Analytics — ${xe(co.name)}`,`
-    <div style="font-size:11.5px;color:var(--text3);margin-bottom:8px;">
-      Conversion funnel · ${xe(co.name)}${co.driveDate?' · Drive: '+fmtDate(co.driveDate):''}
-    </div>
-    <div style="background:var(--bg2);border-radius:12px;padding:14px 16px;margin-bottom:14px;">
-      ${funnelHtml}
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-      <div style="background:var(--bg2);border-radius:10px;padding:12px;">
-        <div style="font-size:10px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Conversion Ratios</div>
-        ${ratioRows}
+  const joinCard = `<div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px 18px;position:relative;overflow:hidden;">
+    <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#16A34A,#DC2626,#D97706);"></div>
+    <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">Joining Breakdown</div>
+    <div style="display:flex;align-items:center;gap:14px;">
+      <div style="width:56px;height:56px;border-radius:50%;background:${donut};flex-shrink:0;"></div>
+      <div style="display:flex;flex-direction:column;gap:4px;font-size:12px;">
+        <div style="display:flex;align-items:center;gap:6px;"><span style="width:9px;height:9px;border-radius:50%;background:#16A34A;display:inline-block;"></span><span style="color:var(--text2);">Joined</span><span style="font-weight:800;color:#16A34A;margin-left:auto;">${jnd}</span></div>
+        <div style="display:flex;align-items:center;gap:6px;"><span style="width:9px;height:9px;border-radius:50%;background:#DC2626;display:inline-block;"></span><span style="color:var(--text2);">Not Joined</span><span style="font-weight:800;color:#DC2626;margin-left:auto;">${njnd}</span></div>
+        <div style="display:flex;align-items:center;gap:6px;"><span style="width:9px;height:9px;border-radius:50%;background:#D97706;display:inline-block;"></span><span style="color:var(--text2);">Pending</span><span style="font-weight:800;color:#D97706;margin-left:auto;">${pend}</span></div>
       </div>
-      <div style="background:var(--bg2);border-radius:10px;padding:12px;">
-        <div style="font-size:10px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Joining Status  <span style="font-size:11px;color:var(--text4);font-weight:400;">(of ${sel} selected)</span></div>
-        ${joinRows}
-        <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:12px;">
-          <span style="font-weight:700;color:var(--text1)">Total Selected</span>
-          <span style="font-weight:800;color:var(--text1)">${sel}</span>
-        </div>
+    </div>
+  </div>`;
+
+  const html = `
+  <!-- company header -->
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--border);">
+    <div style="flex:1;min-width:0;">
+      <div style="font-size:16px;font-weight:800;color:var(--text1);letter-spacing:-.02em;">${xe(co.name)}</div>
+      <div style="font-size:11.5px;color:var(--text3);margin-top:2px;">
+        ${co.driveDate?'📅 '+fmtDate(co.driveDate)+'&nbsp;&nbsp;':''}
+        ${co.interviewMode?'🖥 '+xe(co.interviewMode)+'&nbsp;&nbsp;':''}
+        ${co.roles&&co.roles.length?'💼 '+xe(co.roles.slice(0,2).join(', '))+(co.roles.length>2?' +more':''):''}
       </div>
-    </div>`,
+    </div>
+    <div style="text-align:right;flex-shrink:0;">
+      <div style="font-size:28px;font-weight:900;color:${rateColor(pct(jnd,reg))};line-height:1;">${pctS(jnd,reg)}</div>
+      <div style="font-size:10px;color:var(--text3);font-weight:600;">Overall Reg→Joined</div>
+    </div>
+  </div>
+
+  <!-- pipeline flow -->
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px 20px;margin-bottom:14px;">
+    <div style="font-size:10px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px;">Placement Pipeline</div>
+    <div style="display:flex;align-items:flex-start;gap:8px;">
+      ${pipe(reg,'#7C3AED','Registered','All applicants')}
+      ${chevron(pct(att,reg),'conv')}
+      ${pipe(att,'#2563EB','Attended','Interview / drive')}
+      ${chevron(pct(sel,att),'conv')}
+      ${pipe(sel,'#059669','Selected','Offer given')}
+      ${chevron(pct(jnd,sel),'conv')}
+      ${pipe(jnd,'#16A34A','Joined','Confirmed')}
+    </div>
+  </div>
+
+  <!-- 5 metric cards -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+    ${metCard('Reg → Attended',att,reg,'#2563EB','Showed up for interview')}
+    ${metCard('Attended → Selected',sel,att,'#059669','Cleared selection process')}
+    ${metCard('Selected → Joined',jnd,sel,'#16A34A','Accepted & joined')}
+    ${metCard('Attended → Joined',jnd,att,'#7C3AED','Direct attended-to-joined')}
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+    ${metCard('Overall: Reg → Joined',jnd,reg,'#6D0E6A','End-to-end conversion')}
+    ${joinCard}
+  </div>`;
+
+  openModalWide(`📊 ${xe(co.name)} — Placement Analytics`, html,
     `<button class="btn btn-outline btn-sm" onclick="closeModal()">Close</button>
      <button class="btn btn-admin btn-sm" onclick="closeModal();downloadAnalyticsPDF(${companyId})">⬇ Download Report</button>`
   );
 }
 
-/* ─ Branded PDF download ─ */
+/* ════════════════════════════════════════════════════
+   ANALYTICS PDF  — branded, clean, two-page
+════════════════════════════════════════════════════ */
 async function downloadAnalyticsPDF(companyId){
   const co = COMPANIES.find(x=>x.id===companyId);
   if(!co){ toast('Company not found','error'); return; }
-
-  const { jsPDF } = window.jspdf;
-  if(!jsPDF){ toast('PDF library not loaded yet — please wait and try again','error'); return; }
+  if(!window.jspdf){ toast('PDF library not ready — try again in a moment','error'); return; }
 
   toast('Generating PDF…','info','⏳');
 
-  const W=297, H=210; // A4 landscape mm
-  const DATE_STR = new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+  const { jsPDF } = window.jspdf;
+  const reg  = co.studentsRegistered.length;
+  const att  = co.studentsInterviewed.length;
+  const sel  = co.studentsSelected.length;
+  const jnd  = co.studentsSelected.filter(s=>s.joinStatus==='Joined').length;
+  const njnd = co.studentsSelected.filter(s=>s.joinStatus==='Not Joined').length;
+  const pend = sel - jnd - njnd;
+  const p    = (n,d) => d>0 ? Math.round(n/d*100) : 0;
+  const ps   = (n,d) => d>0 ? Math.round(n/d*100)+'%' : 'N/A';
+  const DATE = new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+  const rCol = (pv) => pv>=70?[22,163,74]:pv>=40?[217,119,6]:[220,38,38];
 
-  const reg       = co.studentsRegistered.length;
-  const att       = co.studentsInterviewed.length;
-  const sel       = co.studentsSelected.length;
-  const joined    = co.studentsSelected.filter(s=>s.joinStatus==='Joined').length;
-  const notJoined = co.studentsSelected.filter(s=>s.joinStatus==='Not Joined').length;
-  const pending   = sel - joined - notJoined;
-  const pct = (n,d) => d>0 ? Math.round(n/d*100) : 0;
-
-  // ── Load logo ──
-  let logoB64 = null;
+  /* load logo */
+  let logo = null;
   try {
-    const resp = await fetch('logo.jpg');
-    if(resp.ok){
-      const blob = await resp.blob();
-      logoB64 = await new Promise(res=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.readAsDataURL(blob); });
-    }
-  } catch(e){ logoB64 = null; }
+    const r = await fetch('logo.jpg');
+    if(r.ok){ const bl=await r.blob(); logo=await new Promise(res=>{ const fr=new FileReader(); fr.onload=()=>res(fr.result); fr.readAsDataURL(bl); }); }
+  } catch(e){}
 
-  // ── Draw chart on offscreen canvas (includes watermark via globalAlpha) ──
-  const canvas = document.createElement('canvas');
-  canvas.width = 880; canvas.height = 460;
-  const ctx = canvas.getContext('2d');
+  /* ── offscreen funnel canvas ── */
+  const CV = document.createElement('canvas');
+  CV.width=860; CV.height=420;
+  const CX=CV.getContext('2d');
+  CX.fillStyle='#ffffff'; CX.fillRect(0,0,CV.width,CV.height);
 
-  // White background
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  // Watermark logo at low opacity
-  if(logoB64){
-    await new Promise(res => {
-      const img = new Image();
-      img.onload = () => {
-        ctx.save();
-        ctx.globalAlpha = 0.06;
-        ctx.drawImage(img, canvas.width/2-80, canvas.height/2-80, 160, 160);
-        ctx.restore();
-        res();
-      };
-      img.onerror = res;
-      img.src = logoB64;
-    });
+  if(logo){
+    await new Promise(res=>{ const i=new Image(); i.onload=()=>{ CX.save(); CX.globalAlpha=.05; CX.drawImage(i,CV.width/2-90,CV.height/2-90,180,180); CX.restore(); res(); }; i.onerror=res; i.src=logo; });
   }
 
-  // Draw funnel bars
-  const stages = [
-    { label:'Registered', n:reg,    color:'#6D0E6A' },
-    { label:'Attended',   n:att,    color:'#1D4ED8' },
-    { label:'Selected',   n:sel,    color:'#059669' },
-    { label:'Joined',     n:joined, color:'#16A34A' },
-  ];
-  const maxN = Math.max(...stages.map(s=>s.n), 1);
-  const padL=40, padR=40, padT=50, padB=60;
-  const cW = canvas.width - padL - padR;
-  const cH = canvas.height - padT - padB;
-  const barW = Math.floor(cW / stages.length);
-  const gap  = Math.floor(barW * 0.24);
-  const bw   = barW - gap;
+  const stages=[{n:reg,c:'#7C3AED',l:'Registered'},{n:att,c:'#2563EB',l:'Attended'},{n:sel,c:'#059669',l:'Selected'},{n:jnd,c:'#16A34A',l:'Joined'}];
+  const mxN=Math.max(...stages.map(s=>s.n),1);
+  const PL=50,PR=50,PT=50,PB=70,CW=CV.width-PL-PR,CH=CV.height-PT-PB;
+  const bw2=Math.floor(CW/stages.length), gap2=Math.floor(bw2*.28), bw=bw2-gap2;
 
-  // Chart title
-  ctx.fillStyle = '#1A0519';
-  ctx.font = "bold 18px 'Helvetica',sans-serif";
-  ctx.textAlign = 'left';
-  ctx.fillText('Placement Funnel — ' + co.name, padL, 30);
+  CX.fillStyle='#1e1b2e'; CX.font="bold 16px Helvetica,sans-serif"; CX.textAlign='left';
+  CX.fillText('Placement Funnel  —  '+co.name, PL, 30);
 
-  stages.forEach((s, i) => {
-    const bh = maxN > 0 ? Math.round(s.n / maxN * cH) : 0;
-    const x = padL + i * barW + gap/2;
-    const y = padT + cH - bh;
-
-    // Bar with gradient
-    const grad = ctx.createLinearGradient(x, y, x, y+bh);
-    grad.addColorStop(0, s.color);
-    grad.addColorStop(1, s.color + 'AA');
-    ctx.fillStyle = grad;
-    const r = 8;
-    if(bh > 0){
-      ctx.beginPath();
-      ctx.moveTo(x+r,y); ctx.lineTo(x+bw-r,y);
-      ctx.quadraticCurveTo(x+bw,y,x+bw,y+r);
-      ctx.lineTo(x+bw,y+bh); ctx.lineTo(x,y+bh);
-      ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y);
-      ctx.closePath(); ctx.fill();
-    }
-
-    // Count above bar
-    ctx.fillStyle = '#1A0519';
-    ctx.font = "bold 20px 'Helvetica',sans-serif";
-    ctx.textAlign = 'center';
-    ctx.fillText(s.n, x+bw/2, bh>0 ? y-10 : padT+cH-10);
-
-    // Conversion % inside bar
-    if(bh > 36 && i > 0 && stages[i-1].n > 0){
-      ctx.fillStyle = '#ffffff';
-      ctx.font = "bold 14px 'Helvetica',sans-serif";
-      ctx.fillText(Math.round(s.n/stages[i-1].n*100)+'%', x+bw/2, y+22);
-    }
-
-    // Arrow between bars
-    if(i < stages.length - 1){
-      ctx.fillStyle = '#94A3B8';
-      ctx.font = "18px sans-serif";
-      ctx.fillText('→', x+bw+gap/2-10, padT+cH/2+7);
-    }
-
-    // Label below
-    ctx.fillStyle = '#64748B';
-    ctx.font = "13px 'Helvetica',sans-serif";
-    ctx.fillText(s.label, x+bw/2, padT+cH+20);
+  stages.forEach((s,i)=>{
+    const bh=Math.round(s.n/mxN*CH)||0;
+    const x=PL+i*bw2+gap2/2, y=PT+CH-bh;
+    const gr=CX.createLinearGradient(x,y,x,y+bh); gr.addColorStop(0,s.c); gr.addColorStop(1,s.c+'66');
+    CX.fillStyle=gr;
+    if(bh>0){ CX.beginPath(); CX.roundRect(x,y,bw,bh,6); CX.fill(); }
+    CX.fillStyle='#0f172a'; CX.font="bold 18px Helvetica,sans-serif"; CX.textAlign='center';
+    CX.fillText(s.n, x+bw/2, bh>0?y-10:PT+CH-10);
+    if(bh>28&&i>0&&stages[i-1].n>0){ CX.fillStyle='#fff'; CX.font="bold 13px Helvetica,sans-serif"; CX.fillText(p(s.n,stages[i-1].n)+'%',x+bw/2,y+20); }
+    CX.fillStyle='#475569'; CX.font="13px Helvetica,sans-serif"; CX.fillText(s.l,x+bw/2,PT+CH+22);
+    if(i<3){ CX.fillStyle='#94a3b8'; CX.font="20px sans-serif"; CX.fillText('›',x+bw+gap2/2-8,PT+CH/2+8); }
   });
-
-  // Stacked join breakdown on last bar
-  if(sel > 0){
-    const bh   = Math.round(sel/maxN*cH);
-    const barX = padL + 3*barW + gap/2;
-    const base = padT + cH;
-    const parts = [[joined,'#22C55E'],[notJoined,'#EF4444'],[pending,'#F59E0B']];
-    let yAcc = 0;
-    parts.forEach(([n,col])=>{
-      const ph = bh>0 ? Math.round(n/sel*bh) : 0;
-      if(ph > 0){
-        ctx.fillStyle = col+'CC';
-        ctx.fillRect(barX, base-yAcc-ph, bw, ph);
-        yAcc += ph;
-      }
-    });
-  }
-
-  // Baseline
-  ctx.strokeStyle = '#E2E8F0'; ctx.lineWidth = 1.5;
-  ctx.beginPath();
-  ctx.moveTo(padL, padT+cH); ctx.lineTo(canvas.width-padR, padT+cH);
-  ctx.stroke();
-
-  const chartImg = canvas.toDataURL('image/png');
-
-  // ── Build PDF ──
-  const doc = new jsPDF({ orientation:'landscape', unit:'mm', format:'a4' });
-
-  // Page 1: Header
-  doc.setFillColor(87,11,84);
-  doc.rect(0,0,W,28,'F');
-  if(logoB64) doc.addImage(logoB64,'JPEG',8,3,22,22);
-  doc.setTextColor(255,255,255);
-  doc.setFontSize(13); doc.setFont('helvetica','bold');
-  doc.text('Vidyavahini First Grade Degree College — Placement Analytics', 36, 12);
-  doc.setFontSize(9); doc.setFont('helvetica','normal');
-  doc.text(xe(co.name) + '   ·   Generated: ' + DATE_STR, 36, 21);
-
-  // Chart image
-  doc.addImage(chartImg,'PNG', 12, 32, 186, 98);
-
-  // Conversion ratios box
-  doc.setFillColor(247,240,247);
-  doc.roundedRect(202,32,88,98,3,3,'F');
-  doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(87,11,84);
-  doc.text('CONVERSION RATIOS', 205, 42);
-  const ratios=[
-    ['Reg → Attended',       pct(att,reg)+'%'],
-    ['Attended → Selected',  pct(sel,att)+'%'],
-    ['Selected → Joined',    pct(joined,sel)+'%'],
-    ['Overall (Reg → Sel)',  pct(sel,reg)+'%'],
-  ];
-  doc.setFont('helvetica','normal'); doc.setFontSize(8);
-  ratios.forEach(([k,v],i)=>{
-    const ry = 52+i*12;
-    doc.setTextColor(60,60,60); doc.text(k, 205, ry);
-    doc.setFont('helvetica','bold'); doc.setTextColor(87,11,84);
-    doc.text(v, 286, ry, {align:'right'});
-    doc.setFont('helvetica','normal');
-    if(i<3){ doc.setDrawColor(210,190,210); doc.line(204,ry+4,288,ry+4); }
-  });
-
-  // Joining breakdown box
-  doc.setFillColor(247,240,247);
-  doc.roundedRect(202,136,88,44,3,3,'F');
-  doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(87,11,84);
-  doc.text('JOINING STATUS', 205, 145);
-  [['Joined',joined,[22,101,52]],['Not Joined',notJoined,[185,28,28]],['Pending',pending,[180,120,10]]].forEach(([k,v,rgb],i)=>{
-    const ry=154+i*9;
-    doc.setFont('helvetica','normal'); doc.setTextColor(60,60,60); doc.text(k,205,ry);
-    doc.setFont('helvetica','bold'); doc.setTextColor(...rgb); doc.text(String(v),286,ry,{align:'right'});
-  });
-
-  // Page 2: Bullet points
-  doc.addPage();
-  doc.setFillColor(87,11,84); doc.rect(0,0,W,28,'F');
-  if(logoB64) doc.addImage(logoB64,'JPEG',8,3,22,22);
-  doc.setTextColor(255,255,255);
-  doc.setFontSize(13); doc.setFont('helvetica','bold');
-  doc.text('Placement Summary — ' + xe(co.name), 36, 12);
-  doc.setFontSize(9); doc.setFont('helvetica','normal');
-  doc.text('Vidyavahini First Grade Degree College  ·  ' + DATE_STR, 36, 21);
-
-  let py = 40;
-  const sec = (t) => {
-    py += 3;
-    doc.setFillColor(87,11,84);
-    doc.roundedRect(12,py-5,W-24,10,2,2,'F');
-    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(10);
-    doc.text(t, 15, py+1.5);
-    py += 13; doc.setTextColor(50,50,50);
-  };
-  const bul = (t,col=[50,50,50],bold=false) => {
-    doc.setFont('helvetica',bold?'bold':'normal');
-    doc.setTextColor(...col); doc.setFontSize(10);
-    doc.text('▸  '+t, 15, py); py += 8;
-  };
-
-  sec('Drive Overview');
-  bul(xe(co.name)+' Campus Placement Drive', [87,11,84], true);
-  if(co.driveDate) bul('Drive Date: '+fmtDate(co.driveDate));
-  if(co.interviewMode) bul('Interview Mode: '+xe(co.interviewMode));
-  if(co.roles&&co.roles.length) bul('Roles Offered: '+xe(co.roles.join(', ')));
-
-  sec('Funnel Performance');
-  bul(reg+' students registered for this placement drive');
-  bul(att+' students attended the interview ('+pct(att,reg)+'% of registrations)');
-  bul(sel+' students selected / placed ('+pct(sel,att)+'% interview-to-selection rate)');
-  bul('Overall registration-to-placement rate: '+pct(sel,reg)+'%');
-
-  sec('Joining Status');
-  bul(joined+' of '+sel+' selected students confirmed joining ('+pct(joined,sel)+'%)', [22,101,52]);
-  bul(notJoined+' student'+(notJoined!==1?'s':'')+' did not join ('+pct(notJoined,sel)+'%)', [185,28,28]);
-  bul(pending+' student'+(pending!==1?'s':'')+' status pending confirmation', [146,64,14]);
-
-  sec('Key Insights');
-  if(reg>0&&att<reg) bul('Drop-off before interview: '+(reg-att)+' registered students did not attend');
-  if(att>0&&sel<att) bul((att-sel)+' interviewed students were not selected');
-  if(pct(sel,reg)>=50) bul('Strong overall conversion rate — above 50%', [22,101,52]);
-  else if(pct(sel,reg)>=25) bul('Moderate conversion — scope to improve pre-placement preparation');
-  else bul('Low conversion — consider targeted aptitude / interview coaching');
+  /* join stacked overlay on last bar */
   if(sel>0){
-    if(pct(joined,sel)>=80) bul('Excellent joining rate — strong student commitment', [22,101,52]);
-    else if(pct(joined,sel)>=50) bul('Good joining rate — follow up with pending students');
-    else bul('Low joining rate — investigate reasons, follow up with selected students');
+    const bh=Math.round(jnd/mxN*CH)||0, bh2=Math.round(njnd/mxN*CH)||0, bh3=Math.round(pend/mxN*CH)||0;
+    const bx=PL+3*bw2+gap2/2, base=PT+CH;
+    [[Math.round(jnd/sel*(Math.round(sel/mxN*CH))||0),'#22C55E'],[Math.round(njnd/sel*(Math.round(sel/mxN*CH))||0),'#EF4444'],[Math.round(pend/sel*(Math.round(sel/mxN*CH))||0),'#F59E0B']].reduce((acc,[h,col])=>{ if(h>0){ CX.fillStyle=col+'CC'; CX.fillRect(bx,base-acc-h,bw,h); } return acc+h; },0);
   }
+  CX.strokeStyle='#e2e8f0'; CX.lineWidth=1.5; CX.beginPath(); CX.moveTo(PL,PT+CH); CX.lineTo(CV.width-PR,PT+CH); CX.stroke();
+  const chartImg=CV.toDataURL('image/png');
 
-  doc.save('VVFGC_'+xe(co.name).replace(/[^a-zA-Z0-9]/g,'_')+'_Analytics_'+DATE_STR.replace(/ /g,'-')+'.pdf');
+  /* ── PAGE 1 ── */
+  const doc=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
+  const W=297,H=210;
+
+  /* header */
+  doc.setFillColor(87,11,84); doc.rect(0,0,W,32,'F');
+  if(logo) doc.addImage(logo,'JPEG',10,5,22,22);
+  doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(14);
+  doc.text('Vidyavahini First Grade Degree College',38,14);
+  doc.setFontSize(10); doc.setFont('helvetica','normal');
+  doc.text('Placement Analytics  ·  '+xe(co.name)+'  ·  '+DATE,38,24);
+
+  /* big overall number */
+  const ovPct=p(jnd,reg);
+  const [or,og,ob]=rCol(ovPct);
+  doc.setFillColor(or,og,ob); doc.roundedRect(W-52,35,44,28,4,4,'F');
+  doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(20);
+  doc.text(ps(jnd,reg), W-30, 51, {align:'center'});
+  doc.setFontSize(7); doc.setFont('helvetica','normal');
+  doc.text('REG → JOINED', W-30, 58, {align:'center'});
+
+  /* chart */
+  doc.addImage(chartImg,'PNG',10,36,170,90);
+
+  /* metrics table */
+  const metrics=[
+    ['Reg → Attended',   att, reg, p(att,reg)],
+    ['Attended → Selected', sel, att, p(sel,att)],
+    ['Selected → Joined', jnd, sel, p(jnd,sel)],
+    ['Attended → Joined', jnd, att, p(jnd,att)],
+    ['Overall Reg → Joined', jnd, reg, p(jnd,reg)],
+  ];
+  let ry=36;
+  doc.setFillColor(250,245,250); doc.roundedRect(184,34,W-186,100,4,4,'F');
+  doc.setTextColor(87,11,84); doc.setFont('helvetica','bold'); doc.setFontSize(8.5);
+  doc.text('CONVERSION METRICS', 187, 43);
+  ry=50;
+  metrics.forEach(([lbl,n,d,pv])=>{
+    const [cr,cg,cb]=rCol(pv);
+    doc.setFont('helvetica','normal'); doc.setTextColor(60,60,60); doc.setFontSize(8);
+    doc.text(lbl, 187, ry);
+    doc.text(n+' / '+d, 256, ry, {align:'right'});
+    doc.setFont('helvetica','bold'); doc.setTextColor(cr,cg,cb); doc.setFontSize(9);
+    doc.text(ps(n,d), W-12, ry, {align:'right'});
+    ry+=10;
+    if(ry<132){ doc.setDrawColor(230,215,230); doc.line(186,ry-5,W-12,ry-5); }
+  });
+
+  /* joining status box */
+  doc.setFillColor(250,245,250); doc.roundedRect(184,138,W-186,46,4,4,'F');
+  doc.setTextColor(87,11,84); doc.setFont('helvetica','bold'); doc.setFontSize(8.5);
+  doc.text('JOINING STATUS  (of '+sel+' selected)', 187, 147);
+  [[`Joined (${ps(jnd,sel)})`,jnd,[22,163,74]],[`Not Joined (${ps(njnd,sel)})`,njnd,[220,38,38]],[`Pending (${ps(pend,sel)})`,pend,[217,119,6]]].forEach(([lbl,n,rgb],i)=>{
+    const iy=156+i*9;
+    doc.setFont('helvetica','normal'); doc.setTextColor(60,60,60); doc.text(lbl,187,iy);
+    doc.setFont('helvetica','bold'); doc.setTextColor(...rgb); doc.text(String(n),W-12,iy,{align:'right'});
+  });
+
+  /* ── PAGE 2 — summary report ── */
+  doc.addPage();
+  doc.setFillColor(87,11,84); doc.rect(0,0,W,32,'F');
+  if(logo) doc.addImage(logo,'JPEG',10,5,22,22);
+  doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(14);
+  doc.text('Placement Summary Report  —  '+xe(co.name),38,14);
+  doc.setFontSize(10); doc.setFont('helvetica','normal');
+  doc.text('Vidyavahini First Grade Degree College  ·  '+DATE,38,24);
+
+  /* 4 big stat tiles */
+  const tiles=[[reg,'#7C3AED','Registered'],[att,'#2563EB','Attended'],[sel,'#059669','Selected'],[jnd,'#16A34A','Joined']];
+  tiles.forEach(([n,col,lbl],i)=>{
+    const tx=12+i*70, ty=36;
+    const hc=parseInt(col.slice(1),16);
+    doc.setFillColor((hc>>16)&255,(hc>>8)&255,hc&255);
+    doc.roundedRect(tx,ty,66,26,4,4,'F');
+    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(18);
+    doc.text(String(n),tx+33,ty+14,{align:'center'});
+    doc.setFontSize(8); doc.setFont('helvetica','normal');
+    doc.text(lbl,tx+33,ty+22,{align:'center'});
+  });
+
+  /* conversion pipeline row */
+  doc.setFontSize(9); doc.setTextColor(60,60,60);
+  const pipe2=[[att,reg,'Reg→Att'],[sel,att,'Att→Sel'],[jnd,sel,'Sel→Jnd'],[jnd,att,'Att→Jnd'],[jnd,reg,'Reg→Jnd']];
+  pipe2.forEach(([n,d,lbl],i)=>{
+    const pv=p(n,d); const [cr,cg,cb]=rCol(pv);
+    const px=12+i*57, py=70;
+    doc.setFillColor(248,242,248); doc.roundedRect(px,py,54,18,3,3,'F');
+    doc.setFont('helvetica','bold'); doc.setTextColor(cr,cg,cb); doc.setFontSize(11);
+    doc.text(ps(n,d),px+27,py+9,{align:'center'});
+    doc.setFont('helvetica','normal'); doc.setTextColor(100,100,100); doc.setFontSize(7.5);
+    doc.text(lbl,px+27,py+15,{align:'center'});
+  });
+
+  /* narrative bullets */
+  let py2=96;
+  const sec2=(t)=>{ doc.setFillColor(87,11,84); doc.roundedRect(10,py2-5,W-20,9,2,2,'F'); doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.text(t,13,py2+1); py2+=13; doc.setTextColor(50,50,50); };
+  const bul2=(t,rgb=[50,50,50],bold=false)=>{ doc.setFont('helvetica',bold?'bold':'normal'); doc.setTextColor(...rgb); doc.setFontSize(9); doc.text('▸  '+t,14,py2); py2+=8; };
+
+  sec2('Drive Summary');
+  bul2(xe(co.name)+' campus placement drive',[87,11,84],true);
+  if(co.driveDate) bul2('Drive Date: '+fmtDate(co.driveDate));
+  if(co.interviewMode) bul2('Mode: '+xe(co.interviewMode));
+  if(co.roles&&co.roles.length) bul2('Role(s): '+xe(co.roles.join(', ')));
+
+  sec2('Funnel Performance');
+  bul2(reg+' students registered  →  '+att+' attended ('+ps(att,reg)+' registration-to-interview conversion)');
+  bul2(att+' attended  →  '+sel+' selected ('+ps(sel,att)+' interview-to-selection rate)');
+  bul2(sel+' selected  →  '+jnd+' joined ('+ps(jnd,sel)+' offer acceptance rate)');
+  bul2('End-to-end: '+reg+' registered  →  '+jnd+' joined  ('+ps(jnd,reg)+' overall conversion)',[87,11,84],true);
+
+  sec2('Key Observations');
+  if(p(att,reg)<60&&reg>0) bul2((reg-att)+' registered students did not attend — consider pre-drive reminders',[180,90,0]);
+  if(p(sel,att)<50&&att>0) bul2('Selection rate below 50% — review shortlisting or eligibility criteria',[180,90,0]);
+  const ovP=p(jnd,reg);
+  if(ovP>=50) bul2('Strong overall pipeline — more than half of registrations converted to joinings',[22,163,74]);
+  else if(ovP>=25) bul2('Moderate pipeline — scope to improve conversion at each stage');
+  else if(reg>0) bul2('Low end-to-end conversion — targeted intervention recommended',[220,38,38]);
+  if(sel>0){
+    if(p(jnd,sel)>=80) bul2('Excellent offer acceptance — high student commitment',[22,163,74]);
+    else if(p(jnd,sel)>=50) bul2('Good acceptance rate — follow up with '+pend+' pending student'+(pend!==1?'s':''));
+    else bul2('Low acceptance rate — investigate reasons; '+njnd+' actively declined',[220,38,38]);
+  }
+  if(pend>0) bul2(pend+' student'+(pend!==1?'s':'')+' yet to confirm joining — follow up recommended',[217,119,6]);
+
+  doc.save('VVFGC_'+xe(co.name).replace(/[^a-zA-Z0-9]/g,'_')+'_Analytics_'+DATE.replace(/ /g,'-')+'.pdf');
   toast('Analytics report downloaded','success','⬇');
 }
 
