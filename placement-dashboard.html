@@ -1246,7 +1246,6 @@ async function init(){
       adminMode=true; document.body.classList.add('admin-mode');
     }
     go('home');
-    if(pcMode) setTimeout(scrollToPCPanel, 600);
 
     // 5. Fetch all student data in background
     loadAllStudents();
@@ -1315,16 +1314,11 @@ function renderNav(){
     const c=COMPANIES.find(x=>x.id===cId);
     right=`<nav class="nav-crumb"><span class="crumb" id="n-h">Home</span><span class="crumb-sep">/</span><span class="crumb" id="n-d">Companies</span><span class="crumb-sep">/</span><span class="crumb-active">${c?xe(c.name):''}</span></nav>`;
   }
-  const adminBtnStyle = adminMode
-    ? 'background:#6D0E6A;color:#fff;border:none;border-radius:8px;padding:6px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:.02em;'
-    : 'background:none;border:1.5px solid #D3B6D2;color:#570B54;border-radius:8px;padding:6px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:.02em;';
-  const adminBtnLabel = adminMode ? '🛡️ Admin On' : '🛡️ Admin';
-  nb.innerHTML=`<div class="navbar"><a class="nav-brand" id="n-brand"><div class="nav-logo"><img src="logo.jpg" alt="VG" style="width:100%;height:100%;object-fit:contain;border-radius:10px;display:block;"/></div><div class="nav-name"><span>Vidyavahini</span><span>First Grade Degree College</span></div></a><div class="nav-right"><a href="index.html" class="btn-nav-home-pd" title="Home">←</a><button id="n-admin" style="${adminBtnStyle}">${adminBtnLabel}</button><button class="btn-icon" id="n-theme">🌙</button>${right}</div></div>`;
+  nb.innerHTML=`<div class="navbar"><a class="nav-brand" id="n-brand"><div class="nav-logo"><img src="logo.jpg" alt="VG" style="width:100%;height:100%;object-fit:contain;border-radius:10px;display:block;"/></div><div class="nav-name"><span>Vidyavahini</span><span>First Grade Degree College</span></div></a><div class="nav-right"><a href="index.html" class="btn-nav-home-pd" title="Home">←</a><button class="btn-icon" id="n-theme">🌙</button>${right}</div></div>`;
   const g=id=>document.getElementById(id);
   g('n-brand').onclick=()=>{ window.location.href='index.html'; };
   g('n-theme').onclick=toggleTheme;
   updateThemeIcon();
-  if(g('n-admin')) g('n-admin').onclick=handleAdmin;
   if(g('n-home'))  g('n-home').onclick=()=>go('home');
   if(g('n-h'))     g('n-h').onclick=()=>go('home');
   if(g('n-d'))     g('n-d').onclick=()=>go('dashboard');
@@ -1352,7 +1346,7 @@ function renderPCBar(){
   const r=document.getElementById('pc-bar');
   if(!r)return;
   if(!pcMode){ r.innerHTML=''; return; }
-  r.innerHTML=`<div class="pc-bar"><span>🔐 Placement Cell Mode &nbsp;·&nbsp; <a href="#" onclick="event.preventDefault();handleAdmin()" style="color:#FCD34D;text-decoration:underline;font-weight:800;">Campus Placement Dashboard</a></span><span class="pc-bar-badge">CONFIDENTIAL</span><div class="pc-bar-actions"><button onclick="scrollToPCPanel()">↓ Jump to Tracker</button><button onclick="exitPCMode()">Exit</button></div></div>`;
+  r.innerHTML=`<div class="pc-bar"><span>🔐 Placement Cell Mode active &nbsp;·&nbsp; Join status editing enabled on Selected Students</span><span class="pc-bar-badge">CONFIDENTIAL</span><div class="pc-bar-actions"><button onclick="exitPCMode()">Exit</button></div></div>`;
 }
 
 /* ════════════════════════════════════════════════════
@@ -1367,7 +1361,7 @@ function handleAdmin(){
   };
   const chk=()=>{
     if(pin===ADMIN_PIN){ closeModal(); adminMode=true; document.body.classList.add('admin-mode'); sessionStorage.setItem('placementAdmin','1'); go(view,cId); toast('Admin Mode enabled — you can now edit student data','success','🛡️'); }
-    else if(pin===JOIN_PIN){ closeModal(); pcMode=true; go(view,cId); toast('Placement Cell Mode enabled','success','🔐'); setTimeout(scrollToPCPanel,400); }
+    else if(pin===JOIN_PIN){ closeModal(); pcMode=true; renderAdminBar(); go(view,cId); toast('Placement Cell Mode enabled','success','🔐'); }
     else{ upd(true); setTimeout(()=>{ pin=''; upd(false); },800); }
   };
   openModal('Access PIN',`<p style="font-size:13px;color:var(--text3);margin-bottom:4px;text-align:center;">Enter PIN to enable a mode</p><p style="font-size:11px;color:var(--text4);margin-bottom:16px;text-align:center;">Admin Mode (edit) &nbsp;·&nbsp; Placement Cell Mode (tracker)</p><div class="pin-row">${[0,1,2,3].map(i=>`<input class="pin-cell" id="pc${i}" maxlength="1" inputmode="numeric" pattern="[0-9]"/>`).join('')}</div><div class="pin-error" id="pe"></div>`);
@@ -1598,7 +1592,6 @@ function buildHome(){
   document.querySelectorAll('.co-card[data-id]').forEach(el=>{
     el.onclick=()=>go('detail',parseInt(el.dataset.id));
   });
-  if(pcMode) renderPCPanel();
 }
 
 function coCardHtml(c){
@@ -2033,7 +2026,7 @@ function buildStudentSection(title,students,anchorId,companyId){
     if(!isSelected) return '';
     const st = s.joinStatus || 'Pending';
     const stl = joinStatusColor(st);
-    if(adminMode){
+    if(pcMode || adminMode){
       return `<td>
         <select class="join-select" style="${stl};border:1.5px solid;border-radius:20px;padding:3px 10px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit;appearance:none;-webkit-appearance:none;background-image:url('data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'12\' viewBox=\'0 0 12 12\'><path d=\'M6 8L2 4h8z\' fill=\'%23666\'></path></svg>');background-repeat:no-repeat;background-position:right 8px center;padding-right:24px;"
           onchange="updateJoinStatus(${companyId},${i},'${(s.email||s.name||'').replace(/'/g,"\\'")}'  ,this.value,this)">
@@ -2052,7 +2045,7 @@ function buildStudentSection(title,students,anchorId,companyId){
       <div style="display:flex;gap:8px;">${analyticBtn}${pdfBtn}</div>
     </div>
     <table class="student-table">
-      <thead><tr><th>#</th><th>Name</th>${hasEmail?'<th>Email</th>':''}${hasBranch?'<th>Class</th>':''}${hasPhone?'<th>Phone</th>':''}${isSelected?'<th>Status</th>':''}</tr></thead>
+      <thead><tr><th>#</th><th>Name</th>${hasEmail?'<th>Email</th>':''}${hasBranch?'<th>Class</th>':''}${hasPhone?'<th>Phone</th>':''}${isSelected&&(pcMode||adminMode)?'<th>Status</th>':''}</tr></thead>
       <tbody>${students.map((s,i)=>`<tr>
         <td>${xe(s.id)}</td><td>${xe(s.name||'—')}</td>
         ${hasEmail?`<td>${xe(s.email||'—')}</td>`:''}
@@ -2502,7 +2495,10 @@ function checkCellPin(){
     return;
   }
   closeModal();
-  window.open('placement-cell.html','_blank');
+  pcMode = true;
+  renderAdminBar(); // renders pc-bar too
+  go(view, cId);
+  toast('Placement Cell Mode active — join status editing enabled','success','🔐');
 }
 
 function checkPlacementPin(){
@@ -2556,9 +2552,7 @@ function saveJoinStatus(js){ sessionStorage.setItem('joinStatus',JSON.stringify(
 function exitPCMode(){
   pcMode=false;
   renderAdminBar();
-  renderNav();
-  const p=document.getElementById('pc-panel');
-  if(p)p.remove();
+  go(view, cId);
   toast('Placement Cell Mode off','info','🔒');
 }
 
