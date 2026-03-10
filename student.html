@@ -108,6 +108,10 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;}
 .btn-reset-resume{background:none;border:1px solid #aaa;color:#666;font-size:11px;padding:4px 10px;border-radius:20px;cursor:pointer;margin-top:4px;}
 .btn-reset-resume:hover{border-color:#6D0E6A;color:#6D0E6A;}
 .btn-rewrite:hover{opacity:.9;transform:translateY(-1px);}
+.pf-row-edit{cursor:pointer;transition:background .15s;}
+.pf-row-edit:hover{background:#F7F0F7;border-radius:6px;}
+.pf-edit-icon{font-size:11px;color:#6D0E6A;margin-left:5px;opacity:0.6;}
+.pf-row-edit:hover .pf-edit-icon{opacity:1;}
 .btn-edit-profile{display:block;width:100%;padding:9px;border-radius:10px;border:1.5px solid #D3B6D2;background:#fff;color:#6D0E6A;font-size:12.5px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;transition:all .15s;margin-top:6px;}
 .btn-edit-profile:hover{background:#F7F0F7;}
 /* ── Edit Profile Modal ── */
@@ -714,6 +718,11 @@ function renderProfile(elig){
   if(isEmail)return`<div class="pf-row"><span class="pf-k">${k}</span><span class="pf-v pf-email" id="email-pf-v"><span class="pf-scroll" id="email-pf-scroll">${xe(v||'\u2014')}</span></span></div>`;
   return`<div class="pf-row"><span class="pf-k">${k}</span><span class="pf-v">${xe(v||'\u2014')}</span></div>`;
 };
+  const pfRowEdit=(k,v)=>
+  `<div class="pf-row pf-row-edit" onclick="openEditProfile()" title="Click to edit">
+    <span class="pf-k">${k}</span>
+    <span class="pf-v">${xe(v||'\u2014')}<span class="pf-edit-icon">&#9998;</span></span>
+  </div>`;
 
   document.getElementById('profile-wrap').innerHTML=`
     <div class="profile-card">
@@ -724,12 +733,12 @@ function renderProfile(elig){
       <span class="elig-badge ${elig?'elig-yes':'elig-no'}">${elig?'\u2713 Eligible':'\u2717 Not Eligible'}</span>
       <div class="profile-fields">
         ${pfRow('\ud83d\udce7 Email',s.email,true)}
-        ${pfRow('\ud83d\udcf1 Phone',s.phone)}
+        ${pfRowEdit('\ud83d\udcf1 Phone',s.phone)}
         ${pfRow('\ud83d\udcda Course',s.course)}
         ${pfRow('\ud83d\udcc5 Semester',s.semester)}
         ${pfRow('\ud83c\udfdb\ufe0f Section',s.section)}
-        ${pfRow('\ud83d\udcca 10th %',s.tenth+'%')}
-        ${pfRow('\ud83d\udcca 12th %',s.twelfth+'%')}
+        ${pfRowEdit('\ud83d\udcca 10th %',s.tenth+'%')}
+        ${pfRowEdit('\ud83d\udcca 12th %',s.twelfth+'%')}
         ${pfRow('\u26a0\ufe0f Backlogs',s.backlogs)}
       </div>
       ${ (()=>{
@@ -1538,7 +1547,6 @@ async function uploadFormattedResume(pdfBlob, filename){
 /* ── Edit Profile ── */
 function openEditProfile(){
   document.getElementById('ep-phone').value   = ST.phone    || '';
-  document.getElementById('ep-photo').value   = ST.photoUrl || '';
   document.getElementById('ep-tenth').value   = ST.tenth>0 ? ST.tenth    : '';
   document.getElementById('ep-twelfth').value = ST.twelfth>0 ? ST.twelfth : '';
   document.getElementById('ep-modal').classList.add('show');
@@ -1550,7 +1558,6 @@ document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeEditProfile()
 
 async function saveEditProfile(){
   const phone    = document.getElementById('ep-phone').value.trim();
-  const photoUrl = document.getElementById('ep-photo').value.trim();
   const tenth    = document.getElementById('ep-tenth').value.trim();
   const twelfth  = document.getElementById('ep-twelfth').value.trim();
 
@@ -1562,14 +1569,13 @@ async function saveEditProfile(){
   try{
     const res=await fetch(_WEBAPP,{
       method:'POST',
-      body:JSON.stringify({action:'updateProfile',email:ST.email,phone,photoUrl,tenth,twelfth})
+      body:JSON.stringify({action:'updateProfile',email:ST.email,phone,tenth,twelfth})
     });
     if(!res.ok)throw new Error('Server error '+res.status);
     const data=await res.json();
     if(!data.ok)throw new Error(data.error||'Could not save');
 
     if(phone)    ST.phone    = phone;
-    if(photoUrl) ST.photoUrl = drivePhoto(photoUrl);
     if(tenth)    ST.tenth    = parseFloat(tenth);
     if(twelfth)  ST.twelfth  = parseFloat(twelfth);
 
@@ -1596,11 +1602,6 @@ async function saveEditProfile(){
       <div class="ep-field">
         <label class="ep-label">&#128241; PHONE NUMBER</label>
         <input class="ep-input" id="ep-phone" type="tel" placeholder="e.g. 9876543210">
-      </div>
-      <div class="ep-field">
-        <label class="ep-label">&#128247; PHOTO (Google Drive link)</label>
-        <input class="ep-input" id="ep-photo" type="url" placeholder="https://drive.google.com/file/d/...">
-        <span class="ep-hint">Share your photo on Google Drive &rarr; Copy link &rarr; Paste here.<br>Make sure sharing is set to &ldquo;Anyone with the link&rdquo;.</span>
       </div>
       <div class="ep-field">
         <label class="ep-label">&#128202; 10th PERCENTAGE</label>
