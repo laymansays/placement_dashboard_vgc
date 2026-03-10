@@ -661,7 +661,9 @@ async function loadStatus(){
    ELIGIBILITY
 \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 */
 function isEligible(s){
-  return s.tenth>=60 && s.twelfth>=60 && (s.backlogs||'').toLowerCase()==='no';
+  const bl=(s.backlogs||'').toLowerCase().trim();
+  const noBacklogs=!bl||bl==='no'||bl==='nil'||bl==='none'||bl==='0'||bl==='na'||bl==='n/a';
+  return s.tenth>=60 && s.twelfth>=60 && noBacklogs;
 }
 
 /* \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
@@ -1462,8 +1464,7 @@ try{
   /* ── Immediately show formatted resume in sidebar via blob URL ── */
   const _tempUrl=URL.createObjectURL(pdfBlob);
   ST.formattedResume=_tempUrl;
-  const _isPlaced=Object.values(STATUS).some(s=>s&&s.sel);
-  renderProfile(!_isPlaced);
+  renderProfile(isEligible(ST));
   closeRwModal();
   /* ── Attempt permanent Drive upload + Sheets write in background ── */
   uploadFormattedResume(pdfBlob, fname+"_Resume_VGI'26.pdf").catch(uErr=>{
@@ -1500,8 +1501,8 @@ async function resetFormattedResume(){
     const data=await res.json();
     if(!data.ok)throw new Error(data.error||'Apps Script error');
     ST.formattedResume='';
-    const isPlaced=Object.values(STATUS).some(s=>s&&s.sel);
-    renderProfile(!isPlaced);
+    ST.resume='';
+    renderProfile(isEligible(ST));
     console.log('[Portal] Formatted resume cleared.');
   }catch(e){alert('Could not reset: '+e.message);}
 }
@@ -1521,9 +1522,57 @@ async function uploadFormattedResume(pdfBlob, filename){
 
   /* 3. Update in-memory ST with permanent Drive URL and re-render */
   ST.formattedResume=data.url;
-  const isPlaced=Object.values(STATUS).some(s=>s&&s.sel);
-  renderProfile(!isPlaced);
+  renderProfile(isEligible(ST));
   console.log('[Portal] Formatted resume saved:',data.url);
+}
+
+
+/* ── Edit Profile ── */
+function openEditProfile(){
+  document.getElementById('ep-phone').value   = ST.phone    || '';
+  document.getElementById('ep-photo').value   = ST.photoUrl || '';
+  document.getElementById('ep-tenth').value   = ST.tenth>0 ? ST.tenth    : '';
+  document.getElementById('ep-twelfth').value = ST.twelfth>0 ? ST.twelfth : '';
+  document.getElementById('ep-modal').classList.add('show');
+}
+function closeEditProfile(){
+  document.getElementById('ep-modal').classList.remove('show');
+}
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeEditProfile(); });
+
+async function saveEditProfile(){
+  const phone    = document.getElementById('ep-phone').value.trim();
+  const photoUrl = document.getElementById('ep-photo').value.trim();
+  const tenth    = document.getElementById('ep-tenth').value.trim();
+  const twelfth  = document.getElementById('ep-twelfth').value.trim();
+
+  if(tenth   && (isNaN(tenth)   || +tenth   < 0 || +tenth   > 100)){ alert('Please enter a valid 10th percentage (0–100).'); return; }
+  if(twelfth && (isNaN(twelfth) || +twelfth < 0 || +twelfth > 100)){ alert('Please enter a valid 12th percentage (0–100).'); return; }
+
+  const btn=document.getElementById('ep-save-btn');
+  btn.disabled=true; btn.textContent='Saving…';
+  try{
+    const res=await fetch(_WEBAPP,{
+      method:'POST',
+      body:JSON.stringify({action:'updateProfile',email:ST.email,phone,photoUrl,tenth,twelfth})
+    });
+    if(!res.ok)throw new Error('Server error '+res.status);
+    const data=await res.json();
+    if(!data.ok)throw new Error(data.error||'Could not save');
+
+    if(phone)    ST.phone    = phone;
+    if(photoUrl) ST.photoUrl = drivePhoto(photoUrl);
+    if(tenth)    ST.tenth    = parseFloat(tenth);
+    if(twelfth)  ST.twelfth  = parseFloat(twelfth);
+
+    closeEditProfile();
+    const elig=isEligible(ST);
+    renderProfile(elig);
+    renderInelig(elig);
+    if(elig) renderAvailable();
+
+  }catch(e){ alert('Could not save: '+e.message);
+  }finally{ btn.disabled=false; btn.textContent='Save Changes'; }
 }
 
 </script>
@@ -1561,63 +1610,5 @@ async function uploadFormattedResume(pdfBlob, filename){
   </div>
 </div>
 
-<script>
-function openEditProfile(){
-  document.getElementById('ep-phone').value   = ST.phone    || '';
-  document.getElementById('ep-photo').value   = ST.photoUrl || '';
-  document.getElementById('ep-tenth').value   = ST.tenth    || '';
-  document.getElementById('ep-twelfth').value = ST.twelfth  || '';
-  document.getElementById('ep-modal').classList.add('show');
-}
-function closeEditProfile(){
-  document.getElementById('ep-modal').classList.remove('show');
-}
-document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeEditProfile(); });
-
-async function saveEditProfile(){
-  const phone    = document.getElementById('ep-phone').value.trim();
-  const photoUrl = document.getElementById('ep-photo').value.trim();
-  const tenth    = document.getElementById('ep-tenth').value.trim();
-  const twelfth  = document.getElementById('ep-twelfth').value.trim();
-
-  // Basic validation
-  if(tenth  && (isNaN(tenth)   || tenth   < 0 || tenth   > 100)){ alert('Please enter a valid 10th percentage (0–100).'); return; }
-  if(twelfth&& (isNaN(twelfth) || twelfth < 0 || twelfth > 100)){ alert('Please enter a valid 12th percentage (0–100).'); return; }
-
-  const btn = document.getElementById('ep-save-btn');
-  btn.disabled = true; btn.textContent = 'Saving…';
-
-  try{
-    const res = await fetch(_WEBAPP, {
-      method: 'POST',
-      body: JSON.stringify({
-        action:  'updateProfile',
-        email:   ST.email,
-        phone, photoUrl, tenth, twelfth
-      })
-    });
-    if(!res.ok) throw new Error('Server error '+res.status);
-    const data = await res.json();
-    if(!data.ok) throw new Error(data.error || 'Could not save');
-
-    // Update in-memory ST immediately
-    if(phone)    ST.phone    = phone;
-    if(photoUrl) ST.photoUrl = drivePhoto(photoUrl);
-    if(tenth)    ST.tenth    = parseFloat(tenth);
-    if(twelfth)  ST.twelfth  = parseFloat(twelfth);
-
-    closeEditProfile();
-    const isPlaced = Object.values(STATUS).some(s=>s&&s.sel);
-    const elig = ST.tenth>=60 && ST.twelfth>=60 && (ST.backlogs||'').toLowerCase()==='no';
-    renderProfile(elig);
-    renderInelig(elig);
-
-  }catch(e){
-    alert('Could not save: '+e.message);
-  }finally{
-    btn.disabled = false; btn.textContent = 'Save Changes';
-  }
-}
-</script>
 </body>
 </html>>
