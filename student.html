@@ -506,8 +506,8 @@ async function doLogin(email){
       backlogs:  row[8]||'',
       tenth:     parseFloat((row[9]||'').replace('%',''))||0,
       twelfth:   parseFloat((row[10]||'').replace('%',''))||0,
-      resume:        row[11]||'',
-      formattedResume: row[12]||'',
+      resume:        (row[11]||'').trim(),
+      formattedResume: (row[12]||'').trim(),
     };
 
     showLoad('Loading company data\u2026','Fetching placement configuration');
@@ -730,6 +730,7 @@ function renderProfile(elig){
   if(s.formattedResume){
     // Formatted resume exists — show it, offer re-format and reset
     return `<div class="resume-btn-group">
+      <button class="btn-edit-profile" onclick="openEditProfile()">&#9998; Edit Profile</button>
       <a href="${xe(s.formattedResume)}"
          onclick="if(this.getAttribute('href').startsWith('blob:')){event.preventDefault();window.open(this.href,'_blank');}"
          target="_blank" rel="noopener"
@@ -741,13 +742,13 @@ function renderProfile(elig){
   } else {
     // No formatted resume — show original link (if exists) + always show Format button
     return `<div class="resume-btn-group">
+      <button class="btn-edit-profile" onclick="openEditProfile()">&#9998; Edit Profile</button>
       ${s.resume ? `<a href="${xe(s.resume)}" target="_blank" rel="noopener"
          class="btn-resume">&#128196; View Resume &#x2197;</a>` : ''}
       <button class="btn-rewrite" onclick="openRewriteModal()">&#128203; Format for Placement</button>
     </div>`;
   }
 })() }
-      <button class="btn-edit-profile" onclick="openEditProfile()">&#9998; Edit Profile</button>
     </div>`;
 }
 
