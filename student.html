@@ -1438,8 +1438,23 @@ const fname=(ST&&ST.name?ST.name.trim().replace(/\s+/g,'_'):'Resume');
 doc.save(fname+"_Resume_VGI'26.pdf");
 try{
   const pdfBlob=doc.output('blob');
-  await uploadFormattedResume(pdfBlob, fname+"_Resume_VGI'26.pdf");
-}catch(uErr){console.warn('[Portal] Auto-upload skipped:',uErr.message);}
+  /* ── Immediately show formatted resume in sidebar via blob URL ── */
+  const _tempUrl=URL.createObjectURL(pdfBlob);
+  ST.formattedResume=_tempUrl;
+  const _isPlaced=Object.values(STATUS).some(s=>s&&s.sel);
+  renderProfile(!_isPlaced);
+  closeRwModal();
+  /* ── Attempt permanent Drive upload + Sheets write in background ── */
+  uploadFormattedResume(pdfBlob, fname+"_Resume_VGI'26.pdf").catch(uErr=>{
+    console.warn('[Portal] Drive upload skipped:',uErr.message);
+    /* Non-blocking toast — sidebar already shows formatted resume */
+    const _toast=document.createElement('div');
+    _toast.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#FEF3C7;border:1.5px solid #FDE68A;color:#92400E;padding:12px 20px;border-radius:10px;font-size:13.5px;font-weight:600;z-index:10000;max-width:420px;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,.14);line-height:1.5';
+    _toast.innerHTML='&#9888;&#xFE0F; Resume formatted successfully. <br>Could not save to your profile permanently &mdash; please tap <b>Re-format</b> and try again once signed in.';
+    document.body.appendChild(_toast);
+    setTimeout(()=>_toast.remove(),7000);
+  });
+}catch(uErr){console.warn('[Portal] Blob creation failed:',uErr.message);}
 }catch(err){alert('PDF error: '+err.message);}}
 /* ═══════════════════════════════════════════════════════
    uploadFormattedResume — Drive upload + STUDENT_MASTER write
