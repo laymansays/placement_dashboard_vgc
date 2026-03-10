@@ -720,6 +720,7 @@ body.admin-mode .modal{border-top:3px solid var(--admin);}
 .join-btn.not-joined{background:#FEF2F2;border-color:#FCA5A5;color:#991B1B;}
 .join-btn.pending  {background:var(--bg2);border-color:var(--border);color:var(--text3);}
 .student-section-chevron{display:inline-block;font-size:10px;color:var(--text4);margin-right:7px;transition:transform .2s;width:10px;text-align:center;}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
 .student-section-head[style*="cursor:pointer"]:hover{background:var(--bg2);border-radius:10px;}
 .join-btn:hover    {opacity:.8;transform:scale(1.03);}
 .join-cycle-hint   {font-size:10px;color:var(--text3);margin-top:3px;text-align:right;}
@@ -2521,31 +2522,49 @@ async function showDiagnostics(){
    PLACEMENT CELL LOGIN GATE
 ════════════════════════════════════════════════════ */
 function openCellPrompt(){
-  // Show a simple overlay prompting for PIN 2007 to open placement-cell.html
-  // Use the existing modal system
-  openModal('Placement Cell Access',
-    '<p style="font-size:13px;color:var(--text3);margin-bottom:4px;text-align:center;">Enter the Placement Cell passkey</p>' +
-    '<p style="font-size:11px;color:var(--text4);margin-bottom:18px;text-align:center;">This opens the confidential analytics screen</p>' +
-    '<div style="display:flex;justify-content:center;"><input id="cell-pin-input" type="tel" maxlength="4" inputmode="numeric" placeholder="••••" autocomplete="off" style="width:120px;text-align:center;font-size:24px;letter-spacing:8px;border:2px solid var(--border2);border-radius:10px;padding:10px 14px;background:var(--bg);color:var(--text);font-family:monospace;" /></div>' +
-    '<p id="cell-pin-err" style="text-align:center;font-size:12px;color:var(--red);margin-top:10px;min-height:18px;"></p>',
-    '<button class="btn btn-outline btn-sm" onclick="closeModal()">Cancel</button>' +
-    '<button class="btn btn-primary btn-sm" onclick="checkCellPin()">Open Analytics →</button>'
+  openModal('🔐 Placement Cell Access',
+    '<p style="font-size:13px;color:var(--text3);margin-bottom:20px;text-align:center;">Enter the 4-digit passkey</p>' +
+    '<div style="display:flex;justify-content:center;gap:12px;margin-bottom:20px;" id="cell-dots">' +
+      [0,1,2,3].map(i=>'<div id="cdot'+i+'" style="width:16px;height:16px;border-radius:50%;background:var(--bg3);border:2px solid var(--border2);transition:all .15s;"></div>').join('') +
+    '</div>' +
+    '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:200px;margin:0 auto;">' +
+      [1,2,3,4,5,6,7,8,9,'',0,'⌫'].map(k=>`<button onclick="cellPadPress('${k}')" style="padding:14px 0;font-size:17px;font-weight:700;border-radius:10px;border:1.5px solid var(--border2);background:var(--bg2);color:var(--text1);cursor:pointer;font-family:inherit;transition:all .12s;" onmousedown="this.style.background='var(--bg3)'" onmouseup="this.style.background='var(--bg2)'">${k}</button>`).join('') +
+    '</div>' +
+    '<p id="cell-pin-err" style="text-align:center;font-size:12px;color:var(--red);margin-top:12px;min-height:18px;"></p>',
+    '<button class="btn btn-outline btn-sm" onclick="closeModal()">Cancel</button>'
   );
-  setTimeout(()=>{ const el=document.getElementById('cell-pin-input'); if(el){ el.focus(); el.onkeydown=e=>{ if(e.key==='Enter') checkCellPin(); }; } }, 100);
+  window._cellPin = '';
+}
+
+function cellPadPress(k){
+  if(k==='') return;
+  if(k==='⌫'){ window._cellPin=(window._cellPin||'').slice(0,-1); }
+  else if((window._cellPin||'').length<4){ window._cellPin=(window._cellPin||'')+k; }
+  // update dots
+  const pin=window._cellPin||'';
+  [0,1,2,3].forEach(i=>{
+    const d=document.getElementById('cdot'+i);
+    if(d) d.style.background = i<pin.length ? 'var(--text1)' : 'var(--bg3)';
+  });
+  if(pin.length===4) setTimeout(checkCellPin,120);
 }
 
 function checkCellPin(){
-  const val = (document.getElementById('cell-pin-input')?.value||'').trim();
+  const val = (window._cellPin||'').trim();
   const err = document.getElementById('cell-pin-err');
   if(val !== '2007'){
     if(err) err.textContent = 'Incorrect passkey. Please try again.';
-    document.getElementById('cell-pin-input').value='';
-    document.getElementById('cell-pin-input').focus();
+    window._cellPin='';
+    [0,1,2,3].forEach(i=>{ const d=document.getElementById('cdot'+i); if(d)d.style.background='var(--bg3)'; });
+    // shake dots
+    const dots=document.getElementById('cell-dots');
+    if(dots){ dots.style.animation='shake .3s'; setTimeout(()=>{ if(dots)dots.style.animation=''; },350); }
     return;
   }
+  window._cellPin='';
   closeModal();
   pcMode = true;
-  renderAdminBar(); // renders pc-bar too
+  renderAdminBar();
   go(view, cId);
   toast('Placement Cell Mode active — join status editing enabled','success','🔐');
 }
@@ -2867,9 +2886,8 @@ function openCompanyAnalytics(companyId){
 async function downloadAnalyticsPDF(companyId){
   const co = COMPANIES.find(x=>x.id===companyId);
   if(!co){ toast('Company not found','error'); return; }
-  if(!window.jspdf){ toast('PDF library not ready — try again in a moment','error'); return; }
-
-  toast('Generating PDF…','info','⏳');
+  if(!window.jspdf){ toast('PDF library not ready — try again shortly','error'); return; }
+  toast('Generating visual report…','info','⏳');
 
   const { jsPDF } = window.jspdf;
   const reg  = co.studentsRegistered.length;
@@ -2878,183 +2896,306 @@ async function downloadAnalyticsPDF(companyId){
   const jnd  = co.studentsSelected.filter(s=>s.joinStatus==='Joined').length;
   const njnd = co.studentsSelected.filter(s=>s.joinStatus==='Not Joined').length;
   const pend = sel - jnd - njnd;
-  const p    = (n,d) => d>0 ? Math.round(n/d*100) : 0;
-  const ps   = (n,d) => d>0 ? Math.round(n/d*100)+'%' : 'N/A';
+  const p  = (n,d) => d>0 ? Math.round(n/d*100) : 0;
+  const ps = (n,d) => d>0 ? Math.round(n/d*100)+'%' : 'N/A';
   const DATE = new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
-  const rCol = (pv) => pv>=70?[22,163,74]:pv>=40?[217,119,6]:[220,38,38];
+  const rateCol = (pv) => pv>=70?'#16A34A':pv>=40?'#D97706':'#DC2626';
 
   /* load logo */
-  let logo = null;
-  try {
-    const r = await fetch('logo.jpg');
-    if(r.ok){ const bl=await r.blob(); logo=await new Promise(res=>{ const fr=new FileReader(); fr.onload=()=>res(fr.result); fr.readAsDataURL(bl); }); }
-  } catch(e){}
+  let logo=null;
+  try{ const r=await fetch('logo.jpg'); if(r.ok){ const bl=await r.blob(); logo=await new Promise(res=>{ const fr=new FileReader(); fr.onload=()=>res(fr.result); fr.readAsDataURL(bl); }); } }catch(e){}
 
-  /* ── offscreen funnel canvas ── */
-  const CV = document.createElement('canvas');
-  CV.width=860; CV.height=420;
-  const CX=CV.getContext('2d');
-  CX.fillStyle='#ffffff'; CX.fillRect(0,0,CV.width,CV.height);
+  /* helper: load img from dataURL */
+  const loadImg = (src) => new Promise(res=>{ const i=new Image(); i.onload=()=>res(i); i.onerror=()=>res(null); i.src=src; });
+  const logoImg = logo ? await loadImg(logo) : null;
 
-  if(logo){
-    await new Promise(res=>{ const i=new Image(); i.onload=()=>{ CX.save(); CX.globalAlpha=.05; CX.drawImage(i,CV.width/2-90,CV.height/2-90,180,180); CX.restore(); res(); }; i.onerror=res; i.src=logo; });
+  /* ══════════════════════════════════════════════
+     BUILD ONE BIG CANVAS  (A4 landscape = 297×210mm @ 3.78px/mm ≈ 1123×794px)
+     We'll split into 2 pages of equal height.
+  ══════════════════════════════════════════════ */
+  const SC=3.2; // scale factor: mm→px
+  const PW=297*SC, PH=210*SC; // one page in px
+
+  const CV=document.createElement('canvas');
+  CV.width=PW; CV.height=PH*2; // two pages stacked
+  const X=CV.getContext('2d');
+
+  /* ── Fonts & helpers ── */
+  const F=(sz,wt='normal')=>{ X.font=`${wt} ${sz}px Inter,Helvetica,sans-serif`; };
+  const txt=(t,x,y,col='#0f172a',sz=13,wt='normal',align='left')=>{
+    F(sz,wt); X.fillStyle=col; X.textAlign=align; X.fillText(t,x,y);
+  };
+  const roundRect=(x,y,w,h,r,fill,stroke)=>{
+    X.beginPath(); X.roundRect(x,y,w,h,r);
+    if(fill){ X.fillStyle=fill; X.fill(); }
+    if(stroke){ X.strokeStyle=stroke; X.lineWidth=1.5; X.stroke(); }
+  };
+
+  /* ══════════════════════════════
+     PAGE 1
+  ══════════════════════════════ */
+
+  /* — Header bar — */
+  const grad0=X.createLinearGradient(0,0,PW,0);
+  grad0.addColorStop(0,'#3b0764'); grad0.addColorStop(1,'#6D0E6A');
+  X.fillStyle=grad0; X.fillRect(0,0,PW,80);
+  if(logoImg){ X.save(); X.beginPath(); X.roundRect(18,10,60,60,10); X.clip(); X.drawImage(logoImg,18,10,60,60); X.restore(); }
+  txt('Vidyavahini First Grade Degree College',92,34,'#fff',16,'700');
+  txt('Placement Analytics Report',92,58,'rgba(255,255,255,.7)',12);
+  txt(xe(co.name)+' · '+DATE, PW-20, 34, '#FCD34D', 13, '700', 'right');
+  if(co.driveDate||co.interviewMode){
+    const sub=[(co.driveDate?'📅 '+fmtDate(co.driveDate):''),(co.interviewMode?'🖥 '+xe(co.interviewMode):'')].filter(Boolean).join('   ');
+    txt(sub, PW-20, 58, 'rgba(255,255,255,.6)', 10, 'normal', 'right');
   }
 
-  const stages=[{n:reg,c:'#7C3AED',l:'Registered'},{n:att,c:'#2563EB',l:'Attended'},{n:sel,c:'#059669',l:'Selected'},{n:jnd,c:'#16A34A',l:'Joined'}];
-  const mxN=Math.max(...stages.map(s=>s.n),1);
-  const PL=50,PR=50,PT=50,PB=70,CW=CV.width-PL-PR,CH=CV.height-PT-PB;
-  const bw2=Math.floor(CW/stages.length), gap2=Math.floor(bw2*.28), bw=bw2-gap2;
+  /* watermark */
+  if(logoImg){ X.save(); X.globalAlpha=0.04; X.drawImage(logoImg,PW/2-120,PH/2-120,240,240); X.restore(); }
 
-  CX.fillStyle='#1e1b2e'; CX.font="bold 16px Helvetica,sans-serif"; CX.textAlign='left';
-  CX.fillText('Placement Funnel  —  '+co.name, PL, 30);
-
-  stages.forEach((s,i)=>{
-    const bh=Math.round(s.n/mxN*CH)||0;
-    const x=PL+i*bw2+gap2/2, y=PT+CH-bh;
-    const gr=CX.createLinearGradient(x,y,x,y+bh); gr.addColorStop(0,s.c); gr.addColorStop(1,s.c+'66');
-    CX.fillStyle=gr;
-    if(bh>0){ CX.beginPath(); CX.roundRect(x,y,bw,bh,6); CX.fill(); }
-    CX.fillStyle='#0f172a'; CX.font="bold 18px Helvetica,sans-serif"; CX.textAlign='center';
-    CX.fillText(s.n, x+bw/2, bh>0?y-10:PT+CH-10);
-    if(bh>28&&i>0&&stages[i-1].n>0){ CX.fillStyle='#fff'; CX.font="bold 13px Helvetica,sans-serif"; CX.fillText(p(s.n,stages[i-1].n)+'%',x+bw/2,y+20); }
-    CX.fillStyle='#475569'; CX.font="13px Helvetica,sans-serif"; CX.fillText(s.l,x+bw/2,PT+CH+22);
-    if(i<3){ CX.fillStyle='#94a3b8'; CX.font="20px sans-serif"; CX.fillText('›',x+bw+gap2/2-8,PT+CH/2+8); }
-  });
-  /* join stacked overlay on last bar */
-  if(sel>0){
-    const bh=Math.round(jnd/mxN*CH)||0, bh2=Math.round(njnd/mxN*CH)||0, bh3=Math.round(pend/mxN*CH)||0;
-    const bx=PL+3*bw2+gap2/2, base=PT+CH;
-    [[Math.round(jnd/sel*(Math.round(sel/mxN*CH))||0),'#22C55E'],[Math.round(njnd/sel*(Math.round(sel/mxN*CH))||0),'#EF4444'],[Math.round(pend/sel*(Math.round(sel/mxN*CH))||0),'#F59E0B']].reduce((acc,[h,col])=>{ if(h>0){ CX.fillStyle=col+'CC'; CX.fillRect(bx,base-acc-h,bw,h); } return acc+h; },0);
-  }
-  CX.strokeStyle='#e2e8f0'; CX.lineWidth=1.5; CX.beginPath(); CX.moveTo(PL,PT+CH); CX.lineTo(CV.width-PR,PT+CH); CX.stroke();
-  const chartImg=CV.toDataURL('image/png');
-
-  /* ── PAGE 1 ── */
-  const doc=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
-  const W=297,H=210;
-
-  /* header */
-  doc.setFillColor(87,11,84); doc.rect(0,0,W,32,'F');
-  if(logo) doc.addImage(logo,'JPEG',10,5,22,22);
-  doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(14);
-  doc.text('Vidyavahini First Grade Degree College',38,14);
-  doc.setFontSize(10); doc.setFont('helvetica','normal');
-  doc.text('Placement Analytics  ·  '+xe(co.name)+'  ·  '+DATE,38,24);
-
-  /* big overall number */
-  const ovPct=p(jnd,reg);
-  const [or,og,ob]=rCol(ovPct);
-  doc.setFillColor(or,og,ob); doc.roundedRect(W-52,35,44,28,4,4,'F');
-  doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(20);
-  doc.text(ps(jnd,reg), W-30, 51, {align:'center'});
-  doc.setFontSize(7); doc.setFont('helvetica','normal');
-  doc.text('REG → JOINED', W-30, 58, {align:'center'});
-
-  /* chart */
-  doc.addImage(chartImg,'PNG',10,36,170,90);
-
-  /* metrics table */
-  const metrics=[
-    ['Reg → Attended',   att, reg, p(att,reg)],
-    ['Attended → Selected', sel, att, p(sel,att)],
-    ['Selected → Joined', jnd, sel, p(jnd,sel)],
-    ['Attended → Joined', jnd, att, p(jnd,att)],
-    ['Overall Reg → Joined', jnd, reg, p(jnd,reg)],
+  /* — 4 KPI tiles row — */
+  const kpis=[
+    {n:reg, lbl:'Registered', col:'#7C3AED', icon:'📋'},
+    {n:att, lbl:'Attended',   col:'#2563EB', icon:'🎯'},
+    {n:sel, lbl:'Selected',   col:'#059669', icon:'✅'},
+    {n:jnd, lbl:'Joined',     col:'#16A34A', icon:'🎉'},
   ];
-  let ry=36;
-  doc.setFillColor(250,245,250); doc.roundedRect(184,34,W-186,100,4,4,'F');
-  doc.setTextColor(87,11,84); doc.setFont('helvetica','bold'); doc.setFontSize(8.5);
-  doc.text('CONVERSION METRICS', 187, 43);
-  ry=50;
-  metrics.forEach(([lbl,n,d,pv])=>{
-    const [cr,cg,cb]=rCol(pv);
-    doc.setFont('helvetica','normal'); doc.setTextColor(60,60,60); doc.setFontSize(8);
-    doc.text(lbl, 187, ry);
-    doc.text(n+' / '+d, 256, ry, {align:'right'});
-    doc.setFont('helvetica','bold'); doc.setTextColor(cr,cg,cb); doc.setFontSize(9);
-    doc.text(ps(n,d), W-12, ry, {align:'right'});
-    ry+=10;
-    if(ry<132){ doc.setDrawColor(230,215,230); doc.line(186,ry-5,W-12,ry-5); }
+  const tileW=(PW-40)/4-10, tileH=90, tileY=95;
+  kpis.forEach((k,i)=>{
+    const tx=20+i*(tileW+10);
+    roundRect(tx,tileY,tileW,tileH,10,k.col+'18','');
+    /* left accent */
+    roundRect(tx,tileY,5,tileH,3,k.col,'');
+    txt(k.icon,tx+18,tileY+30,'',18,'normal');
+    txt(String(k.n),tx+18,tileY+62,k.col,28,'900');
+    txt(k.lbl,tx+18,tileY+78,'#64748b',11,'600');
   });
 
-  /* joining status box */
-  doc.setFillColor(250,245,250); doc.roundedRect(184,138,W-186,46,4,4,'F');
-  doc.setTextColor(87,11,84); doc.setFont('helvetica','bold'); doc.setFontSize(8.5);
-  doc.text('JOINING STATUS  (of '+sel+' selected)', 187, 147);
-  [[`Joined (${ps(jnd,sel)})`,jnd,[22,163,74]],[`Not Joined (${ps(njnd,sel)})`,njnd,[220,38,38]],[`Pending (${ps(pend,sel)})`,pend,[217,119,6]]].forEach(([lbl,n,rgb],i)=>{
-    const iy=156+i*9;
-    doc.setFont('helvetica','normal'); doc.setTextColor(60,60,60); doc.text(lbl,187,iy);
-    doc.setFont('helvetica','bold'); doc.setTextColor(...rgb); doc.text(String(n),W-12,iy,{align:'right'});
+  /* — Funnel bar chart — */
+  const chartX=20, chartY=205, chartW=PW*0.55-30, chartH=200;
+  roundRect(chartX,chartY,chartW,chartH,12,'#f8fafc','#e2e8f0');
+  txt('Placement Funnel',chartX+16,chartY+26,'#1e1b2e',13,'700');
+
+  const fStages=[
+    {n:reg,c:'#7C3AED',l:'Registered'},
+    {n:att,c:'#2563EB',l:'Attended'},
+    {n:sel,c:'#059669',l:'Selected'},
+    {n:jnd,c:'#16A34A',l:'Joined'},
+  ];
+  const fMaxN=Math.max(...fStages.map(s=>s.n),1);
+  const fPL=chartX+16, fPR=chartX+chartW-16, fPT=chartY+40, fPB=chartY+chartH-28;
+  const fCW=fPR-fPL, fCH=fPB-fPT;
+  const fBW=Math.floor(fCW/fStages.length), fGap=Math.floor(fBW*.25), fbw=fBW-fGap;
+
+  fStages.forEach((s,i)=>{
+    const bh=Math.round(s.n/fMaxN*fCH)||0;
+    const fx=fPL+i*fBW+fGap/2, fy=fPT+fCH-bh;
+    if(bh>0){
+      const gr=X.createLinearGradient(fx,fy,fx,fy+bh);
+      gr.addColorStop(0,s.c); gr.addColorStop(1,s.c+'77');
+      X.fillStyle=gr; X.beginPath(); X.roundRect(fx,fy,fbw,bh,5); X.fill();
+    }
+    /* count above */
+    txt(String(s.n),fx+fbw/2,bh>0?fy-8:fPT+fCH-8,s.c,14,'800','center');
+    /* conv% inside */
+    if(bh>22&&i>0&&fStages[i-1].n>0){
+      txt(p(s.n,fStages[i-1].n)+'%',fx+fbw/2,fy+18,'#fff',10,'700','center');
+    }
+    /* label */
+    txt(s.l,fx+fbw/2,fPB+16,'#64748b',10,'600','center');
+    /* arrow */
+    if(i<3){ txt('›',fx+fbw+fGap/2-6,fPT+fCH/2+6,'#94a3b8',16,'400','center'); }
+  });
+  /* baseline */
+  X.strokeStyle='#e2e8f0'; X.lineWidth=1.5;
+  X.beginPath(); X.moveTo(fPL,fPB); X.lineTo(fPR,fPB); X.stroke();
+
+  /* — Conversion metrics panel — */
+  const mX=PW*0.55, mY=205, mW=PW-mX-20, mH=chartH;
+  roundRect(mX,mY,mW,mH,12,'#f8fafc','#e2e8f0');
+  txt('Conversion Metrics',mX+16,mY+26,'#1e1b2e',13,'700');
+
+  const metrics=[
+    {l:'Reg → Attended',    n:att, d:reg},
+    {l:'Att → Selected',    n:sel, d:att},
+    {l:'Sel → Joined',      n:jnd, d:sel},
+    {l:'Att → Joined',      n:jnd, d:att},
+    {l:'Reg → Joined',      n:jnd, d:reg},
+  ];
+  metrics.forEach((m,i)=>{
+    const my=mY+46+i*31;
+    const pv=p(m.n,m.d), col=rateCol(pv);
+    /* bar background */
+    roundRect(mX+16,my,mW-32,22,5,'#f1f5f9','');
+    /* filled bar */
+    const bw2=Math.round((mW-32)*pv/100);
+    if(bw2>0){ roundRect(mX+16,my,bw2,22,5,col+'33',''); }
+    /* left border accent */
+    roundRect(mX+16,my,4,22,2,col,'');
+    txt(m.l,mX+26,my+15,'#374151',10,'600');
+    txt(ps(m.n,m.d),mX+mW-20,my+15,col,13,'800','right');
+    txt(m.n+'/'+m.d,mX+mW-64,my+15,'#94a3b8',9,'normal','right');
   });
 
-  /* ── PAGE 2 — summary report ── */
-  doc.addPage();
-  doc.setFillColor(87,11,84); doc.rect(0,0,W,32,'F');
-  if(logo) doc.addImage(logo,'JPEG',10,5,22,22);
-  doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(14);
-  doc.text('Placement Summary Report  —  '+xe(co.name),38,14);
-  doc.setFontSize(10); doc.setFont('helvetica','normal');
-  doc.text('Vidyavahini First Grade Degree College  ·  '+DATE,38,24);
+  /* — Joining donut + breakdown — */
+  const dX=20, dY=chartY+chartH+16, dW=(PW-40)/2-8, dH=92;
+  roundRect(dX,dY,dW,dH,12,'#f8fafc','#e2e8f0');
+  txt('Joining Status',dX+16,dY+24,'#1e1b2e',13,'700');
 
-  /* 4 big stat tiles */
-  const tiles=[[reg,'#7C3AED','Registered'],[att,'#2563EB','Attended'],[sel,'#059669','Selected'],[jnd,'#16A34A','Joined']];
-  tiles.forEach(([n,col,lbl],i)=>{
-    const tx=12+i*70, ty=36;
-    const hc=parseInt(col.slice(1),16);
-    doc.setFillColor((hc>>16)&255,(hc>>8)&255,hc&255);
-    doc.roundedRect(tx,ty,66,26,4,4,'F');
-    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(18);
-    doc.text(String(n),tx+33,ty+14,{align:'center'});
-    doc.setFontSize(8); doc.setFont('helvetica','normal');
-    doc.text(lbl,tx+33,ty+22,{align:'center'});
+  /* donut */
+  const dcx=dX+60, dcy=dY+58, dr=26;
+  const parts2=[[jnd,'#16A34A'],[njnd,'#DC2626'],[pend,'#D97706']];
+  let startA=-Math.PI/2;
+  const total2=jnd+njnd+pend||1;
+  parts2.forEach(([n,col])=>{
+    const sweep=n/total2*Math.PI*2;
+    if(n>0){
+      X.beginPath(); X.moveTo(dcx,dcy); X.arc(dcx,dcy,dr,startA,startA+sweep); X.closePath();
+      X.fillStyle=col; X.fill();
+    }
+    startA+=sweep;
+  });
+  /* donut hole */
+  X.beginPath(); X.arc(dcx,dcy,dr*0.58,0,Math.PI*2); X.fillStyle='#f8fafc'; X.fill();
+  txt(ps(jnd,sel),dcx,dcy+5,'#1e1b2e',11,'800','center');
+
+  /* legend */
+  [['Joined',jnd,'#16A34A'],['Not Joined',njnd,'#DC2626'],['Pending',pend,'#D97706']].forEach(([lbl,n,col],i)=>{
+    const ly=dY+38+i*18;
+    roundRect(dX+98,ly-8,9,9,2,col,'');
+    txt(lbl,dX+114,ly,'#374151',10,'500');
+    txt(String(n),dX+dW-20,ly,col,12,'800','right');
   });
 
-  /* conversion pipeline row */
-  doc.setFontSize(9); doc.setTextColor(60,60,60);
-  const pipe2=[[att,reg,'Reg→Att'],[sel,att,'Att→Sel'],[jnd,sel,'Sel→Jnd'],[jnd,att,'Att→Jnd'],[jnd,reg,'Reg→Jnd']];
-  pipe2.forEach(([n,d,lbl],i)=>{
-    const pv=p(n,d); const [cr,cg,cb]=rCol(pv);
-    const px=12+i*57, py=70;
-    doc.setFillColor(248,242,248); doc.roundedRect(px,py,54,18,3,3,'F');
-    doc.setFont('helvetica','bold'); doc.setTextColor(cr,cg,cb); doc.setFontSize(11);
-    doc.text(ps(n,d),px+27,py+9,{align:'center'});
-    doc.setFont('helvetica','normal'); doc.setTextColor(100,100,100); doc.setFontSize(7.5);
-    doc.text(lbl,px+27,py+15,{align:'center'});
-  });
-
-  /* narrative bullets */
-  let py2=96;
-  const sec2=(t)=>{ doc.setFillColor(87,11,84); doc.roundedRect(10,py2-5,W-20,9,2,2,'F'); doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.text(t,13,py2+1); py2+=13; doc.setTextColor(50,50,50); };
-  const bul2=(t,rgb=[50,50,50],bold=false)=>{ doc.setFont('helvetica',bold?'bold':'normal'); doc.setTextColor(...rgb); doc.setFontSize(9); doc.text('▸  '+t,14,py2); py2+=8; };
-
-  sec2('Drive Summary');
-  bul2(xe(co.name)+' campus placement drive',[87,11,84],true);
-  if(co.driveDate) bul2('Drive Date: '+fmtDate(co.driveDate));
-  if(co.interviewMode) bul2('Mode: '+xe(co.interviewMode));
-  if(co.roles&&co.roles.length) bul2('Role(s): '+xe(co.roles.join(', ')));
-
-  sec2('Funnel Performance');
-  bul2(reg+' students registered  →  '+att+' attended ('+ps(att,reg)+' registration-to-interview conversion)');
-  bul2(att+' attended  →  '+sel+' selected ('+ps(sel,att)+' interview-to-selection rate)');
-  bul2(sel+' selected  →  '+jnd+' joined ('+ps(jnd,sel)+' offer acceptance rate)');
-  bul2('End-to-end: '+reg+' registered  →  '+jnd+' joined  ('+ps(jnd,reg)+' overall conversion)',[87,11,84],true);
-
-  sec2('Key Observations');
-  if(p(att,reg)<60&&reg>0) bul2((reg-att)+' registered students did not attend — consider pre-drive reminders',[180,90,0]);
-  if(p(sel,att)<50&&att>0) bul2('Selection rate below 50% — review shortlisting or eligibility criteria',[180,90,0]);
+  /* — Overall conversion hero tile — */
+  const hX=dX+dW+16, hY=dY, hW=(PW-40)/2-8, hH=dH;
   const ovP=p(jnd,reg);
-  if(ovP>=50) bul2('Strong overall pipeline — more than half of registrations converted to joinings',[22,163,74]);
-  else if(ovP>=25) bul2('Moderate pipeline — scope to improve conversion at each stage');
-  else if(reg>0) bul2('Low end-to-end conversion — targeted intervention recommended',[220,38,38]);
-  if(sel>0){
-    if(p(jnd,sel)>=80) bul2('Excellent offer acceptance — high student commitment',[22,163,74]);
-    else if(p(jnd,sel)>=50) bul2('Good acceptance rate — follow up with '+pend+' pending student'+(pend!==1?'s':''));
-    else bul2('Low acceptance rate — investigate reasons; '+njnd+' actively declined',[220,38,38]);
+  const ovCol=rateCol(ovP);
+  const hg=X.createLinearGradient(hX,hY,hX,hY+hH);
+  hg.addColorStop(0,ovCol+'22'); hg.addColorStop(1,ovCol+'08');
+  roundRect(hX,hY,hW,hH,12,'','#e2e8f0');
+  X.fillStyle=hg; X.beginPath(); X.roundRect(hX,hY,hW,hH,12); X.fill();
+  roundRect(hX,hY,hW,4,0,ovCol,'');
+  txt('Overall Conversion',hX+hW/2,hY+24,'#64748b',11,'600','center');
+  txt(ps(jnd,reg),hX+hW/2,hY+64,ovCol,42,'900','center');
+  txt('Registered → Joined',hX+hW/2,hY+80,'#94a3b8',9,'500','center');
+
+  /* ══════════════════════════════
+     PAGE 2  (y offset = PH)
+  ══════════════════════════════ */
+  const P2=PH; // y-offset for page 2
+
+  /* watermark p2 */
+  if(logoImg){ X.save(); X.globalAlpha=0.04; X.drawImage(logoImg,PW/2-120,P2+PH/2-120,240,240); X.restore(); }
+
+  /* — Page 2 header bar — */
+  const g2=X.createLinearGradient(0,P2,PW,P2);
+  g2.addColorStop(0,'#1e1b2e'); g2.addColorStop(1,'#3b0764');
+  X.fillStyle=g2; X.fillRect(0,P2,PW,64);
+  if(logoImg){ X.save(); X.beginPath(); X.roundRect(18,P2+8,48,48,8); X.clip(); X.drawImage(logoImg,18,P2+8,48,48); X.restore(); }
+  txt(xe(co.name),80,P2+28,'#fff',15,'800');
+  txt('Placement Summary  ·  '+DATE,80,P2+48,'rgba(255,255,255,.55)',10);
+  txt('VIDYAVAHINI FIRST GRADE DEGREE COLLEGE',PW-20,P2+28,'rgba(255,255,255,.35)',9,'600','right');
+
+  /* — 5 big pipeline conversion cards in a row — */
+  const cards=[
+    {l1:'Reg',l2:'Attended',n:att,d:reg},
+    {l1:'Att',l2:'Selected',n:sel,d:att},
+    {l1:'Sel',l2:'Joined',n:jnd,d:sel},
+    {l1:'Att',l2:'Joined',n:jnd,d:att},
+    {l1:'Reg',l2:'Joined',n:jnd,d:reg},
+  ];
+  const cPad=16, cW2=(PW-cPad*(cards.length+1))/cards.length, cH2=108, cY2=P2+76;
+  cards.forEach((cd,i)=>{
+    const cx2=cPad+i*(cW2+cPad), pv=p(cd.n,cd.d), col=rateCol(pv);
+    /* card bg */
+    roundRect(cx2,cY2,cW2,cH2,10,'#ffffff','#e2e8f0');
+    roundRect(cx2,cY2,cW2,4,0,col,'');
+    /* arc progress */
+    const arcR=28, acx2=cx2+cW2/2, acy2=cY2+52;
+    X.strokeStyle='#f1f5f9'; X.lineWidth=7;
+    X.beginPath(); X.arc(acx2,acy2,arcR,-Math.PI/2,Math.PI*1.5); X.stroke();
+    const sweep2=(pv/100)*Math.PI*2;
+    X.strokeStyle=col; X.lineWidth=7; X.lineCap='round';
+    X.beginPath(); X.arc(acx2,acy2,arcR,-Math.PI/2,-Math.PI/2+sweep2); X.stroke();
+    X.lineCap='butt';
+    /* percentage inside arc */
+    txt(ps(cd.n,cd.d),acx2,acy2+5,col,13,'900','center');
+    /* labels */
+    txt(cd.l1,cx2+12,cY2+92,'#94a3b8',9,'500');
+    txt('→ '+cd.l2,cx2+cW2-12,cY2+92,'#374151',9,'600','right');
+    txt(cd.n+' / '+cd.d,acx2,cY2+100,'#94a3b8',8,'400','center');
+  });
+
+  /* — Joining visual breakdown horizontal bar — */
+  const jbY=P2+200, jbH=56;
+  roundRect(cPad,jbY,PW-cPad*2,jbH,10,'#ffffff','#e2e8f0');
+  txt('Joining Breakdown',cPad+16,jbY+20,'#1e1b2e',12,'700');
+  /* stacked horizontal bar */
+  const barX2=cPad+16, barW2=PW-cPad*2-32, barH2=14, barY2=jbY+28;
+  roundRect(barX2,barY2,barW2,barH2,7,'#f1f5f9','');
+  const total3=jnd+njnd+pend||1;
+  let bx=barX2;
+  [[jnd,'#16A34A'],[njnd,'#DC2626'],[pend,'#D97706']].forEach(([n,col],i)=>{
+    const w2=Math.round(n/total3*barW2);
+    if(w2>4){
+      if(i===0) X.beginPath(),X.roundRect(bx,barY2,w2,barH2,[7,0,0,7]),X.fillStyle=col,X.fill();
+      else if(i===2) X.beginPath(),X.roundRect(bx,barY2,w2,barH2,[0,7,7,0]),X.fillStyle=col,X.fill();
+      else { X.fillStyle=col; X.fillRect(bx,barY2,w2,barH2); }
+    }
+    bx+=w2;
+  });
+  /* legend inline */
+  const jLbls=[['Joined',jnd,'#16A34A'],['Not Joined',njnd,'#DC2626'],['Pending',pend,'#D97706']];
+  jLbls.forEach(([lbl,n,col],i)=>{
+    const lx=barX2+i*(barW2/3);
+    roundRect(lx,jbY+46,8,8,2,col,'');
+    txt(lbl+': '+n+' ('+ps(n,sel)+')',lx+12,jbY+54,'#374151',9,'600');
+  });
+
+  /* — Mini table: selected students with status — */
+  const stY=P2+268, stMaxH=PH*2-stY-20;
+  const shown=co.studentsSelected.slice(0,Math.floor((stMaxH-36)/26));
+  if(shown.length>0){
+    roundRect(cPad,stY,PW-cPad*2,36+shown.length*26,10,'#ffffff','#e2e8f0');
+    txt('Selected Students',cPad+16,stY+22,'#1e1b2e',12,'700');
+    /* header */
+    X.fillStyle='#f8fafc'; X.fillRect(cPad,stY+30,PW-cPad*2,20);
+    const cols2=[['#',30],['Name',(PW-cPad*2)*0.35],['Email',(PW-cPad*2)*0.38],['Status',(PW-cPad*2)*0.15]];
+    let hx2=cPad+12;
+    cols2.forEach(([lbl,w])=>{ txt(lbl,hx2,stY+43,'#94a3b8',9,'700'); hx2+=w; });
+    shown.forEach((s,i)=>{
+      const ry=stY+56+i*26;
+      if(i%2===0){ X.fillStyle='#f8fafc'; X.fillRect(cPad+1,ry-14,PW-cPad*2-2,24); }
+      const st=s.joinStatus||'Pending';
+      const sc=st==='Joined'?'#16A34A':st==='Not Joined'?'#DC2626':'#D97706';
+      let rx2=cPad+12;
+      txt(String(i+1)+'.',rx2,ry,'#94a3b8',9); rx2+=cols2[0][1];
+      txt((s.name||'—').slice(0,34),rx2,ry,'#1e1b2e',9,'500'); rx2+=cols2[1][1];
+      txt((s.email||'—').slice(0,38),rx2,ry,'#64748b',8); rx2+=cols2[2][1];
+      /* status pill */
+      roundRect(rx2-2,ry-10,52,13,3,sc+'22','');
+      txt(st,rx2+2,ry,sc,8,'700');
+    });
+    if(co.studentsSelected.length>shown.length){
+      txt('+ '+(co.studentsSelected.length-shown.length)+' more students…',cPad+16,stY+56+shown.length*26,'#94a3b8',9,'400');
+    }
   }
-  if(pend>0) bul2(pend+' student'+(pend!==1?'s':'')+' yet to confirm joining — follow up recommended',[217,119,6]);
+
+  /* ── Render to PDF ── */
+  const doc=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
+
+  /* Page 1: top half of canvas */
+  const p1=document.createElement('canvas'); p1.width=PW; p1.height=PH;
+  p1.getContext('2d').drawImage(CV,0,0,PW,PH,0,0,PW,PH);
+  doc.addImage(p1.toDataURL('image/png'),'PNG',0,0,297,210);
+
+  /* Page 2: bottom half */
+  doc.addPage();
+  const p2=document.createElement('canvas'); p2.width=PW; p2.height=PH;
+  p2.getContext('2d').drawImage(CV,0,PH,PW,PH,0,0,PW,PH);
+  doc.addImage(p2.toDataURL('image/png'),'PNG',0,0,297,210);
 
   doc.save('VVFGC_'+xe(co.name).replace(/[^a-zA-Z0-9]/g,'_')+'_Analytics_'+DATE.replace(/ /g,'-')+'.pdf');
-  toast('Analytics report downloaded','success','⬇');
+  toast('Visual analytics report downloaded','success','⬇');
 }
 
 </script>
