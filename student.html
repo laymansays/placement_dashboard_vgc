@@ -16,7 +16,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-:root{--c1:#6D0E6A;--c2:#570B54;--c3:#41083F;--pale:#D3B6D2;--bg:#F7F0F7;--sidebar-w:300px;}
+:root{--c1:#6D0E6A;--c2:#570B54;--c3:#41083F;--pale:#D3B6D2;--bg:#F7F0F7;--sidebar-w:360px;}
 body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;}
 
 /* ── LOADING ── */
@@ -75,29 +75,36 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;}
 .profile-fields{width:100%;display:flex;flex-direction:column;margin-bottom:16px;}
 .pf-row{
   display:grid;
-  grid-template-columns:120px 1fr;
+  grid-template-columns:150px 1fr;
   align-items:center;
-  padding:10px 0;
+  padding:12px 0;
   border-bottom:1px solid #EEF2F6;
+  gap:12px;
+}
+.pf-k{
+  text-align:left;
 }
 
+.pf-row:hover{
+  background:#F9FAFB;
+}
+  
+.pf-v{
+  text-align:left;
+}
 .pf-row:last-child{
   border-bottom:none;
 }
 .pf-k{
-  font-size:12px;
+  font-size:13px;
   font-weight:600;
-  color:#64748B;
-  letter-spacing:.01em;
+  color:#6B7280;
 }  
 .pf-v{
-  font-size:13px;
-  color:#0F172A;
+  font-size:14px;
   font-weight:500;
-  text-align:right;
-  overflow:hidden;
-  white-space:nowrap;
-  text-overflow:ellipsis;
+  color:#111827;
+  word-break:break-word;
 }
 @keyframes marquee-scroll{0%,15%{transform:translateX(0);}85%,100%{transform:translateX(var(--md,0px));}}
 .resume-btn-group{display:flex;flex-direction:column;gap:10px;width:100%;margin-top:4px;}
@@ -1049,7 +1056,7 @@ function launchConfetti(canvas){
   const resizer=document.getElementById('sp-resizer');
   const sidebar=document.getElementById('sp-sidebar');
   if(!resizer||!sidebar)return;
-  const MIN=200,MAX=540;let dragging=false,startX=0,startW=0;
+  const MIN=240,MAX=620;let dragging=false,startX=0,startW=0;
   resizer.addEventListener('mousedown',e=>{dragging=true;startX=e.clientX;startW=sidebar.getBoundingClientRect().width;resizer.classList.add('dragging');document.body.style.cursor='col-resize';document.body.style.userSelect='none';e.preventDefault();});
   document.addEventListener('mousemove',e=>{if(!dragging)return;const w=Math.min(MAX,Math.max(MIN,startW+(e.clientX-startX)));document.documentElement.style.setProperty('--sidebar-w',w+'px');});
   document.addEventListener('mouseup',()=>{if(!dragging)return;dragging=false;resizer.classList.remove('dragging');document.body.style.cursor='';document.body.style.userSelect='';});
