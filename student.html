@@ -63,7 +63,9 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;}
 
 /* ── PROFILE CARD ── */
 .profile-card{display:flex;flex-direction:column;align-items:center;text-align:center;}
-.profile-photo-wrap{width:100px;height:100px;border-radius:50%;overflow:hidden;border:3px solid var(--pale);margin-bottom:14px;flex-shrink:0;}
+.profile-photo-wrap{width:100px;height:100px;border-radius:50%;overflow:hidden;border:3px solid var(--pale);margin-bottom:14px;flex-shrink:0;position:relative;cursor:pointer;}
+.profile-photo-wrap:hover .photo-edit-overlay{opacity:1;}
+.photo-edit-overlay{position:absolute;inset:0;background:rgba(87,11,84,.55);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s;font-size:22px;}
 .profile-photo{width:100%;height:100%;object-fit:cover;}
 .profile-ini{width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#6D0E6A,#41083F);color:#fff;font-size:38px;font-weight:800;}
 .profile-name{font-size:18px;font-weight:800;color:#0F172A;margin-bottom:3px;}
@@ -74,37 +76,35 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;}
 .elig-no{background:#FEF2F2;color:#DC2626;}
 .profile-fields{width:100%;display:flex;flex-direction:column;margin-bottom:16px;}
 .pf-row{
-  display:grid;
-  grid-template-columns:150px 1fr;
-  align-items:center;
-  padding:12px 0;
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  padding:11px 0;
   border-bottom:1px solid #EEF2F6;
-  gap:12px;
+  gap:8px;
 }
-.pf-k{
-  text-align:left;
-}
-
 .pf-row:hover{
   background:#F9FAFB;
-}
-  
-.pf-v{
-  text-align:left;
 }
 .pf-row:last-child{
   border-bottom:none;
 }
 .pf-k{
-  font-size:13px;
+  font-size:12.5px;
   font-weight:600;
   color:#6B7280;
-}  
+  text-align:left;
+  flex-shrink:0;
+  white-space:nowrap;
+}
 .pf-v{
-  font-size:14px;
+  font-size:13.5px;
   font-weight:500;
   color:#111827;
-  word-break:break-word;
+  text-align:right;
+  word-break:break-all;
+  min-width:0;
+  flex:1;
 }
 @keyframes marquee-scroll{0%,15%{transform:translateX(0);}85%,100%{transform:translateX(var(--md,0px));}}
 .resume-btn-group{display:flex;flex-direction:column;gap:10px;width:100%;margin-top:4px;}
@@ -222,7 +222,7 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;}
 /* ── COMPANY MODAL ── */
 .co-modal{position:fixed;inset:0;background:rgba(15,15,30,.55);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;pointer-events:none;transition:opacity .22s;overflow:hidden;}
 .co-modal.show{opacity:1;pointer-events:all;}
-.co-modal-box{background:#fff;border-radius:20px;width:92%;max-width:560px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 64px rgba(15,15,30,.25);transform:translateY(16px);transition:transform .22s;}
+.co-modal-box{background:#fff;border-radius:20px;width:95%;max-width:780px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 64px rgba(15,15,30,.25);transform:translateY(16px);transition:transform .22s;}
 .co-modal.show .co-modal-box{transform:translateY(0);}
 .co-modal-head{display:flex;align-items:flex-start;gap:16px;padding:22px 22px 16px;border-bottom:1px solid #F1E8F1;flex-shrink:0;}
 .co-modal-name{font-size:20px;font-weight:800;color:#0F172A;letter-spacing:-.02em;}
@@ -243,6 +243,14 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;}
 .jd-box{background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:14px;}
 .jd-box-title{font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;}
 .jd-box-text{font-size:13px;color:#334155;line-height:1.6;}
+/* JD Preview */
+.jd-preview-wrap{margin-top:14px;border:1px solid #E2E8F0;border-radius:12px;overflow:hidden;background:#F8FAFC;}
+.jd-preview-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#F1E8F1;border-bottom:1px solid #D3B6D2;gap:10px;}
+.jd-preview-label{font-size:11.5px;font-weight:700;color:#570B54;letter-spacing:.04em;}
+.jd-preview-dl{padding:6px 14px;border:1.5px solid #6D0E6A;border-radius:8px;background:#fff;color:#6D0E6A;font-size:12px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;text-decoration:none;white-space:nowrap;display:inline-flex;align-items:center;gap:5px;}
+.jd-preview-dl:hover{background:#F7F0F7;}
+.jd-preview-iframe{width:100%;height:480px;border:none;display:block;}
+.jd-preview-fallback{padding:24px;text-align:center;}
 .co-modal-footer{display:flex;align-items:center;gap:10px;padding:14px 20px;border-top:1px solid #F1E8F1;flex-shrink:0;}
 .btn-modal-close{padding:10px 20px;border:1.5px solid #E2E8F0;border-radius:10px;background:none;font-size:14px;font-weight:600;color:#64748B;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;}
 .btn-modal-close:hover{border-color:#CBD5E1;color:#0F172A;}
@@ -711,6 +719,7 @@ function renderPortal(){
   if(elig)renderAvailable();
   else document.getElementById('avail-wrap').innerHTML='';
   setTimeout(autoSizeForEmail,350);
+  window.addEventListener('resize',autoSizeForEmail);
 }
 
 /* Profile */
@@ -718,8 +727,8 @@ function renderProfile(elig){
   const s=ST;
   const driveImg=url=>{if(!url)return'';const m=url.match(/\/d\/([a-zA-Z0-9_-]{20,})/);return m?`https://drive.google.com/uc?export=view&id=${m[1]}`:url;};
   const photoHtml=s.photoUrl
-    ?`<img class="profile-photo" src="${xe(driveImg(s.photoUrl))}" alt="${xe(s.name)}" onerror="this.style.display='none';document.getElementById('ph-ini').style.display='flex';"/><div id="ph-ini" class="profile-ini" style="display:none">${ini(s.name)}</div>`
-    :`<div id="ph-ini" class="profile-ini">${ini(s.name)}</div>`;
+    ?`<img class="profile-photo" src="${xe(driveImg(s.photoUrl))}" alt="${xe(s.name)}" onerror="this.style.display='none';document.getElementById('ph-ini').style.display='flex';"/><div id="ph-ini" class="profile-ini" style="display:none">${ini(s.name)}</div><div class="photo-edit-overlay" onclick="openEditProfile()">&#128247;</div>`
+    :`<div id="ph-ini" class="profile-ini">${ini(s.name)}</div><div class="photo-edit-overlay" onclick="openEditProfile()">&#128247;</div>`;
 
   const pfRow=(k,v,isEmail)=>{
   if(isEmail)return`<div class="pf-row"><span class="pf-k">${k}</span><span class="pf-v pf-email" id="email-pf-v"><span class="pf-scroll" id="email-pf-scroll">${xe(v||'\u2014')}</span></span></div>`;
@@ -733,7 +742,7 @@ function renderProfile(elig){
 
   document.getElementById('profile-wrap').innerHTML=`
     <div class="profile-card">
-      <div class="profile-photo-wrap">${photoHtml}</div>
+      <div class="profile-photo-wrap" onclick="openEditProfile()" title="Click to update photo">${photoHtml}</div>
       <div class="profile-name">${xe(s.name)}</div>
       <div class="profile-sub">${xe(s.course)}</div>
       <div class="profile-sub2">Sem ${xe(s.semester)} \u00b7 Sec ${xe(s.section)}</div>
@@ -953,6 +962,34 @@ function openCoModal(id){
     mfRow('Eligibility', c.eligSummary||'10th \u2265 60%, 12th \u2265 60%, No Active Backlogs'),
   ].filter(Boolean).join('');
 
+  /* Convert any Drive/Docs share URL to an embeddable preview URL */
+  function toEmbedUrl(url){
+    if(!url)return null;
+    // Google Drive file: /file/d/ID/view → /file/d/ID/preview
+    let m=url.match(/drive\.google\.com\/file\/d\/([\w-]+)/);
+    if(m)return`https://drive.google.com/file/d/${m[1]}/preview`;
+    // Google Docs: /document/d/ID → /document/d/ID/preview
+    m=url.match(/docs\.google\.com\/document\/d\/([\w-]+)/);
+    if(m)return`https://docs.google.com/document/d/${m[1]}/preview`;
+    // Google Slides
+    m=url.match(/docs\.google\.com\/presentation\/d\/([\w-]+)/);
+    if(m)return`https://docs.google.com/presentation/d/${m[1]}/preview`;
+    // Already a preview or other URL — try embedding directly
+    return url;
+  }
+
+  const embedUrl=c.jdUrl?toEmbedUrl(c.jdUrl):null;
+  const jdSection=embedUrl?`
+    <div class="jd-preview-wrap">
+      <div class="jd-preview-bar">
+        <span class="jd-preview-label">&#128196; Job Description Preview</span>
+        <a href="${xe(c.jdUrl)}" target="_blank" rel="noopener" class="jd-preview-dl">&#11015; Download JD</a>
+      </div>
+      <iframe class="jd-preview-iframe" src="${embedUrl}" allow="autoplay" loading="lazy"
+        onerror="this.parentElement.innerHTML='<div class=jd-preview-fallback><p style=color:#64748B;font-size:13px>Preview not available. <a href=${xe(c.jdUrl)} target=_blank rel=noopener style=color:#6D0E6A>Open JD &#8599;</a></p></div>'">
+      </iframe>
+    </div>`:'';
+
   document.getElementById('co-modal-inner').innerHTML=`
     <div class="co-modal-head">
       ${logoHtml(c.name,c.website,c.id-1,60)}
@@ -969,12 +1006,11 @@ function openCoModal(id){
     </div>
     <div class="co-modal-body">
       <div class="mf-grid">${rows}</div>
-      
+      ${jdSection}
     </div>`;
 
   const applySlot=document.getElementById('modal-apply-slot');
   const parts=[];
-  if(c.jdUrl)parts.push(`<a href="${xe(c.jdUrl)}" target="_blank" rel="noopener" style="padding:10px 18px;border:1.5px solid #6D0E6A;border-radius:10px;background:#fff;color:#6D0E6A;font-size:13.5px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;flex-shrink:0;">\u2b07 Download JD</a>`);
   if(c.regFormUrl)parts.push(`<button class="btn-modal-apply" style="flex:1;" onclick="applyNow('${xe(c.regFormUrl)}')">Apply Now \u2192</button>`);
   else parts.push(`<span class="no-form-txt">Registration form not yet available</span>`);
   applySlot.innerHTML=parts.join('');
@@ -1553,6 +1589,7 @@ async function uploadFormattedResume(pdfBlob, filename){
 
 /* ── Edit Profile ── */
 function openEditProfile(){
+  document.getElementById('ep-photo').value   = ST.photoUrl || '';
   document.getElementById('ep-phone').value   = ST.phone    || '';
   document.getElementById('ep-tenth').value   = ST.tenth>0 ? ST.tenth    : '';
   document.getElementById('ep-twelfth').value = ST.twelfth>0 ? ST.twelfth : '';
@@ -1564,6 +1601,7 @@ function closeEditProfile(){
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeEditProfile(); });
 
 async function saveEditProfile(){
+  const photoUrl = document.getElementById('ep-photo').value.trim();
   const phone    = document.getElementById('ep-phone').value.trim();
   const tenth    = document.getElementById('ep-tenth').value.trim();
   const twelfth  = document.getElementById('ep-twelfth').value.trim();
@@ -1576,12 +1614,13 @@ async function saveEditProfile(){
   try{
     const res=await fetch(_WEBAPP,{
       method:'POST',
-      body:JSON.stringify({action:'updateProfile',email:ST.email,phone,tenth,twelfth})
+      body:JSON.stringify({action:'updateProfile',email:ST.email,phone,photoUrl,tenth,twelfth})
     });
     if(!res.ok)throw new Error('Server error '+res.status);
     const data=await res.json();
     if(!data.ok)throw new Error(data.error||'Could not save');
 
+    if(photoUrl) ST.photoUrl = drivePhoto(photoUrl);
     if(phone)    ST.phone    = phone;
     if(tenth)    ST.tenth    = parseFloat(tenth);
     if(twelfth)  ST.twelfth  = parseFloat(twelfth);
@@ -1606,6 +1645,11 @@ async function saveEditProfile(){
       <button class="ep-close" onclick="closeEditProfile()">&times;</button>
     </div>
     <div class="ep-body">
+      <div class="ep-field">
+        <label class="ep-label">&#128247; PHOTO (Google Drive link)</label>
+        <input class="ep-input" id="ep-photo" type="url" placeholder="https://drive.google.com/file/d/...">
+        <span class="ep-hint">Share your photo on Google Drive &rarr; set sharing to &ldquo;Anyone with the link&rdquo; &rarr; paste here.</span>
+      </div>
       <div class="ep-field">
         <label class="ep-label">&#128241; PHONE NUMBER</label>
         <input class="ep-input" id="ep-phone" type="tel" placeholder="e.g. 9876543210">
