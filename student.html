@@ -728,22 +728,24 @@ function renderProfile(elig){
       </div>
       ${ (()=>{
   if(s.formattedResume){
-    // Formatted resume exists — show it, hide original, offer reset
+    // Formatted resume exists — show it, offer re-format and reset
     return `<div class="resume-btn-group">
-      <a href="${xe(s.formattedResume)}" target="_blank" rel="noopener"
+      <a href="${xe(s.formattedResume)}"
+         onclick="if(this.getAttribute('href').startsWith('blob:')){event.preventDefault();window.open(this.href,'_blank');}"
+         target="_blank" rel="noopener"
          class="btn-resume btn-resume-formatted">&#10003; Formatted Resume &#x2197;</a>
       <button class="btn-rewrite" onclick="openRewriteModal()">&#128203; Re-format</button>
       <button class="btn-reset-resume" onclick="resetFormattedResume()"
          title="Remove formatted resume and restore original">&#8635; Reset to Original</button>
     </div>`;
-  } else if(s.resume){
-    // No formatted resume yet — show original + format button
+  } else {
+    // No formatted resume — show original link (if exists) + always show Format button
     return `<div class="resume-btn-group">
-      <a href="${xe(s.resume)}" target="_blank" rel="noopener"
-         class="btn-resume">&#128196; View Resume &#x2197;</a>
+      ${s.resume ? `<a href="${xe(s.resume)}" target="_blank" rel="noopener"
+         class="btn-resume">&#128196; View Resume &#x2197;</a>` : ''}
       <button class="btn-rewrite" onclick="openRewriteModal()">&#128203; Format for Placement</button>
     </div>`;
-  } return '';
+  }
 })() }
       <button class="btn-edit-profile" onclick="openEditProfile()">&#9998; Edit Profile</button>
     </div>`;
