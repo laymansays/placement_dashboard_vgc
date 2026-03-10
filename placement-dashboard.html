@@ -2700,9 +2700,17 @@ function saveJoinStatus(js){ sessionStorage.setItem('joinStatus',JSON.stringify(
 
 function exitPCMode(){
   pcMode=false;
-  renderAdminBar();
-  go(view, cId);
-  toast('Placement Cell Mode off','info','🔒');
+  adminMode=false;
+  // Clear session and lock back to the main login gate
+  try{ sessionStorage.clear(); }catch(e){}
+  const app=document.getElementById('app');
+  if(app) app.classList.remove('ready');
+  const login=document.getElementById('placement-login');
+  if(login) login.classList.remove('hidden');
+  const pin=document.getElementById('placement-pin');
+  if(pin){ pin.value=''; pin.focus(); }
+  const err=document.getElementById('pin-error');
+  if(err) err.textContent='';
 }
 
 function scrollToPCPanel(){
