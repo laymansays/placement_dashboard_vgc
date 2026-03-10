@@ -102,6 +102,26 @@ body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;}
 .btn-reset-resume{background:none;border:1px solid #aaa;color:#666;font-size:11px;padding:4px 10px;border-radius:20px;cursor:pointer;margin-top:4px;}
 .btn-reset-resume:hover{border-color:#6D0E6A;color:#6D0E6A;}
 .btn-rewrite:hover{opacity:.9;transform:translateY(-1px);}
+.btn-edit-profile{display:block;width:100%;padding:9px;border-radius:10px;border:1.5px solid #D3B6D2;background:#fff;color:#6D0E6A;font-size:12.5px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;transition:all .15s;margin-top:6px;}
+.btn-edit-profile:hover{background:#F7F0F7;}
+/* ── Edit Profile Modal ── */
+.ep-overlay{position:fixed;inset:0;background:rgba(26,5,25,.55);z-index:9999;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .22s;}
+.ep-overlay.show{opacity:1;pointer-events:all;}
+.ep-box{background:#fff;border-radius:20px;width:90%;max-width:460px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 64px rgba(26,5,25,.28);transform:translateY(16px);transition:transform .22s;}
+.ep-overlay.show .ep-box{transform:translateY(0);}
+.ep-head{display:flex;align-items:center;justify-content:space-between;padding:18px 20px 14px;border-bottom:1.5px solid #F1E8F1;}
+.ep-title{font-size:16px;font-weight:800;color:#1A0519;}
+.ep-close{width:30px;height:30px;border-radius:50%;border:none;background:#F7F0F7;color:#6D0E6A;font-size:16px;cursor:pointer;}
+.ep-body{padding:20px;display:flex;flex-direction:column;gap:14px;overflow-y:auto;max-height:60vh;}
+.ep-field{display:flex;flex-direction:column;gap:5px;}
+.ep-label{font-size:12px;font-weight:700;color:#64748B;letter-spacing:.03em;}
+.ep-input{padding:10px 12px;border:1.5px solid #E2E8F0;border-radius:10px;font-size:13.5px;font-family:'Inter',sans-serif;color:#0F172A;outline:none;transition:border-color .15s;}
+.ep-input:focus{border-color:#6D0E6A;box-shadow:0 0 0 3px rgba(109,14,106,.1);}
+.ep-hint{font-size:11px;color:#94A3B8;line-height:1.5;}
+.ep-foot{padding:14px 20px;border-top:1.5px solid #F1E8F1;display:flex;gap:10px;}
+.ep-save{flex:1;padding:11px;border:none;border-radius:10px;background:linear-gradient(135deg,#570B54,#6D0E6A);color:#fff;font-size:14px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;}
+.ep-cancel{padding:11px 20px;border:1.5px solid #D3B6D2;border-radius:10px;background:#fff;color:#6D0E6A;font-size:14px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;}
+.ep-save:disabled{opacity:.55;cursor:not-allowed;}
 
 /* ── SECTIONS ── */
 .sp-section{background:#fff;border-radius:20px;border:1.5px solid #E2E8F0;padding:24px;margin-bottom:20px;box-shadow:0 1px 6px rgba(0,0,0,.04);}
@@ -723,6 +743,7 @@ function renderProfile(elig){
     </div>`;
   } return '';
 })() }
+      <button class="btn-edit-profile" onclick="openEditProfile()">&#9998; Edit Profile</button>
     </div>`;
 }
 
@@ -1505,6 +1526,98 @@ async function uploadFormattedResume(pdfBlob, filename){
   console.log('[Portal] Formatted resume saved:',data.url);
 }
 
+</script>
+
+<!-- ── Edit Profile Modal ── -->
+<div class="ep-overlay" id="ep-modal">
+  <div class="ep-box">
+    <div class="ep-head">
+      <div class="ep-title">&#9998; Edit Profile</div>
+      <button class="ep-close" onclick="closeEditProfile()">&times;</button>
+    </div>
+    <div class="ep-body">
+      <div class="ep-field">
+        <label class="ep-label">&#128241; PHONE NUMBER</label>
+        <input class="ep-input" id="ep-phone" type="tel" placeholder="e.g. 9876543210">
+      </div>
+      <div class="ep-field">
+        <label class="ep-label">&#128247; PHOTO (Google Drive link)</label>
+        <input class="ep-input" id="ep-photo" type="url" placeholder="https://drive.google.com/file/d/...">
+        <span class="ep-hint">Share your photo on Google Drive &rarr; Copy link &rarr; Paste here.<br>Make sure sharing is set to &ldquo;Anyone with the link&rdquo;.</span>
+      </div>
+      <div class="ep-field">
+        <label class="ep-label">&#128202; 10th PERCENTAGE</label>
+        <input class="ep-input" id="ep-tenth" type="number" min="0" max="100" step="0.01" placeholder="e.g. 82.5">
+      </div>
+      <div class="ep-field">
+        <label class="ep-label">&#128202; 12th PERCENTAGE</label>
+        <input class="ep-input" id="ep-twelfth" type="number" min="0" max="100" step="0.01" placeholder="e.g. 78.0">
+      </div>
+    </div>
+    <div class="ep-foot">
+      <button class="ep-cancel" onclick="closeEditProfile()">Cancel</button>
+      <button class="ep-save" id="ep-save-btn" onclick="saveEditProfile()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function openEditProfile(){
+  document.getElementById('ep-phone').value   = ST.phone    || '';
+  document.getElementById('ep-photo').value   = ST.photoUrl || '';
+  document.getElementById('ep-tenth').value   = ST.tenth    || '';
+  document.getElementById('ep-twelfth').value = ST.twelfth  || '';
+  document.getElementById('ep-modal').classList.add('show');
+}
+function closeEditProfile(){
+  document.getElementById('ep-modal').classList.remove('show');
+}
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeEditProfile(); });
+
+async function saveEditProfile(){
+  const phone    = document.getElementById('ep-phone').value.trim();
+  const photoUrl = document.getElementById('ep-photo').value.trim();
+  const tenth    = document.getElementById('ep-tenth').value.trim();
+  const twelfth  = document.getElementById('ep-twelfth').value.trim();
+
+  // Basic validation
+  if(tenth  && (isNaN(tenth)   || tenth   < 0 || tenth   > 100)){ alert('Please enter a valid 10th percentage (0–100).'); return; }
+  if(twelfth&& (isNaN(twelfth) || twelfth < 0 || twelfth > 100)){ alert('Please enter a valid 12th percentage (0–100).'); return; }
+
+  const btn = document.getElementById('ep-save-btn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+
+  try{
+    const res = await fetch(_WEBAPP, {
+      method: 'POST',
+      body: JSON.stringify({
+        action:  'updateProfile',
+        email:   ST.email,
+        phone, photoUrl, tenth, twelfth
+      })
+    });
+    if(!res.ok) throw new Error('Server error '+res.status);
+    const data = await res.json();
+    if(!data.ok) throw new Error(data.error || 'Could not save');
+
+    // Update in-memory ST immediately
+    if(phone)    ST.phone    = phone;
+    if(photoUrl) ST.photoUrl = drivePhoto(photoUrl);
+    if(tenth)    ST.tenth    = parseFloat(tenth);
+    if(twelfth)  ST.twelfth  = parseFloat(twelfth);
+
+    closeEditProfile();
+    const isPlaced = Object.values(STATUS).some(s=>s&&s.sel);
+    const elig = ST.tenth>=60 && ST.twelfth>=60 && (ST.backlogs||'').toLowerCase()==='no';
+    renderProfile(elig);
+    renderInelig(elig);
+
+  }catch(e){
+    alert('Could not save: '+e.message);
+  }finally{
+    btn.disabled = false; btn.textContent = 'Save Changes';
+  }
+}
 </script>
 </body>
 </html>>
