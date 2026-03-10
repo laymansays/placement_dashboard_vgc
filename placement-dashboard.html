@@ -686,6 +686,41 @@ body.admin-mode .modal{border-top:3px solid var(--admin);}
 }
 .pl-back:hover{color:#0F172A;}
 
+
+/* ─── PLACEMENT CELL MODE ─────────────────────────────── */
+.pc-bar{background:linear-gradient(135deg,#1A0519,#3A0838);color:#fff;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:13px;font-weight:700;letter-spacing:.02em;}
+.pc-bar-badge{background:#FCD34D;color:#78350F;font-size:11px;font-weight:800;padding:3px 10px;border-radius:20px;letter-spacing:.04em;}
+.pc-bar-actions{display:flex;gap:8px;}
+.pc-bar-actions button{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:12px;font-weight:600;padding:5px 14px;border-radius:8px;cursor:pointer;font-family:inherit;}
+.pc-bar-actions button:hover{background:rgba(255,255,255,.22);}
+
+/* Unique placed panel */
+.pc-panel{background:var(--card);border:1.5px solid #A855F7;border-radius:16px;margin:24px 0 0;overflow:hidden;}
+.pc-panel-head{background:linear-gradient(135deg,#2D0A2C,#3A0838);padding:18px 22px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.pc-panel-title{font-size:15px;font-weight:800;color:#fff;letter-spacing:-.01em;flex:1;}
+.pc-stat-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:4px;width:100%;}
+.pc-stat-chip{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);border-radius:10px;padding:10px 18px;text-align:center;min-width:100px;}
+.pc-stat-chip .pc-num{font-size:26px;font-weight:800;color:#fff;line-height:1;}
+.pc-stat-chip .pc-lbl{font-size:10.5px;font-weight:700;color:rgba(255,255,255,.65);text-transform:uppercase;letter-spacing:.05em;margin-top:3px;}
+.pc-stat-chip.green .pc-num{color:#86EFAC;}
+.pc-stat-chip.amber .pc-num{color:#FCD34D;}
+.pc-stat-chip.red   .pc-num{color:#FCA5A5;}
+
+/* Student join table */
+.pc-table-wrap{overflow-x:auto;}
+.pc-table{width:100%;border-collapse:collapse;font-size:13px;}
+.pc-table th{background:rgba(168,85,247,.12);padding:10px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border);}
+.pc-table td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text1);vertical-align:middle;}
+.pc-table tr:last-child td{border-bottom:none;}
+.pc-table tr:hover td{background:rgba(168,85,247,.04);}
+.pc-name-cell{font-weight:600;font-size:13.5px;}
+.pc-company-list{font-size:11.5px;color:var(--text3);margin-top:2px;}
+.join-btn{padding:5px 14px;border-radius:20px;font-size:11.5px;font-weight:700;cursor:pointer;border:1.5px solid;font-family:inherit;transition:all .15s;white-space:nowrap;}
+.join-btn.joined   {background:#DCFCE7;border-color:#86EFAC;color:#166534;}
+.join-btn.not-joined{background:#FEF2F2;border-color:#FCA5A5;color:#991B1B;}
+.join-btn.pending  {background:var(--bg2);border-color:var(--border);color:var(--text3);}
+.join-btn:hover    {opacity:.8;transform:scale(1.03);}
+.join-cycle-hint   {font-size:10px;color:var(--text3);margin-top:3px;text-align:right;}
 </style>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -739,6 +774,7 @@ body.admin-mode .modal{border-top:3px solid var(--admin);}
 <div id="app">
   <nav id="navbar"></nav>
   <div id="admin-bar"></div>
+  <div id="pc-bar"></div>
   <div id="refresh-bar" class="refresh-bar"><span class="spin">↻</span> Refreshing student data from sheets…</div>
   <main id="main"></main>
 </div>
@@ -765,6 +801,7 @@ const CONFIG_SHEET_ID = '1Mb9jrzZMSta5NYs28i3STS2tYNqhMtabj3wktvHiYmw';
 const CONFIG_TAB      = 'CONFIG_TAB';   // Main config tab — tab renamed by user
 const ADMIN_DATA_TAB  = 'ADMIN_MODE';   // Admin overrides tab — tab renamed by user
 const ADMIN_PIN       = '1234';
+const JOIN_PIN        = '2007';   // Placement Cell Mode
 const CACHE_TTL       = 60000;          // 60s per company
 
 /* ════════════════════════════════════════════════════
@@ -775,6 +812,7 @@ let ADMIN_DATA  = {};   // Keyed by company name, from Admin Data tab
 let view        = 'home';
 let cId         = null;
 let adminMode   = false;
+let pcMode      = false;   // Placement Cell Mode (PIN 2007)
 let filters     = { status: 'all' };
 
 /* ════════════════════════════════════════════════════
@@ -1290,11 +1328,21 @@ function toggleTheme(){ const d=document.documentElement; d.setAttribute('data-t
 ════════════════════════════════════════════════════ */
 function renderAdminBar(){
   const r=document.getElementById('admin-bar');
-  if(!adminMode){ r.innerHTML=''; return; }
-  r.innerHTML=`<div class="admin-bar"><span>🛡️ Admin Mode active</span><div class="admin-bar-actions"><button class="btn btn-admin-outline btn-sm" id="ab-diag">🔍 Diagnostics</button><button class="btn btn-admin-outline btn-sm" id="ab-refresh">↺ Reload Config</button><button class="btn btn-admin-outline btn-sm" id="ab-exit">Exit Admin</button></div></div>`;
-  document.getElementById('ab-diag').onclick=showDiagnostics;
-  document.getElementById('ab-refresh').onclick=()=>{ init(); toast('Reloading config…','info','↺'); };
-  document.getElementById('ab-exit').onclick=()=>{ adminMode=false; document.body.classList.remove('admin-mode'); sessionStorage.removeItem('placementAdmin'); go(view,cId); toast('Admin Mode off','info','🔒'); };
+  if(!adminMode){ r.innerHTML=''; }
+  else {
+    r.innerHTML=`<div class="admin-bar"><span>🛡️ Admin Mode active</span><div class="admin-bar-actions"><button class="btn btn-admin-outline btn-sm" id="ab-diag">🔍 Diagnostics</button><button class="btn btn-admin-outline btn-sm" id="ab-refresh">↺ Reload Config</button><button class="btn btn-admin-outline btn-sm" id="ab-exit">Exit Admin</button></div></div>`;
+    document.getElementById('ab-diag').onclick=showDiagnostics;
+    document.getElementById('ab-refresh').onclick=()=>{ init(); toast('Reloading config…','info','↺'); };
+    document.getElementById('ab-exit').onclick=()=>{ adminMode=false; document.body.classList.remove('admin-mode'); sessionStorage.removeItem('placementAdmin'); go(view,cId); toast('Admin Mode off','info','🔒'); };
+  }
+  renderPCBar();
+}
+
+function renderPCBar(){
+  const r=document.getElementById('pc-bar');
+  if(!r)return;
+  if(!pcMode){ r.innerHTML=''; return; }
+  r.innerHTML=`<div class="pc-bar"><span>🔐 Placement Cell Mode</span><span class="pc-bar-badge">CONFIDENTIAL</span><div class="pc-bar-actions"><button onclick="scrollToPCPanel()">↓ Jump to Tracker</button><button onclick="exitPCMode()">Exit</button></div></div>`;
 }
 
 /* ════════════════════════════════════════════════════
@@ -1309,6 +1357,7 @@ function handleAdmin(){
   };
   const chk=()=>{
     if(pin===ADMIN_PIN){ closeModal(); adminMode=true; document.body.classList.add('admin-mode'); go(view,cId); toast('Admin Mode enabled','success','🛡️'); }
+    else if(pin===JOIN_PIN){ closeModal(); pcMode=true; go(view,cId); toast('Placement Cell Mode enabled','success','🔐'); setTimeout(scrollToPCPanel,300); }
     else{ upd(true); setTimeout(()=>{ pin=''; upd(false); },800); }
   };
   openModal('Admin Access',`<p style="font-size:13px;color:var(--text3);margin-bottom:16px;text-align:center;">Enter PIN to enable admin mode</p><div class="pin-row">${[0,1,2,3].map(i=>`<input class="pin-cell" id="pc${i}" maxlength="1" inputmode="numeric" pattern="[0-9]"/>`).join('')}</div><div class="pin-error" id="pe"></div>`);
@@ -1539,6 +1588,7 @@ function buildHome(){
   document.querySelectorAll('.co-card[data-id]').forEach(el=>{
     el.onclick=()=>go('detail',parseInt(el.dataset.id));
   });
+  if(pcMode) renderPCPanel();
 }
 
 function coCardHtml(c){
@@ -2419,6 +2469,112 @@ window.addEventListener('DOMContentLoaded', function(){
           .catch(e=>console.warn('[PWA] SW failed:',e));
       });
     }
-  </script>
+  
+
+/* ════════════════════════════════════════════════════
+   PLACEMENT CELL MODE  (PIN 2007)
+════════════════════════════════════════════════════ */
+
+// joinStatus: { emailOrName -> 'joined' | 'not_joined' | 'pending' }
+function loadJoinStatus(){
+  try{ return JSON.parse(sessionStorage.getItem('joinStatus')||'{}'); }catch{ return {}; }
+}
+function saveJoinStatus(js){ sessionStorage.setItem('joinStatus',JSON.stringify(js)); }
+
+function exitPCMode(){
+  pcMode=false;
+  renderPCBar();
+  // remove panel from DOM if visible
+  const p=document.getElementById('pc-panel');
+  if(p)p.remove();
+  toast('Placement Cell Mode off','info','🔒');
+}
+
+function scrollToPCPanel(){
+  const p=document.getElementById('pc-panel');
+  if(p) p.scrollIntoView({behavior:'smooth',block:'start'});
+  else if(view==='home') renderPCPanel();
+}
+
+/* Build unique placed student list across all companies */
+function getUniquePlaced(){
+  const seen=new Map(); // key=lower(email||name) → {name,email,companies:[]}
+  COMPANIES.forEach(c=>{
+    (c.studentsSelected||[]).forEach(s=>{
+      const key=(s.email||s.name||'').toLowerCase().trim();
+      if(!key)return;
+      if(!seen.has(key)) seen.set(key,{name:s.name||'',email:s.email||'',companies:[]});
+      seen.get(key).companies.push(c.name);
+    });
+  });
+  return [...seen.values()];
+}
+
+function joinKey(student){ return (student.email||student.name||'').toLowerCase().trim(); }
+function cycleJoin(key){
+  const js=loadJoinStatus();
+  const cur=js[key]||'pending';
+  js[key]=cur==='pending'?'joined':cur==='joined'?'not_joined':'pending';
+  saveJoinStatus(js);
+  renderPCPanel();
+}
+
+function renderPCPanel(){
+  if(!pcMode)return;
+  const homeWrap=document.querySelector('.home-wrap');
+  if(!homeWrap)return; // only on home view
+  let panel=document.getElementById('pc-panel');
+  if(!panel){ panel=document.createElement('div'); panel.id='pc-panel'; panel.className='pc-panel'; homeWrap.appendChild(panel); }
+
+  const uniq=getUniquePlaced();
+  const js=loadJoinStatus();
+  const total=uniq.length;
+  const joined=uniq.filter(s=>js[joinKey(s)]==='joined').length;
+  const notJoined=uniq.filter(s=>js[joinKey(s)]==='not_joined').length;
+  const pending=total-joined-notJoined;
+  const rawTotal=COMPANIES.reduce((s,c)=>s+c.studentsSelected.length,0);
+
+  const rows=uniq.map((s,i)=>{
+    const k=joinKey(s);
+    const status=js[k]||'pending';
+    const btnLabel=status==='joined'?'✅ Joined':status==='not_joined'?'❌ Not Joined':'⏳ Pending';
+    return `<tr>
+      <td style="color:var(--text3);font-size:12px;width:36px">${i+1}</td>
+      <td><div class="pc-name-cell">${xe(s.name||'—')}</div><div class="pc-company-list">${xe(s.email||'—')}</div></td>
+      <td><div class="pc-company-list" style="font-size:12px;">${s.companies.map(c=>'• '+xe(c)).join('<br>')}</div></td>
+      <td style="text-align:right">
+        <button class="join-btn ${status}" onclick="cycleJoin('${k.replace(/'/g,"\\'")}')">
+          ${btnLabel}
+        </button>
+        <div class="join-cycle-hint">click to cycle</div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  panel.innerHTML=`
+    <div class="pc-panel-head">
+      <div style="width:100%;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+        <div class="pc-panel-title">🔐 Placement Cell — Joining Tracker</div>
+        <span style="font-size:11px;color:rgba(255,255,255,.5);">Raw total (incl. duplicates): ${rawTotal} · Unique students placed: ${total}</span>
+      </div>
+      <div class="pc-stat-row">
+        <div class="pc-stat-chip"><div class="pc-num">${total}</div><div class="pc-lbl">Unique Placed</div></div>
+        <div class="pc-stat-chip green"><div class="pc-num">${joined}</div><div class="pc-lbl">Joined</div></div>
+        <div class="pc-stat-chip red"><div class="pc-num">${notJoined}</div><div class="pc-lbl">Not Joined</div></div>
+        <div class="pc-stat-chip amber"><div class="pc-num">${pending}</div><div class="pc-lbl">Pending</div></div>
+        <div class="pc-stat-chip" style="min-width:120px;"><div class="pc-num" style="color:#C4B5FD">${rawTotal}</div><div class="pc-lbl">Total Selections</div></div>
+        <div class="pc-stat-chip" style="min-width:120px;"><div class="pc-num" style="font-size:18px;color:#C4B5FD">${rawTotal>0?total+' / '+rawTotal:'—'}</div><div class="pc-lbl">Unique / Raw</div></div>
+      </div>
+    </div>
+    ${uniq.length===0
+      ?'<div style="padding:32px;text-align:center;color:var(--text3);font-size:13px;">No students selected yet across any company.</div>'
+      :`<div class="pc-table-wrap"><table class="pc-table">
+          <thead><tr><th>#</th><th>Student</th><th>Selected By</th><th style="text-align:right">Joining Status</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table></div>`
+    }`;
+}
+
+</script>
 </body>
 </html>
