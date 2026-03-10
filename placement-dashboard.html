@@ -789,7 +789,7 @@ function fmtDate(d){ if(!d)return'—'; try{return new Date(d).toLocaleDateStrin
 const STATUS_MAP = {
   completed:        { l:'Completed',        cls:'s-completed' },
   results_awaited:  { l:'Results Awaited',  cls:'s-results_awaited' },
-  registered_sent:  { l:'Reg. Sent',        cls:'s-registered_sent' },
+  registered_sent:  { l:'Ongoing',        cls:'s-registered_sent' },
   upcoming:         { l:'Upcoming',         cls:'s-upcoming' }
 };
 function statusOf(c){
