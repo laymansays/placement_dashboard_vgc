@@ -2729,79 +2729,152 @@ function openCompanyAnalytics(companyId){
   const co = COMPANIES.find(x=>x.id===companyId);
   if(!co) return;
 
-  const reg = co.studentsRegistered.length;
-  const att = co.studentsInterviewed.length;
-  const sel = co.studentsSelected.length;
-  const joined = co.studentsSelected.filter(s=>s.joinStatus==='Joined').length;
+  const reg    = co.studentsRegistered.length;
+  const att    = co.studentsInterviewed.length;
+  const sel    = co.studentsSelected.length;
+  const joined    = co.studentsSelected.filter(s=>s.joinStatus==='Joined').length;
   const notJoined = co.studentsSelected.filter(s=>s.joinStatus==='Not Joined').length;
-  const pending = sel - joined - notJoined;
+  const pending   = sel - joined - notJoined;
+  const pct = (n,d) => d>0 ? Math.round(n/d*100)+'%' : '—';
 
-  const pct = (n,d) => d>0 ? Math.round(n/d*100) : 0;
-  const r2a = pct(att,reg), a2s = pct(sel,att), s2j = pct(joined,sel), r2s = pct(sel,reg);
+  const maxN = Math.max(reg, att, sel, joined, 1);
+
+  // Pure HTML funnel bars — no canvas, no timing issues
+  function bar(n, color, label, prevN){
+    const pct100 = Math.round(n / maxN * 100);
+    const convLabel = (prevN != null && prevN > 0)
+      ? `<span style="font-size:10px;color:#fff;opacity:.8;margin-left:6px;">${Math.round(n/prevN*100)}%</span>`
+      : '';
+    return `<div style="display:flex;flex-direction:column;align-items:center;flex:1;gap:4px;">
+      <div style="font-size:13px;font-weight:800;color:var(--text1);">${n}</div>
+      <div style="width:100%;background:var(--bg3);border-radius:8px;overflow:hidden;height:120px;display:flex;align-items:flex-end;">
+        <div style="width:100%;height:${pct100}%;background:${color};border-radius:6px 6px 0 0;min-height:${n>0?4:0}px;transition:height .4s;display:flex;align-items:flex-start;justify-content:center;padding-top:6px;">
+          ${n>0 && pct100>18 ? `<span style="font-size:11px;font-weight:700;color:#fff;">${pct100}%</span>` : ''}
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--text3);text-align:center;line-height:1.3;">${label}${convLabel}</div>
+    </div>`;
+  }
+
+  function arrow(){
+    return `<div style="display:flex;align-items:center;padding-bottom:28px;color:var(--text4);font-size:18px;flex-shrink:0;">→</div>`;
+  }
+
+  const funnelHtml = `
+    <div style="display:flex;align-items:flex-end;gap:6px;padding:12px 0 4px;">
+      ${bar(reg,'#6D0E6A','Registered', null)}
+      ${arrow()}
+      ${bar(att,'#1D4ED8','Attended', reg)}
+      ${arrow()}
+      ${bar(sel,'#059669','Selected', att)}
+      ${arrow()}
+      ${bar(joined,'#16A34A','Joined', sel)}
+    </div>`;
+
+  const ratioRows = [
+    ['Reg → Attended',        pct(att,reg)],
+    ['Attended → Selected',   pct(sel,att)],
+    ['Selected → Joined',     pct(joined,sel)],
+    ['Overall (Reg → Sel)',   pct(sel,reg)],
+  ].map(([k,v])=>`
+    <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:12.5px;">
+      <span style="color:var(--text2)">${k}</span>
+      <span style="font-weight:700;color:var(--text1)">${v}</span>
+    </div>`).join('');
+
+  const joinRows = [
+    ['✅ Joined',     joined,    '#16A34A'],
+    ['❌ Not Joined', notJoined, '#DC2626'],
+    ['⏳ Pending',   pending,   '#D97706'],
+  ].map(([k,v,col])=>`
+    <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:12.5px;">
+      <span style="color:var(--text2)">${k}</span>
+      <span style="font-weight:700;color:${col}">${v}</span>
+    </div>`).join('');
 
   openModal(`📊 Analytics — ${xe(co.name)}`,`
-    <div style="font-size:12px;color:var(--text3);margin-bottom:14px;">Conversion funnel from registration to joining. Edit join status via the Selected Students table.</div>
-    <canvas id="analytics-canvas" width="520" height="300" style="width:100%;border-radius:10px;background:var(--bg2);"></canvas>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;">
+    <div style="font-size:11.5px;color:var(--text3);margin-bottom:8px;">
+      Conversion funnel · ${xe(co.name)}${co.driveDate?' · Drive: '+fmtDate(co.driveDate):''}
+    </div>
+    <div style="background:var(--bg2);border-radius:12px;padding:14px 16px;margin-bottom:14px;">
+      ${funnelHtml}
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
       <div style="background:var(--bg2);border-radius:10px;padding:12px;">
-        <div style="font-size:10.5px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Conversion Ratios</div>
-        ${[
-          ['Reg → Attended', r2a+'%'],
-          ['Attended → Selected', a2s+'%'],
-          ['Selected → Joined', s2j+'%'],
-          ['Overall (Reg → Selected)', r2s+'%']
-        ].map(([k,v])=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:12.5px;"><span style="color:var(--text2)">${k}</span><span style="font-weight:700;color:var(--text1)">${v}</span></div>`).join('')}
+        <div style="font-size:10px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Conversion Ratios</div>
+        ${ratioRows}
       </div>
       <div style="background:var(--bg2);border-radius:10px;padding:12px;">
-        <div style="font-size:10.5px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Joining Breakdown</div>
-        ${[
-          ['Joined', joined, '#22C55E'],
-          ['Not Joined', notJoined, '#EF4444'],
-          ['Pending', pending, '#F59E0B'],
-        ].map(([k,v,col])=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:12.5px;"><span style="color:var(--text2)">${k}</span><span style="font-weight:700;color:${col}">${v}</span></div>`).join('')}
-        <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:12.5px;"><span style="font-weight:700;color:var(--text1)">Total Selected</span><span style="font-weight:800;color:var(--text1)">${sel}</span></div>
+        <div style="font-size:10px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Joining Status  <span style="font-size:11px;color:var(--text4);font-weight:400;">(of ${sel} selected)</span></div>
+        ${joinRows}
+        <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:12px;">
+          <span style="font-weight:700;color:var(--text1)">Total Selected</span>
+          <span style="font-weight:800;color:var(--text1)">${sel}</span>
+        </div>
       </div>
     </div>`,
     `<button class="btn btn-outline btn-sm" onclick="closeModal()">Close</button>
-     <button class="btn btn-admin btn-sm" onclick="downloadAnalyticsPDF(${companyId})">⬇ Download Report</button>`
+     <button class="btn btn-admin btn-sm" onclick="closeModal();downloadAnalyticsPDF(${companyId})">⬇ Download Report</button>`
   );
-
-  // Draw canvas chart after modal renders
-  requestAnimationFrame(()=>{
-    const canvas = document.getElementById('analytics-canvas');
-    if(!canvas) return;
-    drawFunnelChart(canvas, co.name, reg, att, sel, joined, notJoined, pending);
-  });
 }
 
-function drawFunnelChart(canvas, companyName, reg, att, sel, joined, notJoined, pending){
+/* ─ Branded PDF download ─ */
+async function downloadAnalyticsPDF(companyId){
+  const co = COMPANIES.find(x=>x.id===companyId);
+  if(!co){ toast('Company not found','error'); return; }
+
+  const { jsPDF } = window.jspdf;
+  if(!jsPDF){ toast('PDF library not loaded yet — please wait and try again','error'); return; }
+
+  toast('Generating PDF…','info','⏳');
+
+  const W=297, H=210; // A4 landscape mm
+  const DATE_STR = new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+
+  const reg       = co.studentsRegistered.length;
+  const att       = co.studentsInterviewed.length;
+  const sel       = co.studentsSelected.length;
+  const joined    = co.studentsSelected.filter(s=>s.joinStatus==='Joined').length;
+  const notJoined = co.studentsSelected.filter(s=>s.joinStatus==='Not Joined').length;
+  const pending   = sel - joined - notJoined;
+  const pct = (n,d) => d>0 ? Math.round(n/d*100) : 0;
+
+  // ── Load logo ──
+  let logoB64 = null;
+  try {
+    const resp = await fetch('logo.jpg');
+    if(resp.ok){
+      const blob = await resp.blob();
+      logoB64 = await new Promise(res=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.readAsDataURL(blob); });
+    }
+  } catch(e){ logoB64 = null; }
+
+  // ── Draw chart on offscreen canvas (includes watermark via globalAlpha) ──
+  const canvas = document.createElement('canvas');
+  canvas.width = 880; canvas.height = 460;
   const ctx = canvas.getContext('2d');
-  const W = canvas.width, H = canvas.height;
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  const bg    = isDark ? '#1E1B2E' : '#F8FAFC';
-  const text1 = isDark ? '#F1F5F9' : '#0F172A';
-  const text3 = isDark ? '#94A3B8' : '#64748B';
-  const border= isDark ? '#334155' : '#E2E8F0';
 
-  ctx.clearRect(0,0,W,H);
-  ctx.fillStyle = bg;
-  ctx.fillRect(0,0,W,H);
+  // White background
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // Logo watermark
-  const logoImg = new Image();
-  logoImg.onload = () => {
-    ctx.save();
-    ctx.globalAlpha = 0.06;
-    const lw = 140, lh = 140;
-    ctx.drawImage(logoImg, W/2-lw/2, H/2-lh/2, lw, lh);
-    ctx.restore();
-    _drawFunnelBars(ctx, W, H, reg, att, sel, joined, notJoined, pending, text1, text3, border, isDark);
-  };
-  logoImg.onerror = () => _drawFunnelBars(ctx, W, H, reg, att, sel, joined, notJoined, pending, text1, text3, border, isDark);
-  logoImg.src = 'logo.jpg';
-}
+  // Watermark logo at low opacity
+  if(logoB64){
+    await new Promise(res => {
+      const img = new Image();
+      img.onload = () => {
+        ctx.save();
+        ctx.globalAlpha = 0.06;
+        ctx.drawImage(img, canvas.width/2-80, canvas.height/2-80, 160, 160);
+        ctx.restore();
+        res();
+      };
+      img.onerror = res;
+      img.src = logoB64;
+    });
+  }
 
-function _drawFunnelBars(ctx, W, H, reg, att, sel, joined, notJoined, pending, text1, text3, border, isDark){
+  // Draw funnel bars
   const stages = [
     { label:'Registered', n:reg,    color:'#6D0E6A' },
     { label:'Attended',   n:att,    color:'#1D4ED8' },
@@ -2809,258 +2882,194 @@ function _drawFunnelBars(ctx, W, H, reg, att, sel, joined, notJoined, pending, t
     { label:'Joined',     n:joined, color:'#16A34A' },
   ];
   const maxN = Math.max(...stages.map(s=>s.n), 1);
-  const padL=14, padR=14, padT=36, padB=52;
-  const chartW = W - padL - padR;
-  const chartH = H - padT - padB;
-  const barW = Math.floor(chartW / stages.length);
-  const gap = Math.floor(barW * 0.22);
-  const bw = barW - gap;
+  const padL=40, padR=40, padT=50, padB=60;
+  const cW = canvas.width - padL - padR;
+  const cH = canvas.height - padT - padB;
+  const barW = Math.floor(cW / stages.length);
+  const gap  = Math.floor(barW * 0.24);
+  const bw   = barW - gap;
 
-  // Title
-  ctx.fillStyle = text1;
-  ctx.font = `bold 13px 'Inter','Helvetica',sans-serif`;
+  // Chart title
+  ctx.fillStyle = '#1A0519';
+  ctx.font = "bold 18px 'Helvetica',sans-serif";
   ctx.textAlign = 'left';
-  ctx.fillText('Placement Funnel — ' + companyName, padL, 22);
+  ctx.fillText('Placement Funnel — ' + co.name, padL, 30);
 
   stages.forEach((s, i) => {
-    const barH = maxN > 0 ? Math.round(s.n / maxN * chartH) : 0;
+    const bh = maxN > 0 ? Math.round(s.n / maxN * cH) : 0;
     const x = padL + i * barW + gap/2;
-    const y = padT + chartH - barH;
+    const y = padT + cH - bh;
 
-    // Gradient bar
-    const grad = ctx.createLinearGradient(x, y, x, y + barH);
+    // Bar with gradient
+    const grad = ctx.createLinearGradient(x, y, x, y+bh);
     grad.addColorStop(0, s.color);
-    grad.addColorStop(1, s.color + '99');
+    grad.addColorStop(1, s.color + 'AA');
     ctx.fillStyle = grad;
-    const radius = 6;
-    ctx.beginPath();
-    ctx.moveTo(x + radius, y);
-    ctx.lineTo(x + bw - radius, y);
-    ctx.quadraticCurveTo(x + bw, y, x + bw, y + radius);
-    ctx.lineTo(x + bw, y + barH);
-    ctx.lineTo(x, y + barH);
-    ctx.lineTo(x, y + radius);
-    ctx.quadraticCurveTo(x, y, x + radius, y);
-    ctx.closePath();
-    ctx.fill();
-
-    // Value on top of bar
-    ctx.fillStyle = text1;
-    ctx.font = `bold 15px 'Inter','Helvetica',sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.fillText(s.n, x + bw/2, y - 8);
-
-    // Percentage inside bar (if tall enough)
-    if(barH > 30 && i > 0 && stages[i-1].n > 0){
-      const pct = Math.round(s.n / stages[i-1].n * 100);
-      ctx.fillStyle = '#fff';
-      ctx.font = `bold 11px 'Inter','Helvetica',sans-serif`;
-      ctx.fillText(pct+'%', x + bw/2, y + 18);
+    const r = 8;
+    if(bh > 0){
+      ctx.beginPath();
+      ctx.moveTo(x+r,y); ctx.lineTo(x+bw-r,y);
+      ctx.quadraticCurveTo(x+bw,y,x+bw,y+r);
+      ctx.lineTo(x+bw,y+bh); ctx.lineTo(x,y+bh);
+      ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y);
+      ctx.closePath(); ctx.fill();
     }
 
-    // X axis label
-    ctx.fillStyle = text3;
-    ctx.font = `11px 'Inter','Helvetica',sans-serif`;
-    ctx.fillText(s.label, x + bw/2, H - padB + 16);
+    // Count above bar
+    ctx.fillStyle = '#1A0519';
+    ctx.font = "bold 20px 'Helvetica',sans-serif";
+    ctx.textAlign = 'center';
+    ctx.fillText(s.n, x+bw/2, bh>0 ? y-10 : padT+cH-10);
+
+    // Conversion % inside bar
+    if(bh > 36 && i > 0 && stages[i-1].n > 0){
+      ctx.fillStyle = '#ffffff';
+      ctx.font = "bold 14px 'Helvetica',sans-serif";
+      ctx.fillText(Math.round(s.n/stages[i-1].n*100)+'%', x+bw/2, y+22);
+    }
 
     // Arrow between bars
     if(i < stages.length - 1){
-      ctx.fillStyle = text3;
-      ctx.font = `14px sans-serif`;
-      ctx.fillText('→', x + bw + gap/2 - 6, padT + chartH/2 + 5);
+      ctx.fillStyle = '#94A3B8';
+      ctx.font = "18px sans-serif";
+      ctx.fillText('→', x+bw+gap/2-10, padT+cH/2+7);
     }
+
+    // Label below
+    ctx.fillStyle = '#64748B';
+    ctx.font = "13px 'Helvetica',sans-serif";
+    ctx.fillText(s.label, x+bw/2, padT+cH+20);
   });
 
-  // Joining breakdown mini bars at bottom
+  // Stacked join breakdown on last bar
   if(sel > 0){
-    const bx = padL + 3 * barW + gap/2;
-    const bStartY = padT + chartH - (maxN>0?Math.round(joined/maxN*chartH):0);
-    const notJH = maxN>0?Math.round(notJoined/maxN*chartH):0;
-    const pendH = maxN>0?Math.round(pending/maxN*chartH):0;
-
-    // Overlay stacked colors on joined bar region
-    const selBarH = maxN>0?Math.round(sel/maxN*chartH):0;
-    const totalH = selBarH;
-    const jH = totalH>0?Math.round(joined/sel*totalH):0;
-    const nH = totalH>0?Math.round(notJoined/sel*totalH):0;
-    const pH = totalH - jH - nH;
-
-    const barX = padL + 3 * barW + gap/2;
-    const barBaseY = padT + chartH;
-
-    [[jH,'#22C55E'],[nH,'#EF4444'],[pH,'#F59E0B']].reduce((yAcc,[h,col])=>{
-      if(h<=0)return yAcc;
-      ctx.fillStyle = col + 'CC';
-      ctx.fillRect(barX, barBaseY - yAcc - h, bw, h);
-      return yAcc + h;
-    }, 0);
+    const bh   = Math.round(sel/maxN*cH);
+    const barX = padL + 3*barW + gap/2;
+    const base = padT + cH;
+    const parts = [[joined,'#22C55E'],[notJoined,'#EF4444'],[pending,'#F59E0B']];
+    let yAcc = 0;
+    parts.forEach(([n,col])=>{
+      const ph = bh>0 ? Math.round(n/sel*bh) : 0;
+      if(ph > 0){
+        ctx.fillStyle = col+'CC';
+        ctx.fillRect(barX, base-yAcc-ph, bw, ph);
+        yAcc += ph;
+      }
+    });
   }
 
   // Baseline
-  ctx.strokeStyle = border;
-  ctx.lineWidth = 1;
+  ctx.strokeStyle = '#E2E8F0'; ctx.lineWidth = 1.5;
   ctx.beginPath();
-  ctx.moveTo(padL, padT + chartH);
-  ctx.lineTo(W - padR, padT + chartH);
+  ctx.moveTo(padL, padT+cH); ctx.lineTo(canvas.width-padR, padT+cH);
   ctx.stroke();
-}
 
-/* ─ Branded PDF download ─ */
-async function downloadAnalyticsPDF(companyId){
-  const co = COMPANIES.find(x=>x.id===companyId);
-  if(!co) return;
-  const { jsPDF } = window.jspdf;
+  const chartImg = canvas.toDataURL('image/png');
+
+  // ── Build PDF ──
   const doc = new jsPDF({ orientation:'landscape', unit:'mm', format:'a4' });
-  // A4 landscape: 297 × 210
-  const W=297, H=210;
-  const DATE_STR = new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
 
-  const reg = co.studentsRegistered.length;
-  const att = co.studentsInterviewed.length;
-  const sel = co.studentsSelected.length;
-  const joined    = co.studentsSelected.filter(s=>s.joinStatus==='Joined').length;
-  const notJoined = co.studentsSelected.filter(s=>s.joinStatus==='Not Joined').length;
-  const pending   = sel - joined - notJoined;
-  const pct=(n,d)=>d>0?Math.round(n/d*100):0;
-
-  // Load logo
-  let logoB64=null;
-  try {
-    const resp = await fetch('logo.jpg');
-    const blob = await resp.blob();
-    logoB64 = await new Promise(res=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.readAsDataURL(blob); });
-  } catch(e){ logoB64=null; }
-
-  // ── Page 1: Header + Funnel chart ──
-  // Header bar
+  // Page 1: Header
   doc.setFillColor(87,11,84);
   doc.rect(0,0,W,28,'F');
   if(logoB64) doc.addImage(logoB64,'JPEG',8,3,22,22);
   doc.setTextColor(255,255,255);
-  doc.setFontSize(14); doc.setFont('helvetica','bold');
-  doc.text('Vidyavahini First Grade Degree College — Placement Analytics',38,12);
-  doc.setFontSize(10); doc.setFont('helvetica','normal');
-  doc.text(xe(co.name) + '  ·  Generated: ' + DATE_STR,38,21);
+  doc.setFontSize(13); doc.setFont('helvetica','bold');
+  doc.text('Vidyavahini First Grade Degree College — Placement Analytics', 36, 12);
+  doc.setFontSize(9); doc.setFont('helvetica','normal');
+  doc.text(xe(co.name) + '   ·   Generated: ' + DATE_STR, 36, 21);
 
-  // Watermark logo (light)
-  if(logoB64){
-    doc.saveGraphicsState();
-    doc.setGState(new doc.GState({opacity:0.05}));
-    doc.addImage(logoB64,'JPEG',W/2-35,H/2-35,70,70);
-    doc.restoreGraphicsState();
-  }
+  // Chart image
+  doc.addImage(chartImg,'PNG', 12, 32, 186, 98);
 
-  // ── Draw funnel as canvas → image ──
-  const offscreen = document.createElement('canvas');
-  offscreen.width = 900; offscreen.height = 480;
-  _drawFunnelBars(offscreen.getContext('2d'), offscreen.width, offscreen.height, reg, att, sel, joined, notJoined, pending, '#1A0519', '#64748B', '#E2E8F0', false);
-  const chartImg = offscreen.toDataURL('image/png');
-  doc.addImage(chartImg,'PNG',14,32,180,96);
-
-  // ── Conversion table (right of chart) ──
-  doc.setFillColor(245,240,245);
-  doc.roundedRect(200,32,90,96,4,4,'F');
-  doc.setTextColor(87,11,84); doc.setFontSize(9); doc.setFont('helvetica','bold');
-  doc.text('CONVERSION RATIOS',202,41);
+  // Conversion ratios box
+  doc.setFillColor(247,240,247);
+  doc.roundedRect(202,32,88,98,3,3,'F');
+  doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(87,11,84);
+  doc.text('CONVERSION RATIOS', 205, 42);
   const ratios=[
-    ['Reg → Attended', pct(att,reg)+'%'],
-    ['Attended → Selected', pct(sel,att)+'%'],
-    ['Selected → Joined', pct(joined,sel)+'%'],
-    ['Overall (Reg → Sel)', pct(sel,reg)+'%'],
+    ['Reg → Attended',       pct(att,reg)+'%'],
+    ['Attended → Selected',  pct(sel,att)+'%'],
+    ['Selected → Joined',    pct(joined,sel)+'%'],
+    ['Overall (Reg → Sel)',  pct(sel,reg)+'%'],
   ];
-  doc.setFont('helvetica','normal'); doc.setTextColor(50,50,50); doc.setFontSize(8.5);
+  doc.setFont('helvetica','normal'); doc.setFontSize(8);
   ratios.forEach(([k,v],i)=>{
-    const y=50+i*11;
-    doc.text(k,202,y);
+    const ry = 52+i*12;
+    doc.setTextColor(60,60,60); doc.text(k, 205, ry);
     doc.setFont('helvetica','bold'); doc.setTextColor(87,11,84);
-    doc.text(v,282,y,'right');
-    doc.setFont('helvetica','normal'); doc.setTextColor(50,50,50);
-    if(i<ratios.length-1){ doc.setDrawColor(220,200,220); doc.line(200,y+4,290,y+4); }
+    doc.text(v, 286, ry, {align:'right'});
+    doc.setFont('helvetica','normal');
+    if(i<3){ doc.setDrawColor(210,190,210); doc.line(204,ry+4,288,ry+4); }
   });
 
-  // ── Joining breakdown ──
-  doc.setFillColor(245,240,245);
-  doc.roundedRect(200,134,90,44,4,4,'F');
-  doc.setTextColor(87,11,84); doc.setFontSize(9); doc.setFont('helvetica','bold');
-  doc.text('JOINING STATUS',202,143);
-  const jRows=[['Joined',joined,'#22C55E'],['Not Joined',notJoined,'#EF4444'],['Pending',pending,'#F59E0B']];
-  jRows.forEach(([k,v,col],i)=>{
-    const y=152+i*9;
-    doc.setFont('helvetica','normal'); doc.setTextColor(50,50,50); doc.setFontSize(8.5);
-    doc.text(k,202,y);
-    const rgb=parseInt(col.slice(1),16);
-    doc.setTextColor((rgb>>16)&255,(rgb>>8)&255,rgb&255);
-    doc.setFont('helvetica','bold');
-    doc.text(String(v),282,y,'right');
+  // Joining breakdown box
+  doc.setFillColor(247,240,247);
+  doc.roundedRect(202,136,88,44,3,3,'F');
+  doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(87,11,84);
+  doc.text('JOINING STATUS', 205, 145);
+  [['Joined',joined,[22,101,52]],['Not Joined',notJoined,[185,28,28]],['Pending',pending,[180,120,10]]].forEach(([k,v,rgb],i)=>{
+    const ry=154+i*9;
+    doc.setFont('helvetica','normal'); doc.setTextColor(60,60,60); doc.text(k,205,ry);
+    doc.setFont('helvetica','bold'); doc.setTextColor(...rgb); doc.text(String(v),286,ry,{align:'right'});
   });
 
-  // ── Page 2: Presentation bullet points ──
+  // Page 2: Bullet points
   doc.addPage();
-  doc.setFillColor(87,11,84);
-  doc.rect(0,0,W,28,'F');
+  doc.setFillColor(87,11,84); doc.rect(0,0,W,28,'F');
   if(logoB64) doc.addImage(logoB64,'JPEG',8,3,22,22);
   doc.setTextColor(255,255,255);
-  doc.setFontSize(14); doc.setFont('helvetica','bold');
-  doc.text('Placement Summary — ' + xe(co.name),38,12);
-  doc.setFontSize(10); doc.setFont('helvetica','normal');
-  doc.text('Vidyavahini First Grade Degree College  ·  ' + DATE_STR,38,21);
-
-  if(logoB64){
-    doc.saveGraphicsState();
-    doc.setGState(new doc.GState({opacity:0.05}));
-    doc.addImage(logoB64,'JPEG',W/2-35,H/2-35,70,70);
-    doc.restoreGraphicsState();
-  }
+  doc.setFontSize(13); doc.setFont('helvetica','bold');
+  doc.text('Placement Summary — ' + xe(co.name), 36, 12);
+  doc.setFontSize(9); doc.setFont('helvetica','normal');
+  doc.text('Vidyavahini First Grade Degree College  ·  ' + DATE_STR, 36, 21);
 
   let py = 40;
-  const bullet=(text,indent=0,bold=false,col=[50,50,50],size=11)=>{
-    doc.setFont('helvetica',bold?'bold':'normal');
-    doc.setTextColor(...col);
-    doc.setFontSize(size);
-    const prefix = indent===0?'▸ ':'    • ';
-    doc.text(prefix+text, 14+indent*4, py);
-    py += size*0.5+3;
-  };
-  const section=(title)=>{
-    py+=4;
+  const sec = (t) => {
+    py += 3;
     doc.setFillColor(87,11,84);
-    doc.roundedRect(12,py-6,W-24,11,3,3,'F');
-    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(11);
-    doc.text(title,14,py+1);
-    py+=12;
-    doc.setTextColor(50,50,50);
+    doc.roundedRect(12,py-5,W-24,10,2,2,'F');
+    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    doc.text(t, 15, py+1.5);
+    py += 13; doc.setTextColor(50,50,50);
+  };
+  const bul = (t,col=[50,50,50],bold=false) => {
+    doc.setFont('helvetica',bold?'bold':'normal');
+    doc.setTextColor(...col); doc.setFontSize(10);
+    doc.text('▸  '+t, 15, py); py += 8;
   };
 
-  section('Drive Overview');
-  bullet(xe(co.name)+' Campus Placement Drive',0,true,[87,11,84],13);
-  if(co.driveDate) bullet('Drive Date: '+fmtDate(co.driveDate));
-  if(co.interviewMode) bullet('Mode: '+xe(co.interviewMode));
-  if(co.roles&&co.roles.length) bullet('Roles Offered: '+xe(co.roles.join(', ')));
+  sec('Drive Overview');
+  bul(xe(co.name)+' Campus Placement Drive', [87,11,84], true);
+  if(co.driveDate) bul('Drive Date: '+fmtDate(co.driveDate));
+  if(co.interviewMode) bul('Interview Mode: '+xe(co.interviewMode));
+  if(co.roles&&co.roles.length) bul('Roles Offered: '+xe(co.roles.join(', ')));
 
-  section('Funnel Performance');
-  bullet(`${reg} students registered for this placement drive`);
-  bullet(`${att} students attended the interview (${pct(att,reg)}% of registrations)`);
-  bullet(`${sel} students selected / placed (${pct(sel,att)}% interview conversion)`);
-  bullet(`Overall registration-to-placement rate: ${pct(sel,reg)}%`);
+  sec('Funnel Performance');
+  bul(reg+' students registered for this placement drive');
+  bul(att+' students attended the interview ('+pct(att,reg)+'% of registrations)');
+  bul(sel+' students selected / placed ('+pct(sel,att)+'% interview-to-selection rate)');
+  bul('Overall registration-to-placement rate: '+pct(sel,reg)+'%');
 
-  section('Joining Status');
-  bullet(`${joined} of ${sel} selected students have confirmed joining (${pct(joined,sel)}%)`,0,false,[22,101,52]);
-  bullet(`${notJoined} student${notJoined!==1?'s':''} declined or did not join (${pct(notJoined,sel)}%)`,0,false,[153,27,27]);
-  bullet(`${pending} student${pending!==1?'s':''} status yet to be confirmed`,0,false,[146,64,14]);
+  sec('Joining Status');
+  bul(joined+' of '+sel+' selected students confirmed joining ('+pct(joined,sel)+'%)', [22,101,52]);
+  bul(notJoined+' student'+(notJoined!==1?'s':'')+' did not join ('+pct(notJoined,sel)+'%)', [185,28,28]);
+  bul(pending+' student'+(pending!==1?'s':'')+' status pending confirmation', [146,64,14]);
 
-  section('Key Insights');
-  if(reg>0&&att<reg) bullet(`Drop-off at registration stage: ${reg-att} students did not attend`);
-  if(att>0&&sel<att) bullet(`${att-sel} interviewed students were not selected`);
-  if(pct(sel,reg)>=50) bullet('Strong overall conversion — above 50% registration-to-placement',0,false,[22,101,52]);
-  else if(pct(sel,reg)>=25) bullet('Moderate conversion — scope to improve pre-placement preparation');
-  else if(sel>0) bullet('Lower conversion — consider targeted aptitude / interview training');
-  if(pct(joined,sel)>=80) bullet('Excellent joining rate — high student commitment',0,false,[22,101,52]);
-  else if(pct(joined,sel)>=50) bullet('Good joining rate — follow up with pending students');
-  else if(sel>0) bullet('Low joining rate — investigate reasons for non-joining');
-  if(sel===0) bullet('No selections recorded yet for this drive');
+  sec('Key Insights');
+  if(reg>0&&att<reg) bul('Drop-off before interview: '+(reg-att)+' registered students did not attend');
+  if(att>0&&sel<att) bul((att-sel)+' interviewed students were not selected');
+  if(pct(sel,reg)>=50) bul('Strong overall conversion rate — above 50%', [22,101,52]);
+  else if(pct(sel,reg)>=25) bul('Moderate conversion — scope to improve pre-placement preparation');
+  else bul('Low conversion — consider targeted aptitude / interview coaching');
+  if(sel>0){
+    if(pct(joined,sel)>=80) bul('Excellent joining rate — strong student commitment', [22,101,52]);
+    else if(pct(joined,sel)>=50) bul('Good joining rate — follow up with pending students');
+    else bul('Low joining rate — investigate reasons, follow up with selected students');
+  }
 
-  doc.save(`VVFGC_${xe(co.name).replace(/[^a-zA-Z0-9]/g,'_')}_Analytics_${DATE_STR.replace(/ /g,'-')}.pdf`);
-  toast('Analytics PDF downloaded','success','⬇');
+  doc.save('VVFGC_'+xe(co.name).replace(/[^a-zA-Z0-9]/g,'_')+'_Analytics_'+DATE_STR.replace(/ /g,'-')+'.pdf');
+  toast('Analytics report downloaded','success','⬇');
 }
 
 </script>
