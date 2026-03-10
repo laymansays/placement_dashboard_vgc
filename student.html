@@ -1,6 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#570B54">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="VGI Placement">
+  <link rel="apple-touch-icon" href="logo.jpg">
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Student Portal · Vidyavahini Placement</title>
@@ -1612,5 +1618,14 @@ async function saveEditProfile(){
   </div>
 </div>
 
+  <script>
+    if('serviceWorker' in navigator){
+      window.addEventListener('load',()=>{
+        navigator.serviceWorker.register('/placement_dashboard_vgc/sw.js')
+          .then(r=>console.log('[PWA] SW registered'))
+          .catch(e=>console.warn('[PWA] SW failed:',e));
+      });
+    }
+  </script>
 </body>
 </html>
