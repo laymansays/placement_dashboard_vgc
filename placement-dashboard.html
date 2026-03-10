@@ -789,7 +789,7 @@ function fmtDate(d){ if(!d)return'—'; try{return new Date(d).toLocaleDateStrin
 const STATUS_MAP = {
   completed:        { l:'Completed',        cls:'s-completed' },
   results_awaited:  { l:'Results Awaited',  cls:'s-results_awaited' },
-  registered_sent:  { l:'Ongoing',        cls:'s-registered_sent' },
+  registered_sent:  { l:'Reg. Sent',        cls:'s-registered_sent' },
   upcoming:         { l:'Upcoming',         cls:'s-upcoming' }
 };
 function statusOf(c){
@@ -945,7 +945,7 @@ function parseConfigFromJSON(gvizJson, htmlLinks={}){
   const iComp = ci('company')                     !== -1 ? ci('company')                     : 0;
   const iSheet= ci('sheet')                       !== -1 ? ci('sheet')                       : 1;
   const iReg  = ci('reg')                         !== -1 ? ci('reg')                         : 2;
-  const iInt  = ci('int','interview','shortlist')  !== -1 ? ci('int','interview','shortlist')  : 3;
+  const iInt  = ci('int','interview','attended')  !== -1 ? ci('int','interview','attended')  : 3;
   const iSel  = ci('sel','select')                !== -1 ? ci('sel','select')                : 4;
 
   const companies = [];
@@ -1493,7 +1493,7 @@ function buildHome(){
       <div class="home-banner-left">
         <div class="home-eyebrow">PLACEMENT SEASON 2024–25</div>
         <h1 class="home-title">Campus <em>Placement</em><br>Dashboard</h1>
-        <p class="home-sub">Live data from all company sheets — registrations, shortlists and placements in one place.</p>
+        <p class="home-sub">Live data from all company sheets — registrations, attendeds and placements in one place.</p>
         <button class="btn-primary-inv" onclick="go('dashboard')">View All Companies →</button>
       </div>
       <div class="home-banner-right">
@@ -1700,7 +1700,7 @@ async function buildDetail(id){
 
     ${buildJDSection(c)}
     ${buildStudentSection('Registered Students',c.studentsRegistered,'dsr-full')}
-    ${buildStudentSection('Interviewed / Shortlisted',c.studentsInterviewed,'dsi-full')}
+    ${buildStudentSection('Interviewed / Attended',c.studentsInterviewed,'dsi-full')}
     ${buildStudentSection('Selected Students',c.studentsSelected,'dss-full')}
   </div>`;
 
@@ -1719,7 +1719,7 @@ async function buildDetail(id){
   };
   document.getElementById('dsi').onclick=()=>{
     if(adminMode)openEditStudents(c.id,'studentsInterviewed');
-    else showStudentModal('Interviewed / Shortlisted — '+xe(c.name),c.studentsInterviewed);
+    else showStudentModal('Interviewed / Attended — '+xe(c.name),c.studentsInterviewed);
   };
   document.getElementById('dss').onclick=()=>{
     if(adminMode)openEditStudents(c.id,'studentsSelected');
@@ -2080,7 +2080,7 @@ async function downloadPlacedPDF(anchorId){
   if(!co){ toast('No company selected','info'); return; }
 
   const map = { 'dsr-full': ['studentsRegistered','Registered Students'],
-                'dsi-full': ['studentsInterviewed','Interviewed / Shortlisted'],
+                'dsi-full': ['studentsInterviewed','Interviewed / Attended'],
                 'dss-full': ['studentsSelected','Selected / Placed'] };
   const [key, label] = map[anchorId] || ['studentsSelected','Selected'];
   const students = co[key] || [];
