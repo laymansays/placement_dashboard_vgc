@@ -1501,7 +1501,6 @@ async function resetFormattedResume(){
     const data=await res.json();
     if(!data.ok)throw new Error(data.error||'Apps Script error');
     ST.formattedResume='';
-    ST.resume='';
     renderProfile(isEligible(ST));
     console.log('[Portal] Formatted resume cleared.');
   }catch(e){alert('Could not reset: '+e.message);}
