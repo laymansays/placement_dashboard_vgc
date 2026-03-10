@@ -1551,7 +1551,7 @@ function buildHome(){
     <div class="home-banner">
       <div class="home-banner-left">
         <div class="home-eyebrow">PLACEMENT SEASON 2024–25</div>
-        <h1 class="home-title">Campus <em>Placement</em><br>Dashboard</h1>
+        <h1 class="home-title"><span id="cell-link" onclick="openCellPrompt()" title="Placement Cell Analytics" style="cursor:pointer;border-bottom:2px solid transparent;transition:border-color .2s;padding-bottom:1px;" onmouseover="this.style.borderBottomColor='#D3B6D2'" onmouseout="this.style.borderBottomColor='transparent'">Campus <em>Placement</em><br>Dashboard</span></h1>
         <p class="home-sub">Live data from all company sheets — registrations, attendeds and placements in one place.</p>
         <button class="btn-primary-inv" onclick="go('dashboard')">View All Companies →</button>
       </div>
@@ -2478,16 +2478,40 @@ async function showDiagnostics(){
 /* ════════════════════════════════════════════════════
    PLACEMENT CELL LOGIN GATE
 ════════════════════════════════════════════════════ */
+function openCellPrompt(){
+  // Show a simple overlay prompting for PIN 2007 to open placement-cell.html
+  // Use the existing modal system
+  openModal('Placement Cell Access',
+    '<p style="font-size:13px;color:var(--text3);margin-bottom:4px;text-align:center;">Enter the Placement Cell passkey</p>' +
+    '<p style="font-size:11px;color:var(--text4);margin-bottom:18px;text-align:center;">This opens the confidential analytics screen</p>' +
+    '<div style="display:flex;justify-content:center;"><input id="cell-pin-input" type="tel" maxlength="4" inputmode="numeric" placeholder="••••" autocomplete="off" style="width:120px;text-align:center;font-size:24px;letter-spacing:8px;border:2px solid var(--border2);border-radius:10px;padding:10px 14px;background:var(--bg);color:var(--text);font-family:monospace;" /></div>' +
+    '<p id="cell-pin-err" style="text-align:center;font-size:12px;color:var(--red);margin-top:10px;min-height:18px;"></p>',
+    '<button class="btn btn-outline btn-sm" onclick="closeModal()">Cancel</button>' +
+    '<button class="btn btn-primary btn-sm" onclick="checkCellPin()">Open Analytics →</button>'
+  );
+  setTimeout(()=>{ const el=document.getElementById('cell-pin-input'); if(el){ el.focus(); el.onkeydown=e=>{ if(e.key==='Enter') checkCellPin(); }; } }, 100);
+}
+
+function checkCellPin(){
+  const val = (document.getElementById('cell-pin-input')?.value||'').trim();
+  const err = document.getElementById('cell-pin-err');
+  if(val !== '2007'){
+    if(err) err.textContent = 'Incorrect passkey. Please try again.';
+    document.getElementById('cell-pin-input').value='';
+    document.getElementById('cell-pin-input').focus();
+    return;
+  }
+  closeModal();
+  window.open('placement-cell.html','_blank');
+}
+
 function checkPlacementPin(){
   var pin = (document.getElementById('placement-pin').value || '').trim();
   var errEl = document.getElementById('pin-error');
   errEl.textContent = '';
   if(pin.length < 4){ errEl.textContent = 'Please enter the 4-digit passkey.'; return; }
-  if(pin === '2525' || pin === ADMIN_PIN || pin === JOIN_PIN){
+  if(pin === '2525'){
     document.getElementById('placement-login').classList.add('hidden');
-    // Pre-activate modes based on which PIN was used
-    if(pin === ADMIN_PIN){ adminMode=true; document.body.classList.add('admin-mode'); sessionStorage.setItem('placementAdmin','1'); }
-    if(pin === JOIN_PIN){ pcMode=true; }
     init();
   } else {
     errEl.textContent = 'Incorrect Passkey. Please try again.';
