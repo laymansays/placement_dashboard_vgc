@@ -1606,7 +1606,7 @@ function buildHome(){
   <div class="home-wrap">
     <div class="home-banner">
       <div class="home-banner-left">
-        <div class="home-eyebrow">PLACEMENTS</div>
+        <div class="home-eyebrow">PLACEMENT SEASON 2024–25</div>
         <h1 class="home-title"><span id="cell-link" onclick="openCellPrompt()" title="Placement Cell Analytics" style="cursor:pointer;border-bottom:2px solid transparent;transition:border-color .2s;padding-bottom:1px;" onmouseover="this.style.borderBottomColor='#D3B6D2'" onmouseout="this.style.borderBottomColor='transparent'">Campus <em>Placement</em><br>Dashboard</span></h1>
         <p class="home-sub">Live data from all company sheets — registrations, attendeds and placements in one place.</p>
         <button class="btn-primary-inv" onclick="go('dashboard')">View All Companies →</button>
@@ -3711,14 +3711,16 @@ function parseJobSeekers(csv){
     if(!name) return null;
     return {
       name,
-      phone:         (r[iPhone]  ||'').trim(),
-      degree:        (r[iDegree] ||'').trim(),
-      email:         (r[iEmail]  ||'').trim(),
+      phone:  (r[iPhone] ||'').trim(),
+      degree: (r[iDegree]||'').trim(),
+      email:  (r[iEmail] ||'').trim(),
+      // cached best status from sheet (for change detection)
       cachedStatus:  iStatus  >=0 ? (r[iStatus] ||'').trim() : '',
       cachedCompany: iCompany >=0 ? (r[iCompany]||'').trim() : '',
-      // live status resolved after student data loads — starts from cached
-      status:  iStatus  >=0 ? (r[iStatus] ||'').trim() : '',
-      company: iCompany >=0 ? (r[iCompany]||'').trim() : '',
+      // live arrays filled by resolveJobSeekerStatuses()
+      registeredAt: [],
+      attendedAt:   [],
+      selectedAt:   [],
     };
   }).filter(Boolean);
 }
@@ -3727,65 +3729,57 @@ function parseJobSeekers(csv){
 const STATUS_RANK = { 'Selected':3, 'Attended':2, 'Registered':1 };
 
 function resolveJobSeekerStatuses(){
+  const matchesStudent = (js, s) => {
+    if(js.email && s.email && js.email.toLowerCase()===s.email.toLowerCase()) return true;
+    return _fuzzyScore(js.name, s.name||'') >= 0.60;
+  };
+
   let changed = 0;
   JOB_SEEKERS.forEach(js => {
-    let bestRank = 0, bestStatus = '', bestCompany = '';
+    // Reset arrays on each resolve (in case of refresh)
+    js.registeredAt = [];
+    js.attendedAt   = [];
+    js.selectedAt   = [];
 
     COMPANIES.forEach(co => {
-      const check = (list, statusLabel) => {
-        const match = list.find(s => {
-          // Email match (most reliable)
-          if(js.email && s.email && js.email.toLowerCase()===s.email.toLowerCase()) return true;
-          // Fuzzy name match (threshold 0.60)
-          const score = _fuzzyScore(js.name, s.name||'');
-          return score >= 0.60;
-        });
-        if(match && (STATUS_RANK[statusLabel]||0) > bestRank){
-          bestRank    = STATUS_RANK[statusLabel];
-          bestStatus  = statusLabel;
-          bestCompany = co.name;
-        }
-      };
-      check(co.studentsSelected,    'Selected');
-      check(co.studentsInterviewed, 'Attended');
-      check(co.studentsRegistered,  'Registered');
+      if(co.studentsRegistered.some(s => matchesStudent(js, s)))  js.registeredAt.push(co.name);
+      if(co.studentsInterviewed.some(s => matchesStudent(js, s))) js.attendedAt.push(co.name);
+      if(co.studentsSelected.some(s => matchesStudent(js, s)))    js.selectedAt.push(co.name);
     });
 
-    const prevStatus  = js.status;
-    const prevCompany = js.company;
-    js.status  = bestStatus;
-    js.company = bestCompany;
+    // Best status for sheet write-back (Selected > Attended > Registered > '')
+    const bestStatus  = js.selectedAt.length ? 'Selected'
+                      : js.attendedAt.length  ? 'Attended'
+                      : js.registeredAt.length ? 'Registered' : '';
+    const bestCompany = (js.selectedAt[0] || js.attendedAt[0] || js.registeredAt[0] || '');
 
-    // Write back to sheet only if status has changed from what's cached in the sheet
-    if(js.status !== js.cachedStatus || js.company !== js.cachedCompany){
+    if(bestStatus !== js.cachedStatus || bestCompany !== js.cachedCompany){
       changed++;
-      persistJobSeekerStatus(js);
+      persistJobSeekerStatus(js, bestStatus, bestCompany);
     }
   });
 
   console.log(`[JobSeekers] resolved — ${changed} status updates queued`);
-  // Re-render home if visible to reflect updated statuses
   if(view === 'home') buildHome();
 }
 
 /* ── Persist a single job seeker's status to the sheet ── */
-async function persistJobSeekerStatus(js){
+async function persistJobSeekerStatus(js, bestStatus, bestCompany){
   try {
     const payload = {
-      action:     'updateJobSeekerStatus',
-      sheetId:    CONFIG_SHEET_ID,
-      tabName:    JOB_SEEKERS_TAB,
+      action:       'updateJobSeekerStatus',
+      sheetId:      CONFIG_SHEET_ID,
+      tabName:      JOB_SEEKERS_TAB,
       studentName:  js.name,
       studentEmail: js.email || '',
-      status:     js.status,
-      company:    js.company,
+      status:       bestStatus,
+      company:      bestCompany,
     };
     const res  = await fetch(_WEBAPP, { method:'POST', body: JSON.stringify(payload) });
     const data = await res.json();
     if(data.ok){
-      // Update cache so we don't re-write on next load unless it changes again
-      js.cachedStatus  = js.status;
-      js.cachedCompany = js.company;
+      js.cachedStatus  = bestStatus;
+      js.cachedCompany = bestCompany;
     } else {
       console.warn('[JobSeekers] persist failed for', js.name, data.error);
     }
@@ -3798,12 +3792,12 @@ async function persistJobSeekerStatus(js){
 function buildJobSeekersSection(){
   const degrees = [...new Set(JOB_SEEKERS.map(j=>j.degree).filter(Boolean))].sort();
 
-  // Summary counts (all students)
+  // Summary counts — additive: a Selected student also counts as Attended & Registered
   const totalJS  = JOB_SEEKERS.length;
-  const selCount = JOB_SEEKERS.filter(j=>j.status==='Selected').length;
-  const attCount = JOB_SEEKERS.filter(j=>j.status==='Attended').length;
-  const regCount = JOB_SEEKERS.filter(j=>j.status==='Registered').length;
-  const noneCount= JOB_SEEKERS.filter(j=>!j.status).length;
+  const selCount = JOB_SEEKERS.filter(j=>j.selectedAt.length>0).length;
+  const attCount = JOB_SEEKERS.filter(j=>j.attendedAt.length>0).length;
+  const regCount = JOB_SEEKERS.filter(j=>j.registeredAt.length>0).length;
+  const noneCount= JOB_SEEKERS.filter(j=>!j.registeredAt.length&&!j.attendedAt.length&&!j.selectedAt.length).length;
 
   // Always include B.Com and BCA; append any additional degrees found in sheet data
   const fixedDegrees = ['B.Com', 'BCA'];
@@ -3856,20 +3850,62 @@ function buildJobSeekersSection(){
         <span class="js-hint" id="js-filter-hint" style="align-self:center;"></span>
       </div>
       <div id="js-table-body">
-        ${buildJobSeekersTable(JOB_SEEKERS)}
+        ${buildJobSeekersTable(JOB_SEEKERS, '')}
       </div>
     </div>
   </div>`;
 }
 
-function buildJobSeekersTable(list){
+function buildJobSeekersTable(list, statusFilter){
   if(!list.length) return `<div class="no-data" style="padding:24px;">📭 No students match this filter</div>`;
 
-  const statusPill = js => {
-    if(js.status==='Selected')   return `<span class="js-status-pill js-status-selected">✅ Selected</span>`;
-    if(js.status==='Attended')   return `<span class="js-status-pill js-status-attended">🎯 Attended</span>`;
-    if(js.status==='Registered') return `<span class="js-status-pill js-status-registered">📋 Registered</span>`;
+  // Helper: render a list of company tags
+  const coTags = names => names.length
+    ? names.map(n=>`<span class="js-company-tag" title="${xe(n)}">${xe(n)}</span>`).join(' ')
+    : '<span style="color:var(--text4);font-size:11px;">—</span>';
+
+  // Best-status pill (for All / Pending views)
+  const bestPill = js => {
+    if(js.selectedAt.length)    return `<span class="js-status-pill js-status-selected">✅ Selected</span>`;
+    if(js.attendedAt.length)    return `<span class="js-status-pill js-status-attended">🎯 Attended</span>`;
+    if(js.registeredAt.length)  return `<span class="js-status-pill js-status-registered">📋 Registered</span>`;
     return `<span class="js-status-pill js-status-none">⏸ Pending</span>`;
+  };
+
+  // Context-aware: which companies column to show
+  const showReg = !statusFilter || statusFilter === 'Registered';
+  const showAtt = !statusFilter || statusFilter === 'Attended';
+  const showSel = !statusFilter || statusFilter === 'Selected';
+  const isPending = statusFilter === 'pending';
+
+  // For filtered views: one specific companies column; for All: best-status + best company
+  let companyHeader, companyCell;
+  if(statusFilter === 'Registered'){
+    companyHeader = 'Registered At';
+    companyCell   = js => coTags(js.registeredAt);
+  } else if(statusFilter === 'Attended'){
+    companyHeader = 'Attended At';
+    companyCell   = js => coTags(js.attendedAt);
+  } else if(statusFilter === 'Selected'){
+    companyHeader = 'Selected At';
+    companyCell   = js => coTags(js.selectedAt);
+  } else {
+    // All or Pending: show best company
+    companyHeader = 'Company';
+    companyCell   = js => {
+      const best = js.selectedAt[0]||js.attendedAt[0]||js.registeredAt[0]||'';
+      return best ? `<span class="js-company-tag" title="${xe(best)}">${xe(best)}</span>`
+                  : '<span style="color:var(--text4);font-size:11px;">—</span>';
+    };
+  }
+
+  // Status column: for specific filter show that status pill; for All show best
+  const statusHeader = statusFilter && statusFilter !== 'pending' ? statusFilter : 'Status';
+  const statusCell = js => {
+    if(statusFilter === 'Registered') return `<span class="js-status-pill js-status-registered">📋 Registered</span>`;
+    if(statusFilter === 'Attended')   return `<span class="js-status-pill js-status-attended">🎯 Attended</span>`;
+    if(statusFilter === 'Selected')   return `<span class="js-status-pill js-status-selected">✅ Selected</span>`;
+    return bestPill(js);
   };
 
   const rows = list.map((js,i) => `
@@ -3878,8 +3914,8 @@ function buildJobSeekersTable(list){
       <td style="font-weight:600;color:var(--text);">${xe(js.name)}</td>
       <td style="color:var(--text3);">${xe(js.phone||'—')}</td>
       <td><span style="font-size:11px;color:var(--text4);background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:2px 7px;">${xe(js.degree||'—')}</span></td>
-      <td>${statusPill(js)}</td>
-      <td>${js.company ? `<span class="js-company-tag" title="${xe(js.company)}">${xe(js.company)}</span>` : '<span style="color:var(--text4);font-size:11px;">—</span>'}</td>
+      <td>${statusCell(js)}</td>
+      <td style="max-width:220px;">${companyCell(js)}</td>
     </tr>`).join('');
 
   return `
@@ -3887,12 +3923,9 @@ function buildJobSeekersTable(list){
       <table class="js-table">
         <thead>
           <tr>
-            <th>#</th>
-            <th>Name</th>
-            <th>Phone</th>
-            <th>Degree</th>
-            <th>Placement Status</th>
-            <th>Company</th>
+            <th>#</th><th>Name</th><th>Phone</th><th>Degree</th>
+            <th>${xe(statusHeader)}</th>
+            <th>${xe(companyHeader)}</th>
           </tr>
         </thead>
         <tbody>${rows}</tbody>
@@ -3921,9 +3954,15 @@ function applyJobSeekerFilters(){
   if(!tableBody) return;
 
   let filtered = JOB_SEEKERS;
-  if(statusVal === 'pending') filtered = filtered.filter(j => !j.status);
-  else if(statusVal)         filtered = filtered.filter(j => j.status === statusVal);
-  if(degreeVal)              filtered = filtered.filter(j => j.degree === degreeVal);
+
+  // Status filters are INCLUSIVE (Registered = has registered in ≥1 company, regardless of other statuses)
+  if(statusVal === 'Registered') filtered = filtered.filter(j => j.registeredAt.length > 0);
+  else if(statusVal === 'Attended')   filtered = filtered.filter(j => j.attendedAt.length > 0);
+  else if(statusVal === 'Selected')   filtered = filtered.filter(j => j.selectedAt.length > 0);
+  else if(statusVal === 'pending')    filtered = filtered.filter(j =>
+    !j.registeredAt.length && !j.attendedAt.length && !j.selectedAt.length);
+
+  if(degreeVal) filtered = filtered.filter(j => j.degree === degreeVal);
 
   if(hint){
     const parts = [];
@@ -3931,8 +3970,7 @@ function applyJobSeekerFilters(){
     if(degreeVal) parts.push(degreeVal);
     hint.textContent = parts.length ? `${filtered.length} student${filtered.length!==1?'s':''} · ${parts.join(', ')}` : '';
   }
-  tableBody.innerHTML = buildJobSeekersTable(filtered);
-  body.innerHTML = buildJobSeekersTable(filtered);
+  tableBody.innerHTML = buildJobSeekersTable(filtered, statusVal);
 }
 
 </script>
