@@ -1592,7 +1592,7 @@ function buildHome(){
   <div class="home-wrap">
     <div class="home-banner">
       <div class="home-banner-left">
-        <div class="home-eyebrow">PLACEMENT SEASON 2024–25</div>
+        <div class="home-eyebrow">PLACEMENT SEASON 2025–26</div>
         <h1 class="home-title"><span id="cell-link" onclick="openCellPrompt()" title="Placement Cell Analytics" style="cursor:pointer;border-bottom:2px solid transparent;transition:border-color .2s;padding-bottom:1px;" onmouseover="this.style.borderBottomColor='#D3B6D2'" onmouseout="this.style.borderBottomColor='transparent'">Campus <em>Placement</em><br>Dashboard</span></h1>
         <p class="home-sub">Live data from all company sheets — registrations, attendeds and placements in one place.</p>
         <button class="btn-primary-inv" onclick="go('dashboard')">View All Companies →</button>
@@ -2142,7 +2142,7 @@ function buildStudentSection(title,students,anchorId,companyId){
   const analyticBtn = isSelected && students.length
     ? `<button class="btn-pdf-download" style="background:linear-gradient(135deg,#570B54,#3A0838);color:#fff;border:none;" onclick="event.stopPropagation();openCompanyAnalytics(${companyId})">📊 Analytics</button>`
     : '';
-  const bulkUploadBtn = isSelected && students.length && adminMode
+  const bulkUploadBtn = isSelected && students.length && (adminMode||pcMode)
     ? `<input type="file" id="bulk-ol-input-${companyId}" multiple accept=".pdf,image/*" style="display:none" onchange="bulkOfferLetterModal(${companyId},this)">
        <button class="btn-pdf-download" style="background:linear-gradient(135deg,#0e4a6a,#0369a1);color:#fff;border:none;" title="Match filenames to student names and upload all offer letters at once" onclick="event.stopPropagation();document.getElementById('bulk-ol-input-${companyId}').click()">📤 Upload All Offer Letters</button>`
     : '';
