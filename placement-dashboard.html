@@ -3798,18 +3798,27 @@ async function persistJobSeekerStatus(js){
 function buildJobSeekersSection(){
   const degrees = [...new Set(JOB_SEEKERS.map(j=>j.degree).filter(Boolean))].sort();
 
-  // Summary counts (all students, not filtered)
+  // Summary counts (all students)
   const totalJS  = JOB_SEEKERS.length;
   const selCount = JOB_SEEKERS.filter(j=>j.status==='Selected').length;
   const attCount = JOB_SEEKERS.filter(j=>j.status==='Attended').length;
   const regCount = JOB_SEEKERS.filter(j=>j.status==='Registered').length;
   const noneCount= JOB_SEEKERS.filter(j=>!j.status).length;
 
-  const degreeOpts = `<option value="">All Degrees (${totalJS})</option>`
-    + degrees.map(d=>{
-        const n = JOB_SEEKERS.filter(j=>j.degree===d).length;
-        return `<option value="${xe(d)}">${xe(d)} (${n})</option>`;
-      }).join('');
+  const degreeOpts = `<option value="">All Degrees</option>`
+    + degrees.map(d=>`<option value="${xe(d)}">${xe(d)}</option>`).join('');
+
+  const statusOpts = `<option value="">All Statuses</option>
+    <option value="Registered">📋 Registered</option>
+    <option value="Attended">🎯 Attended</option>
+    <option value="Selected">✅ Selected</option>
+    <option value="">— Not in any drive</option>`;
+  // "not in drive" is special — handle via value "none"
+  const statusOptsFixed = `<option value="">All Statuses</option>
+    <option value="Registered">📋 Registered</option>
+    <option value="Attended">🎯 Attended</option>
+    <option value="Selected">✅ Selected</option>
+    <option value="none">— Not in any drive</option>`;
 
   const summaryBar = `
     <div class="js-summary-bar">
@@ -3817,7 +3826,7 @@ function buildJobSeekersSection(){
       <div class="js-summary-stat"><strong style="color:#166534">${selCount}</strong>Selected</div>
       <div class="js-summary-stat"><strong style="color:#1e40af">${attCount}</strong>Attended</div>
       <div class="js-summary-stat"><strong style="color:#92400e">${regCount}</strong>Registered</div>
-      <div class="js-summary-stat"><strong style="color:var(--text4)">${noneCount}</strong>Not yet in any drive</div>
+      <div class="js-summary-stat"><strong style="color:var(--text4)">${noneCount}</strong>Not in any drive</div>
     </div>`;
 
   return `
@@ -3825,20 +3834,26 @@ function buildJobSeekersSection(){
     <div class="section-divider" style="margin-top:8px;"></div>
     <div class="js-section-head" onclick="toggleJobSeekers()">
       <div class="js-section-head-left">
-        <span class="student-section-chevron" id="js-chevron">▼</span>
+        <span class="student-section-chevron" id="js-chevron">▶</span>
         <span class="js-section-title">🎯 Job Seekers</span>
         <span class="js-count">${totalJS}</span>
       </div>
-      <div class="js-controls" onclick="event.stopPropagation()">
-        <select class="js-degree-select" id="js-degree-filter" onchange="filterJobSeekers(this.value)">
+      <div style="font-size:11px;color:var(--text4);padding-right:4px;" id="js-expand-hint">click to expand</div>
+    </div>
+    <div id="js-body" style="display:none;">
+      ${summaryBar}
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;margin-bottom:4px;">
+        <select class="js-degree-select" id="js-status-filter" onchange="applyJobSeekerFilters()">
+          ${statusOptsFixed}
+        </select>
+        <select class="js-degree-select" id="js-degree-filter" onchange="applyJobSeekerFilters()">
           ${degreeOpts}
         </select>
-        <span class="js-hint" id="js-filter-hint"></span>
+        <span class="js-hint" id="js-filter-hint" style="align-self:center;"></span>
       </div>
-    </div>
-    ${summaryBar}
-    <div id="js-body">
-      ${buildJobSeekersTable(JOB_SEEKERS)}
+      <div id="js-table-body">
+        ${buildJobSeekersTable(JOB_SEEKERS)}
+      </div>
     </div>
   </div>`;
 }
@@ -3885,19 +3900,34 @@ function buildJobSeekersTable(list){
 function toggleJobSeekers(){
   const body    = document.getElementById('js-body');
   const chevron = document.getElementById('js-chevron');
+  const hint    = document.getElementById('js-expand-hint');
   if(!body) return;
   const isOpen = body.style.display !== 'none';
   body.style.display = isOpen ? 'none' : '';
   if(chevron) chevron.textContent = isOpen ? '▶' : '▼';
+  if(hint)    hint.textContent    = isOpen ? 'click to expand' : 'click to collapse';
 }
 
-/* ── Degree filter ── */
-function filterJobSeekers(degree){
-  const body = document.getElementById('js-body');
-  const hint = document.getElementById('js-filter-hint');
-  if(!body) return;
-  const filtered = degree ? JOB_SEEKERS.filter(j=>j.degree===degree) : JOB_SEEKERS;
-  if(hint) hint.textContent = degree ? `${filtered.length} student${filtered.length!==1?'s':''}` : '';
+/* ── Combined status + degree filter ── */
+function applyJobSeekerFilters(){
+  const statusVal = (document.getElementById('js-status-filter')||{}).value || '';
+  const degreeVal = (document.getElementById('js-degree-filter')||{}).value || '';
+  const hint      = document.getElementById('js-filter-hint');
+  const tableBody = document.getElementById('js-table-body');
+  if(!tableBody) return;
+
+  let filtered = JOB_SEEKERS;
+  if(statusVal === 'none')   filtered = filtered.filter(j => !j.status);
+  else if(statusVal)         filtered = filtered.filter(j => j.status === statusVal);
+  if(degreeVal)              filtered = filtered.filter(j => j.degree === degreeVal);
+
+  if(hint){
+    const parts = [];
+    if(statusVal) parts.push(statusVal === 'none' ? 'Not in any drive' : statusVal);
+    if(degreeVal) parts.push(degreeVal);
+    hint.textContent = parts.length ? `${filtered.length} student${filtered.length!==1?'s':''} · ${parts.join(', ')}` : '';
+  }
+  tableBody.innerHTML = buildJobSeekersTable(filtered);
   body.innerHTML = buildJobSeekersTable(filtered);
 }
 
