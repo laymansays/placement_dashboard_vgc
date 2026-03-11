@@ -1592,10 +1592,11 @@ function buildHome(){
   <div class="home-wrap">
     <div class="home-banner">
       <div class="home-banner-left">
-        <div class="home-eyebrow">PLACEMENT SEASON 2025–26</div>
+        <div class="home-eyebrow">PLACEMENT SEASON 2024–25</div>
         <h1 class="home-title"><span id="cell-link" onclick="openCellPrompt()" title="Placement Cell Analytics" style="cursor:pointer;border-bottom:2px solid transparent;transition:border-color .2s;padding-bottom:1px;" onmouseover="this.style.borderBottomColor='#D3B6D2'" onmouseout="this.style.borderBottomColor='transparent'">Campus <em>Placement</em><br>Dashboard</span></h1>
         <p class="home-sub">Live data from all company sheets — registrations, attendeds and placements in one place.</p>
         <button class="btn-primary-inv" onclick="go('dashboard')">View All Companies →</button>
+        ${(adminMode||pcMode)?`<a href="placement-report.html" target="_blank" class="btn-primary-inv" style="display:inline-flex;align-items:center;gap:8px;margin-top:8px;background:linear-gradient(135deg,rgba(109,14,106,0.45),rgba(87,11,84,0.45));border-color:rgba(211,182,210,0.45);text-decoration:none;">📊 Visual Analytics Report ↗</a>`:''}
       </div>
       <div class="home-banner-right">
         <div class="stat-tile" onclick="showStatModal('companies')">
