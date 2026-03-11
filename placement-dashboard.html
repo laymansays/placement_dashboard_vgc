@@ -3797,7 +3797,7 @@ function buildJobSeekersSection(){
   const selCount = JOB_SEEKERS.filter(j=>j.selectedAt.length>0).length;
   const attCount = JOB_SEEKERS.filter(j=>j.attendedAt.length>0).length;
   const regCount = JOB_SEEKERS.filter(j=>j.registeredAt.length>0).length;
-  const noneCount= JOB_SEEKERS.filter(j=>!j.registeredAt.length&&!j.attendedAt.length&&!j.selectedAt.length).length;
+  const noneCount= JOB_SEEKERS.filter(j=>j.selectedAt.length===0).length; // Pending = not selected anywhere
 
   // Always include B.Com and BCA; append any additional degrees found in sheet data
   const fixedDegrees = ['B.Com', 'BCA'];
@@ -3866,9 +3866,9 @@ function buildJobSeekersTable(list, statusFilter){
 
   // Best-status pill (for All / Pending views)
   const bestPill = js => {
-    if(js.selectedAt.length)    return `<span class="js-status-pill js-status-selected">✅ Selected</span>`;
-    if(js.attendedAt.length)    return `<span class="js-status-pill js-status-attended">🎯 Attended</span>`;
-    if(js.registeredAt.length)  return `<span class="js-status-pill js-status-registered">📋 Registered</span>`;
+    if(js.selectedAt.length)   return `<span class="js-status-pill js-status-selected">✅ Selected</span>`;
+    if(js.attendedAt.length)   return `<span class="js-status-pill js-status-attended">🎯 Attended · not selected</span>`;
+    if(js.registeredAt.length) return `<span class="js-status-pill js-status-registered">📋 Registered · not interviewed</span>`;
     return `<span class="js-status-pill js-status-none">⏸ Pending</span>`;
   };
 
@@ -3959,8 +3959,7 @@ function applyJobSeekerFilters(){
   if(statusVal === 'Registered') filtered = filtered.filter(j => j.registeredAt.length > 0);
   else if(statusVal === 'Attended')   filtered = filtered.filter(j => j.attendedAt.length > 0);
   else if(statusVal === 'Selected')   filtered = filtered.filter(j => j.selectedAt.length > 0);
-  else if(statusVal === 'pending')    filtered = filtered.filter(j =>
-    !j.registeredAt.length && !j.attendedAt.length && !j.selectedAt.length);
+  else if(statusVal === 'pending')    filtered = filtered.filter(j => j.selectedAt.length === 0);
 
   if(degreeVal) filtered = filtered.filter(j => j.degree === degreeVal);
 
