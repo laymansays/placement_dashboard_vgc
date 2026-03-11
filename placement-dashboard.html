@@ -1606,7 +1606,7 @@ function buildHome(){
   <div class="home-wrap">
     <div class="home-banner">
       <div class="home-banner-left">
-        <div class="home-eyebrow">PLACEMENT SEASON 2025–26</div>
+        <div class="home-eyebrow">PLACEMENTS</div>
         <h1 class="home-title"><span id="cell-link" onclick="openCellPrompt()" title="Placement Cell Analytics" style="cursor:pointer;border-bottom:2px solid transparent;transition:border-color .2s;padding-bottom:1px;" onmouseover="this.style.borderBottomColor='#D3B6D2'" onmouseout="this.style.borderBottomColor='transparent'">Campus <em>Placement</em><br>Dashboard</span></h1>
         <p class="home-sub">Live data from all company sheets — registrations, attendeds and placements in one place.</p>
         <button class="btn-primary-inv" onclick="go('dashboard')">View All Companies →</button>
@@ -3805,8 +3805,12 @@ function buildJobSeekersSection(){
   const regCount = JOB_SEEKERS.filter(j=>j.status==='Registered').length;
   const noneCount= JOB_SEEKERS.filter(j=>!j.status).length;
 
+  // Always include B.Com and BCA; append any additional degrees found in sheet data
+  const fixedDegrees = ['B.Com', 'BCA'];
+  const extraDegrees = degrees.filter(d => !fixedDegrees.includes(d));
+  const allDegrees   = [...fixedDegrees, ...extraDegrees];
   const degreeOpts = `<option value="">All Degrees</option>`
-    + degrees.map(d=>`<option value="${xe(d)}">${xe(d)}</option>`).join('');
+    + allDegrees.map(d=>`<option value="${xe(d)}">${xe(d)}</option>`).join('');
 
   const statusOpts = `<option value="">All Statuses</option>
     <option value="Registered">📋 Registered</option>
@@ -3818,7 +3822,7 @@ function buildJobSeekersSection(){
     <option value="Registered">📋 Registered</option>
     <option value="Attended">🎯 Attended</option>
     <option value="Selected">✅ Selected</option>
-    <option value="none">— Not in any drive</option>`;
+    <option value="pending">⏸ Pending</option>`;
 
   const summaryBar = `
     <div class="js-summary-bar">
@@ -3826,7 +3830,7 @@ function buildJobSeekersSection(){
       <div class="js-summary-stat"><strong style="color:#166534">${selCount}</strong>Selected</div>
       <div class="js-summary-stat"><strong style="color:#1e40af">${attCount}</strong>Attended</div>
       <div class="js-summary-stat"><strong style="color:#92400e">${regCount}</strong>Registered</div>
-      <div class="js-summary-stat"><strong style="color:var(--text4)">${noneCount}</strong>Not in any drive</div>
+      <div class="js-summary-stat"><strong style="color:var(--text4)">${noneCount}</strong>Pending</div>
     </div>`;
 
   return `
@@ -3865,7 +3869,7 @@ function buildJobSeekersTable(list){
     if(js.status==='Selected')   return `<span class="js-status-pill js-status-selected">✅ Selected</span>`;
     if(js.status==='Attended')   return `<span class="js-status-pill js-status-attended">🎯 Attended</span>`;
     if(js.status==='Registered') return `<span class="js-status-pill js-status-registered">📋 Registered</span>`;
-    return `<span class="js-status-pill js-status-none">— Not in any drive</span>`;
+    return `<span class="js-status-pill js-status-none">⏸ Pending</span>`;
   };
 
   const rows = list.map((js,i) => `
@@ -3917,13 +3921,13 @@ function applyJobSeekerFilters(){
   if(!tableBody) return;
 
   let filtered = JOB_SEEKERS;
-  if(statusVal === 'none')   filtered = filtered.filter(j => !j.status);
+  if(statusVal === 'pending') filtered = filtered.filter(j => !j.status);
   else if(statusVal)         filtered = filtered.filter(j => j.status === statusVal);
   if(degreeVal)              filtered = filtered.filter(j => j.degree === degreeVal);
 
   if(hint){
     const parts = [];
-    if(statusVal) parts.push(statusVal === 'none' ? 'Not in any drive' : statusVal);
+    if(statusVal) parts.push(statusVal === 'pending' ? 'Pending' : statusVal);
     if(degreeVal) parts.push(degreeVal);
     hint.textContent = parts.length ? `${filtered.length} student${filtered.length!==1?'s':''} · ${parts.join(', ')}` : '';
   }
