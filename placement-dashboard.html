@@ -834,6 +834,7 @@ body.admin-mode .modal{border-top:3px solid var(--admin);}
 const CONFIG_SHEET_ID = '1Mb9jrzZMSta5NYs28i3STS2tYNqhMtabj3wktvHiYmw';
 const CONFIG_TAB      = 'CONFIG_TAB';   // Main config tab — tab renamed by user
 const ADMIN_DATA_TAB  = 'ADMIN_MODE';   // Admin overrides tab — tab renamed by user
+const JOB_SEEKERS_TAB = 'JOB_SEEKERS';  // Students looking for jobs post-degree
 const ADMIN_PIN       = '1234';
 const JOIN_PIN        = '2007';   // Placement Cell Mode
 const CACHE_TTL       = 60000;          // 60s per company
@@ -844,6 +845,7 @@ const _WEBAPP         = 'https://script.google.com/macros/s/AKfycbzeh9Op-cDApwuN
 ════════════════════════════════════════════════════ */
 let COMPANIES   = [];   // Built from config sheet
 let ADMIN_DATA  = {};   // Keyed by company name, from Admin Data tab
+let JOB_SEEKERS = [];   // Students looking for jobs — from JOB_SEEKERS tab
 let view        = 'home';
 let cId         = null;
 let adminMode   = false;
@@ -1284,6 +1286,16 @@ async function init(){
     // 3. Merge admin data into companies
     mergeAdminData();
 
+    // 3b. Load job seekers list (non-fatal)
+    try {
+      const jsCSV = await fetchSheetCSV(CONFIG_SHEET_ID, JOB_SEEKERS_TAB);
+      JOB_SEEKERS = parseJobSeekers(jsCSV);
+      console.log('[JobSeekers] loaded', JOB_SEEKERS.length, 'students');
+    } catch(e) {
+      JOB_SEEKERS = [];
+      console.warn('[JobSeekers] tab not found or empty:', e.message);
+    }
+
     // 4. Show app
     _clearCountdown();
     document.getElementById('loading-screen').classList.add('hide');
@@ -1333,6 +1345,8 @@ async function loadAllStudents(){
   document.getElementById('refresh-bar').classList.add('show');
   await Promise.all(COMPANIES.map(c => loadStudents(c)));
   document.getElementById('refresh-bar').classList.remove('show');
+  // After all student data loaded, resolve job seeker statuses and persist to sheet
+  if(JOB_SEEKERS.length) resolveJobSeekerStatuses();
   if(view==='home') buildHome();
   else if(view==='dashboard') buildDashboard();
   else if(view==='detail') buildDetail(cId);
@@ -1592,7 +1606,7 @@ function buildHome(){
   <div class="home-wrap">
     <div class="home-banner">
       <div class="home-banner-left">
-        <div class="home-eyebrow">PLACEMENT SEASON 2024–25</div>
+        <div class="home-eyebrow">PLACEMENT SEASON 2025–26</div>
         <h1 class="home-title"><span id="cell-link" onclick="openCellPrompt()" title="Placement Cell Analytics" style="cursor:pointer;border-bottom:2px solid transparent;transition:border-color .2s;padding-bottom:1px;" onmouseover="this.style.borderBottomColor='#D3B6D2'" onmouseout="this.style.borderBottomColor='transparent'">Campus <em>Placement</em><br>Dashboard</span></h1>
         <p class="home-sub">Live data from all company sheets — registrations, attendeds and placements in one place.</p>
         <button class="btn-primary-inv" onclick="go('dashboard')">View All Companies →</button>
@@ -1638,6 +1652,7 @@ function buildHome(){
       <div class="section-divider"></div>
       <div class="co-cards-grid">${COMPANIES.map(c=>coCardHtml(c)).join('')}</div>
     </div>
+    ${(adminMode||pcMode) && JOB_SEEKERS.length ? buildJobSeekersSection() : ''}
   </div>`;
   document.querySelectorAll('.co-card[data-id]').forEach(el=>{
     el.onclick=()=>go('detail',parseInt(el.dataset.id));
@@ -3606,6 +3621,284 @@ async function executeBulkUpload(companyId){
 
   // Refresh detail view after a short delay
   setTimeout(()=>{ closeModal(); go(view,cId); }, 1200);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   JOB SEEKERS — parse, match, render, persist
+══════════════════════════════════════════════════════════════════ */
+
+/* ── CSS injected once ── */
+(function(){
+  const id = 'js-section-styles';
+  if(document.getElementById(id)) return;
+  const s = document.createElement('style');
+  s.id = id;
+  s.textContent = `
+    .js-section{margin-top:32px;padding:0;}
+    .js-section-head{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:14px 0 10px;cursor:pointer;user-select:none;
+    }
+    .js-section-head-left{display:flex;align-items:center;gap:10px;}
+    .js-section-title{font-size:20px;font-weight:700;color:var(--text);letter-spacing:-0.02em;}
+    .js-count{
+      font-size:12px;font-weight:700;padding:2px 9px;border-radius:99px;
+      background:rgba(109,14,106,0.15);color:var(--purple);border:1px solid rgba(109,14,106,0.25);
+    }
+    .js-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+    .js-degree-select{
+      padding:6px 32px 6px 12px;border-radius:10px;
+      border:1.5px solid var(--border);background:var(--bg2);color:var(--text);
+      font-size:12.5px;font-weight:600;font-family:inherit;cursor:pointer;outline:none;
+      -webkit-appearance:none;appearance:none;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M6 8L2 4h8z' fill='%23888'/%3E%3C/svg%3E");
+      background-repeat:no-repeat;background-position:right 10px center;
+      transition:border-color .15s;
+    }
+    .js-degree-select:focus{border-color:var(--purple);}
+    .js-hint{font-size:11px;color:var(--text4);}
+    .js-table-wrap{overflow-x:auto;border-radius:12px;border:1px solid var(--border);margin-top:12px;}
+    .js-table{width:100%;border-collapse:collapse;font-size:12.5px;}
+    .js-table thead tr{background:var(--bg2);}
+    .js-table th{
+      padding:10px 14px;text-align:left;font-size:10.5px;font-weight:700;
+      color:var(--text4);text-transform:uppercase;letter-spacing:.05em;
+      border-bottom:1px solid var(--border);white-space:nowrap;
+    }
+    .js-table td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:middle;}
+    .js-table tr:last-child td{border-bottom:none;}
+    .js-table tr:hover td{background:var(--bg2);}
+    .js-status-pill{
+      display:inline-flex;align-items:center;gap:5px;
+      padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;white-space:nowrap;
+    }
+    .js-status-selected{background:#DCFCE7;color:#166534;border:1px solid #86EFAC;}
+    .js-status-attended{background:#DBEAFE;color:#1e40af;border:1px solid #93C5FD;}
+    .js-status-registered{background:#FEF3C7;color:#92400e;border:1px solid #FCD34D;}
+    .js-status-none{background:var(--bg2);color:var(--text4);border:1px solid var(--border);}
+    .js-company-tag{
+      font-size:11px;color:var(--text3);background:var(--bg2);
+      border:1px solid var(--border);border-radius:6px;
+      padding:2px 7px;white-space:nowrap;max-width:160px;
+      overflow:hidden;text-overflow:ellipsis;display:inline-block;
+    }
+    .js-summary-bar{
+      display:flex;gap:20px;flex-wrap:wrap;
+      margin-top:10px;padding:12px 16px;
+      background:var(--bg2);border-radius:10px;border:1px solid var(--border);
+    }
+    .js-summary-stat{font-size:12px;color:var(--text3);}
+    .js-summary-stat strong{font-size:18px;font-weight:900;color:var(--text);letter-spacing:-0.03em;margin-right:4px;}
+  `;
+  document.head.appendChild(s);
+})();
+
+/* ── Parse JOB_SEEKERS CSV ── */
+function parseJobSeekers(csv){
+  const rows = parseCSV(csv);
+  if(rows.length < 2) return [];
+  const hdr = rows[0].map(h => h.toLowerCase().replace(/[^a-z]/g,''));
+  const col = (...ks) => { for(const k of ks){ const i=hdr.findIndex(h=>h.includes(k)); if(i!==-1)return i; } return -1; };
+  const iName   = col('name');
+  const iPhone  = col('phone','mobile','contact');
+  const iDegree = col('degree','course','program');
+  const iEmail  = col('email','mail');
+  const iStatus = col('status');
+  const iCompany= col('company');
+
+  return rows.slice(1).map(r => {
+    const name = (r[iName]||'').trim();
+    if(!name) return null;
+    return {
+      name,
+      phone:         (r[iPhone]  ||'').trim(),
+      degree:        (r[iDegree] ||'').trim(),
+      email:         (r[iEmail]  ||'').trim(),
+      cachedStatus:  iStatus  >=0 ? (r[iStatus] ||'').trim() : '',
+      cachedCompany: iCompany >=0 ? (r[iCompany]||'').trim() : '',
+      // live status resolved after student data loads — starts from cached
+      status:  iStatus  >=0 ? (r[iStatus] ||'').trim() : '',
+      company: iCompany >=0 ? (r[iCompany]||'').trim() : '',
+    };
+  }).filter(Boolean);
+}
+
+/* ── Resolve placement status for each job seeker ── */
+const STATUS_RANK = { 'Selected':3, 'Attended':2, 'Registered':1 };
+
+function resolveJobSeekerStatuses(){
+  let changed = 0;
+  JOB_SEEKERS.forEach(js => {
+    let bestRank = 0, bestStatus = '', bestCompany = '';
+
+    COMPANIES.forEach(co => {
+      const check = (list, statusLabel) => {
+        const match = list.find(s => {
+          // Email match (most reliable)
+          if(js.email && s.email && js.email.toLowerCase()===s.email.toLowerCase()) return true;
+          // Fuzzy name match (threshold 0.60)
+          const score = _fuzzyScore(js.name, s.name||'');
+          return score >= 0.60;
+        });
+        if(match && (STATUS_RANK[statusLabel]||0) > bestRank){
+          bestRank    = STATUS_RANK[statusLabel];
+          bestStatus  = statusLabel;
+          bestCompany = co.name;
+        }
+      };
+      check(co.studentsSelected,    'Selected');
+      check(co.studentsInterviewed, 'Attended');
+      check(co.studentsRegistered,  'Registered');
+    });
+
+    const prevStatus  = js.status;
+    const prevCompany = js.company;
+    js.status  = bestStatus;
+    js.company = bestCompany;
+
+    // Write back to sheet only if status has changed from what's cached in the sheet
+    if(js.status !== js.cachedStatus || js.company !== js.cachedCompany){
+      changed++;
+      persistJobSeekerStatus(js);
+    }
+  });
+
+  console.log(`[JobSeekers] resolved — ${changed} status updates queued`);
+  // Re-render home if visible to reflect updated statuses
+  if(view === 'home') buildHome();
+}
+
+/* ── Persist a single job seeker's status to the sheet ── */
+async function persistJobSeekerStatus(js){
+  try {
+    const payload = {
+      action:     'updateJobSeekerStatus',
+      sheetId:    CONFIG_SHEET_ID,
+      tabName:    JOB_SEEKERS_TAB,
+      studentName:  js.name,
+      studentEmail: js.email || '',
+      status:     js.status,
+      company:    js.company,
+    };
+    const res  = await fetch(_WEBAPP, { method:'POST', body: JSON.stringify(payload) });
+    const data = await res.json();
+    if(data.ok){
+      // Update cache so we don't re-write on next load unless it changes again
+      js.cachedStatus  = js.status;
+      js.cachedCompany = js.company;
+    } else {
+      console.warn('[JobSeekers] persist failed for', js.name, data.error);
+    }
+  } catch(e){
+    console.warn('[JobSeekers] persist error for', js.name, e.message);
+  }
+}
+
+/* ── Build the home section HTML ── */
+function buildJobSeekersSection(){
+  const degrees = [...new Set(JOB_SEEKERS.map(j=>j.degree).filter(Boolean))].sort();
+
+  // Summary counts (all students, not filtered)
+  const totalJS  = JOB_SEEKERS.length;
+  const selCount = JOB_SEEKERS.filter(j=>j.status==='Selected').length;
+  const attCount = JOB_SEEKERS.filter(j=>j.status==='Attended').length;
+  const regCount = JOB_SEEKERS.filter(j=>j.status==='Registered').length;
+  const noneCount= JOB_SEEKERS.filter(j=>!j.status).length;
+
+  const degreeOpts = `<option value="">All Degrees (${totalJS})</option>`
+    + degrees.map(d=>{
+        const n = JOB_SEEKERS.filter(j=>j.degree===d).length;
+        return `<option value="${xe(d)}">${xe(d)} (${n})</option>`;
+      }).join('');
+
+  const summaryBar = `
+    <div class="js-summary-bar">
+      <div class="js-summary-stat"><strong>${totalJS}</strong>Total</div>
+      <div class="js-summary-stat"><strong style="color:#166534">${selCount}</strong>Selected</div>
+      <div class="js-summary-stat"><strong style="color:#1e40af">${attCount}</strong>Attended</div>
+      <div class="js-summary-stat"><strong style="color:#92400e">${regCount}</strong>Registered</div>
+      <div class="js-summary-stat"><strong style="color:var(--text4)">${noneCount}</strong>Not yet in any drive</div>
+    </div>`;
+
+  return `
+  <div class="js-section" id="js-section-wrap">
+    <div class="section-divider" style="margin-top:8px;"></div>
+    <div class="js-section-head" onclick="toggleJobSeekers()">
+      <div class="js-section-head-left">
+        <span class="student-section-chevron" id="js-chevron">▼</span>
+        <span class="js-section-title">🎯 Job Seekers</span>
+        <span class="js-count">${totalJS}</span>
+      </div>
+      <div class="js-controls" onclick="event.stopPropagation()">
+        <select class="js-degree-select" id="js-degree-filter" onchange="filterJobSeekers(this.value)">
+          ${degreeOpts}
+        </select>
+        <span class="js-hint" id="js-filter-hint"></span>
+      </div>
+    </div>
+    ${summaryBar}
+    <div id="js-body">
+      ${buildJobSeekersTable(JOB_SEEKERS)}
+    </div>
+  </div>`;
+}
+
+function buildJobSeekersTable(list){
+  if(!list.length) return `<div class="no-data" style="padding:24px;">📭 No students match this filter</div>`;
+
+  const statusPill = js => {
+    if(js.status==='Selected')   return `<span class="js-status-pill js-status-selected">✅ Selected</span>`;
+    if(js.status==='Attended')   return `<span class="js-status-pill js-status-attended">🎯 Attended</span>`;
+    if(js.status==='Registered') return `<span class="js-status-pill js-status-registered">📋 Registered</span>`;
+    return `<span class="js-status-pill js-status-none">— Not in any drive</span>`;
+  };
+
+  const rows = list.map((js,i) => `
+    <tr>
+      <td style="color:var(--text4);font-size:11px;">${i+1}</td>
+      <td style="font-weight:600;color:var(--text);">${xe(js.name)}</td>
+      <td style="color:var(--text3);">${xe(js.phone||'—')}</td>
+      <td><span style="font-size:11px;color:var(--text4);background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:2px 7px;">${xe(js.degree||'—')}</span></td>
+      <td>${statusPill(js)}</td>
+      <td>${js.company ? `<span class="js-company-tag" title="${xe(js.company)}">${xe(js.company)}</span>` : '<span style="color:var(--text4);font-size:11px;">—</span>'}</td>
+    </tr>`).join('');
+
+  return `
+    <div class="js-table-wrap">
+      <table class="js-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Degree</th>
+            <th>Placement Status</th>
+            <th>Company</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+}
+
+/* ── Toggle collapse ── */
+function toggleJobSeekers(){
+  const body    = document.getElementById('js-body');
+  const chevron = document.getElementById('js-chevron');
+  if(!body) return;
+  const isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : '';
+  if(chevron) chevron.textContent = isOpen ? '▶' : '▼';
+}
+
+/* ── Degree filter ── */
+function filterJobSeekers(degree){
+  const body = document.getElementById('js-body');
+  const hint = document.getElementById('js-filter-hint');
+  if(!body) return;
+  const filtered = degree ? JOB_SEEKERS.filter(j=>j.degree===degree) : JOB_SEEKERS;
+  if(hint) hint.textContent = degree ? `${filtered.length} student${filtered.length!==1?'s':''}` : '';
+  body.innerHTML = buildJobSeekersTable(filtered);
 }
 
 </script>
