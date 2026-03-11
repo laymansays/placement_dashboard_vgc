@@ -1592,7 +1592,7 @@ function buildHome(){
   <div class="home-wrap">
     <div class="home-banner">
       <div class="home-banner-left">
-        <div class="home-eyebrow">PLACEMENT SEASON 2025–26</div>
+        <div class="home-eyebrow">PLACEMENT SEASON 2024–25</div>
         <h1 class="home-title"><span id="cell-link" onclick="openCellPrompt()" title="Placement Cell Analytics" style="cursor:pointer;border-bottom:2px solid transparent;transition:border-color .2s;padding-bottom:1px;" onmouseover="this.style.borderBottomColor='#D3B6D2'" onmouseout="this.style.borderBottomColor='transparent'">Campus <em>Placement</em><br>Dashboard</span></h1>
         <p class="home-sub">Live data from all company sheets — registrations, attendeds and placements in one place.</p>
         <button class="btn-primary-inv" onclick="go('dashboard')">View All Companies →</button>
@@ -2088,11 +2088,15 @@ async function uploadOfferLetter(companyId, studentIdx, emailOrName, fileInput){
   const filename = `OfferLetter_${xe(co.name).replace(/[^a-zA-Z0-9]/g,'_')}_${safeName}_${Date.now()}.${file.name.split('.').pop()}`;
 
   try {
+    // Find the student object for email+name lookup
+    const _student = co.studentsSelected.find(s=>(s.email||s.name||'')===(emailOrName));
     const payload = {
       action: 'uploadOfferLetter',
       sheetId: co.sheetId,
       tabName: co.tabSel,
-      emailOrName: emailOrName,
+      studentEmail: _student ? (_student.email||'') : '',
+      studentName:  _student ? (_student.name ||'') : emailOrName,
+      emailOrName:  emailOrName,
       fileBase64: b64,
       filename: filename,
       mimeType: file.type || 'application/octet-stream'
@@ -2137,6 +2141,9 @@ function buildStudentSection(title,students,anchorId,companyId){
     : '';
   const analyticBtn = isSelected && students.length
     ? `<button class="btn-pdf-download" style="background:linear-gradient(135deg,#570B54,#3A0838);color:#fff;border:none;" onclick="event.stopPropagation();openCompanyAnalytics(${companyId})">📊 Analytics</button>`
+    : '';
+  const bulkUploadBtn = isSelected && students.length && adminMode
+    ? `<label id="bulk-ol-label-${companyId}" title="Match filenames to student names and upload in bulk" style="cursor:pointer;"><input type="file" multiple accept=".pdf,image/*" style="display:none" onchange="bulkOfferLetterModal(${companyId},this)"><button class="btn-pdf-download" style="background:linear-gradient(135deg,#0e4a6a,#0369a1);color:#fff;border:none;pointer-events:none;">📤 Upload All Offer Letters</button></label>`
     : '';
 
   const statusCell = (s, i) => {
@@ -2186,7 +2193,7 @@ function buildStudentSection(title,students,anchorId,companyId){
   return`<div id="${anchorId}" class="student-section">
     <div class="student-section-head">
       <div class="student-section-head-left"><span class="student-section-title">${title}</span><span class="student-count">${students.length}</span></div>
-      <div style="display:flex;gap:8px;">${analyticBtn}${pdfBtn}</div>
+      <div style="display:flex;gap:8px;">${analyticBtn}${bulkUploadBtn}${pdfBtn}</div>
     </div>
     ${table}
   </div>`;
@@ -3286,6 +3293,303 @@ async function downloadAnalyticsPDF(companyId){
 
   doc.save('VVFGC_'+xe(co.name).replace(/[^a-zA-Z0-9]/g,'_')+'_Analytics_'+DATE.replace(/ /g,'-')+'.pdf');
   toast('Visual analytics report downloaded','success','⬇');
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   BULK OFFER LETTER UPLOAD — admin-only
+   Flow: files selected → fuzzy-match names → preview modal → upload
+══════════════════════════════════════════════════════════════════ */
+
+/* ── Fuzzy Name Matching Engine ── */
+function _normName(s){
+  return String(s||'')
+    .toLowerCase()
+    .replace(/[^a-z\s]/g,' ')   // strip digits, punctuation
+    .replace(/\b(mr|ms|mrs|dr|prof|sri|shri|smt|kumari|km)\b/g,' ')
+    .replace(/\s+/g,' ')
+    .trim();
+}
+
+function _extractNameFromFilename(fname){
+  return fname
+    .replace(/\.[^.]+$/,'')          // strip extension
+    .replace(/[_\-\.]+/g,' ')        // separators → space
+    .replace(/\b(offer|letter|ol|placement|certificate|selected|joined|vgc|vvfgc|vidyavahini|20\d\d)\b/gi,' ')
+    .replace(/\b\d{6,}\b/g,' ')      // strip long numbers (roll/date)
+    .replace(/\b\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}\b/g,' ') // dates
+    .replace(/\s+/g,' ').trim();
+}
+
+function _levenshtein(a, b){
+  const m=a.length, n=b.length;
+  const dp=Array.from({length:m+1},(_,i)=>[i,...Array(n).fill(0)]);
+  for(let j=0;j<=n;j++) dp[0][j]=j;
+  for(let i=1;i<=m;i++) for(let j=1;j<=n;j++){
+    dp[i][j]=a[i-1]===b[j-1]?dp[i-1][j-1]:1+Math.min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1]);
+  }
+  return dp[m][n];
+}
+
+function _tokenOverlap(a, b){
+  const ta=new Set(a.split(' ').filter(Boolean));
+  const tb=new Set(b.split(' ').filter(Boolean));
+  if(!ta.size||!tb.size) return 0;
+  let hits=0;
+  ta.forEach(t=>{ if(tb.has(t)) hits++; });
+  return hits / Math.max(ta.size, tb.size);
+}
+
+function _initialsMatch(nameFile, nameStudent){
+  // "A K Sharma" vs "Anil Kumar Sharma" — check if all tokens of shorter are initials of longer
+  const tf=nameFile.split(' ').filter(Boolean);
+  const ts=nameStudent.split(' ').filter(Boolean);
+  if(tf.length<1||ts.length<1) return 0;
+  // Check if file tokens are initials of student tokens (in any order)
+  let matched=0;
+  tf.forEach(tok=>{
+    if(tok.length===1){
+      // single letter — check if any student token starts with it
+      if(ts.some(st=>st.startsWith(tok))) matched++;
+    } else {
+      if(ts.includes(tok)) matched++;
+    }
+  });
+  return matched / Math.max(tf.length,1);
+}
+
+function _substrScore(a, b){
+  // Does b contain a? (handles extra middle name in student list)
+  const ta=a.split(' ').filter(Boolean);
+  const tb=b.split(' ').filter(Boolean);
+  if(!ta.length) return 0;
+  const matchedTokens=ta.filter(t=>tb.includes(t));
+  return matchedTokens.length / ta.length;
+}
+
+function _fuzzyScore(fileRaw, studentName){
+  const fn = _normName(_extractNameFromFilename(fileRaw));
+  const sn = _normName(studentName);
+  if(!fn || !sn) return 0;
+
+  // Exact after normalisation
+  if(fn===sn) return 1.0;
+
+  // Token overlap (handles reordered name parts)
+  const tok = _tokenOverlap(fn, sn);
+
+  // Levenshtein similarity
+  const maxLen = Math.max(fn.length, sn.length);
+  const lev = maxLen>0 ? 1 - _levenshtein(fn,sn)/maxLen : 0;
+
+  // Initials
+  const ini = _initialsMatch(fn, sn);
+
+  // Substring / partial (file name tokens all exist in student name)
+  const sub = _substrScore(fn, sn);
+
+  // Weighted best
+  return Math.max(tok*0.9, lev*0.75, ini*0.80, sub*0.85);
+}
+
+function matchFilesToStudents(files, students){
+  /*
+    Returns array of match objects:
+    { file, fileName, extractedName, student(best), score, allMatches }
+  */
+  return Array.from(files).map(file=>{
+    const allMatches = students.map(s=>{
+      const score = _fuzzyScore(file.name, s.name||s.email||'');
+      return {student:s, score};
+    }).sort((a,b)=>b.score-a.score);
+
+    const best = allMatches[0];
+    return {
+      file,
+      fileName: file.name,
+      extractedName: _normName(_extractNameFromFilename(file.name)),
+      student: best && best.score>=0.30 ? best.student : null,
+      score: best ? best.score : 0,
+      allMatches,
+      skip: false,
+    };
+  });
+}
+
+/* ── Modal renderer ── */
+function bulkOfferLetterModal(companyId, fileInput){
+  const co = COMPANIES.find(x=>x.id===companyId);
+  if(!co||!fileInput.files.length){ return; }
+  const students = co.studentsSelected;
+  if(!students.length){ toast('No selected students found','error'); return; }
+
+  const matches = matchFilesToStudents(fileInput.files, students);
+  fileInput.value = ''; // reset so same files can be re-chosen
+
+  const confLabel = s => s>=0.85 ? ['#16A34A','High','✅'] : s>=0.55 ? ['#D97706','Medium','⚠️'] : s>=0.30 ? ['#DC2626','Low','❓'] : ['#94a3b8','None','—'];
+
+  const studentOptions = students.map((s,i)=>`<option value="${i}">${xe(s.name||s.email||'Student '+(i+1))}</option>`).join('');
+
+  const rows = matches.map((m,mi)=>{
+    const [col,lbl,ico] = confLabel(m.score);
+    // Always pick best match — never skip by default. Use index 0 if no match found.
+    const matchedIdx = m.student ? students.indexOf(m.student) : 0;
+    return `
+    <tr id="bulk-row-${mi}" style="border-bottom:1px solid var(--border);">
+      <td style="padding:10px 8px;font-size:11px;color:var(--text2);max-width:180px;word-break:break-all;">
+        📄 ${xe(m.fileName)}
+        <div style="font-size:10px;color:var(--text4);margin-top:2px;">Extracted: <em>${xe(m.extractedName)||'—'}</em></div>
+      </td>
+      <td style="padding:10px 8px;min-width:180px;">
+        <select id="bulk-sel-${mi}" style="width:100%;padding:5px 8px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg2);color:var(--text1);font-size:11.5px;font-family:inherit;cursor:pointer;"
+          onchange="document.getElementById('bulk-conf-${mi}').textContent=''">
+          ${students.map((s,i)=>`<option value="${i}" ${i===matchedIdx?'selected':''}>${xe(s.name||s.email||'Student '+(i+1))}</option>`).join('')}
+        </select>
+      </td>
+      <td style="padding:10px 8px;text-align:center;">
+        <span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:${col};">${ico} ${lbl}</span>
+        <div style="font-size:10px;color:var(--text4);">${Math.round(m.score*100)}%</div>
+      </td>
+      <td id="bulk-status-${mi}" style="padding:10px 8px;text-align:center;font-size:12px;min-width:60px;"></td>
+    </tr>`;
+  }).join('');
+
+  const highConf  = matches.filter(m=>m.score>=0.85).length;
+  const medConf   = matches.filter(m=>m.score>=0.55&&m.score<0.85).length;
+  const lowConf   = matches.filter(m=>m.score<0.55).length;
+
+  const html = `
+  <div style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.6;">
+    <strong style="color:var(--text1);">${matches.length} file${matches.length!==1?'s':''} — all will be uploaded.</strong>
+    &nbsp;✅ <span style="color:#16A34A;font-weight:700;">${highConf} high</span>
+    &nbsp;⚠️ <span style="color:#D97706;font-weight:700;">${medConf} medium</span>
+    &nbsp;❓ <span style="color:#DC2626;font-weight:700;">${lowConf} low</span> confidence.
+    <br><span style="font-size:11px;color:var(--text4);">⚠️ Low-confidence rows are pre-assigned to best guess — review and correct before uploading.</span>
+  </div>
+  <div style="overflow-x:auto;border-radius:10px;border:1px solid var(--border);margin-bottom:16px;">
+  <table style="width:100%;border-collapse:collapse;">
+    <thead>
+      <tr style="background:var(--bg2);font-size:10.5px;font-weight:700;color:var(--text4);text-transform:uppercase;letter-spacing:.05em;">
+        <th style="padding:10px 8px;text-align:left;">File</th>
+        <th style="padding:10px 8px;text-align:left;">Assign to Student</th>
+        <th style="padding:10px 8px;text-align:center;">Confidence</th>
+        <th style="padding:10px 8px;text-align:center;">Status</th>
+      </tr>
+    </thead>
+    <tbody>${rows}</tbody>
+  </table>
+  </div>
+  <div id="bulk-progress-bar-wrap" style="display:none;margin-bottom:12px;">
+    <div style="font-size:11px;color:var(--text4);margin-bottom:6px;" id="bulk-progress-txt">Uploading…</div>
+    <div style="height:6px;background:var(--bg2);border-radius:99px;overflow:hidden;">
+      <div id="bulk-progress-bar" style="height:100%;background:#16A34A;border-radius:99px;width:0%;transition:width .3s;"></div>
+    </div>
+  </div>
+  <div style="display:flex;gap:10px;justify-content:flex-end;">
+    <button class="btn btn-outline btn-sm" onclick="closeModal()">Cancel</button>
+    <button class="btn btn-admin btn-sm" id="bulk-upload-btn"
+      onclick="executeBulkUpload(${companyId})" style="background:linear-gradient(135deg,#0e4a6a,#0369a1);color:#fff;border:none;">
+      📤 Upload All Matched
+    </button>
+  </div>`;
+
+  openModalWide(`<span>📤 Bulk Offer Letter Upload</span> <span style="font-size:12px;font-weight:500;color:var(--text4);margin-left:8px;">${xe(co.name)}</span>`, html, 780);
+
+  // Store matches on window for upload phase
+  window._bulkMatches = matches;
+  window._bulkCompanyId = companyId;
+}
+
+async function executeBulkUpload(companyId){
+  const co = COMPANIES.find(x=>x.id===companyId);
+  if(!co) return;
+  const matches = window._bulkMatches || [];
+  const btn = document.getElementById('bulk-upload-btn');
+  if(btn) btn.disabled = true;
+
+  const tasks = matches.map((m, mi)=>{
+    const sel = document.getElementById(`bulk-sel-${mi}`);
+    const idx = sel ? parseInt(sel.value) : -1;
+    return { m, mi, studentIdx: idx };
+  }).filter(t => t.studentIdx >= 0);
+
+  if(!tasks.length){
+    toast('No students assigned — nothing to upload','error'); 
+    if(btn) btn.disabled=false;
+    return;
+  }
+
+  // Show progress
+  const pw = document.getElementById('bulk-progress-bar-wrap');
+  if(pw) pw.style.display='block';
+
+  let done=0, failed=0;
+  const MAX = 8*1024*1024;
+
+  for(const {m, mi, studentIdx} of tasks){
+    const statusEl = document.getElementById(`bulk-status-${mi}`);
+    const student = co.studentsSelected[studentIdx];
+    if(!student){ 
+      if(statusEl) statusEl.innerHTML='<span style="color:#94a3b8;">Skipped</span>'; 
+      continue;
+    }
+    if(statusEl) statusEl.innerHTML='<span style="color:#D97706;">⏳</span>';
+
+    try{
+      if(m.file.size > MAX) throw new Error('File >8MB');
+
+      const b64 = await new Promise(res=>{ const fr=new FileReader(); fr.onload=()=>res(fr.result.split(',')[1]); fr.readAsDataURL(m.file); });
+      const emailOrName = (student.email||student.name||'').replace(/[^a-zA-Z0-9_@.-]/g,'_');
+      const safeCo = co.name.replace(/[^a-zA-Z0-9]/g,'_');
+      const ext = m.file.name.split('.').pop()||'pdf';
+      const filename = `OfferLetter_${safeCo}_${emailOrName}_${Date.now()}.${ext}`;
+
+      const payload = {
+        action: 'uploadOfferLetter',
+        sheetId: co.sheetId,
+        tabName: co.tabSel,
+        studentEmail: student.email || '',
+        studentName:  student.name  || '',
+        emailOrName:  student.email || student.name || '',
+        fileBase64: b64,
+        filename,
+        mimeType: m.file.type || 'application/octet-stream'
+      };
+      const res  = await fetch(_WEBAPP, { method:'POST', body: JSON.stringify(payload) });
+      const data = await res.json();
+      if(!data.ok) throw new Error(data.error||'Upload failed');
+
+      // Update in-memory
+      co.studentsSelected[studentIdx].offerLetter = data.url;
+      if(statusEl) statusEl.innerHTML='<a href="'+data.url+'" target="_blank" style="color:#16A34A;font-size:12px;font-weight:700;text-decoration:none;">✅ Done</a>';
+      done++;
+
+    } catch(e){
+      if(statusEl) statusEl.innerHTML=`<span style="color:#DC2626;font-size:10px;" title="${xe(e.message)}">❌ Failed</span>`;
+      failed++;
+    }
+
+    // Update progress bar
+    const progress = Math.round((done+failed)/tasks.length*100);
+    const pb = document.getElementById('bulk-progress-bar');
+    const pt = document.getElementById('bulk-progress-txt');
+    if(pb) pb.style.width = progress+'%';
+    if(pt) pt.textContent = `Uploaded ${done}/${tasks.length}${failed?' · '+failed+' failed':''}…`;
+  }
+
+  if(btn) btn.disabled=false;
+  const pt = document.getElementById('bulk-progress-txt');
+  if(pt) pt.textContent = `Done — ${done} uploaded${failed?' · '+failed+' failed':''}`;
+
+  toast(
+    done===tasks.length
+      ? `All ${done} offer letters uploaded ✓`
+      : `${done}/${tasks.length} uploaded${failed?' · '+failed+' failed':''}`,
+    done>0?'success':'error','📎'
+  );
+
+  // Refresh detail view after a short delay
+  setTimeout(()=>{ closeModal(); go(view,cId); }, 1200);
 }
 
 </script>
