@@ -2143,7 +2143,8 @@ function buildStudentSection(title,students,anchorId,companyId){
     ? `<button class="btn-pdf-download" style="background:linear-gradient(135deg,#570B54,#3A0838);color:#fff;border:none;" onclick="event.stopPropagation();openCompanyAnalytics(${companyId})">📊 Analytics</button>`
     : '';
   const bulkUploadBtn = isSelected && students.length && adminMode
-    ? `<label id="bulk-ol-label-${companyId}" title="Match filenames to student names and upload in bulk" style="cursor:pointer;"><input type="file" multiple accept=".pdf,image/*" style="display:none" onchange="bulkOfferLetterModal(${companyId},this)"><button class="btn-pdf-download" style="background:linear-gradient(135deg,#0e4a6a,#0369a1);color:#fff;border:none;pointer-events:none;">📤 Upload All Offer Letters</button></label>`
+    ? `<input type="file" id="bulk-ol-input-${companyId}" multiple accept=".pdf,image/*" style="display:none" onchange="bulkOfferLetterModal(${companyId},this)">
+       <button class="btn-pdf-download" style="background:linear-gradient(135deg,#0e4a6a,#0369a1);color:#fff;border:none;" title="Match filenames to student names and upload all offer letters at once" onclick="event.stopPropagation();document.getElementById('bulk-ol-input-${companyId}').click()">📤 Upload All Offer Letters</button>`
     : '';
 
   const statusCell = (s, i) => {
