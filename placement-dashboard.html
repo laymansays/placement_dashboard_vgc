@@ -834,7 +834,8 @@ body.admin-mode .modal{border-top:3px solid var(--admin);}
 const CONFIG_SHEET_ID = '1Mb9jrzZMSta5NYs28i3STS2tYNqhMtabj3wktvHiYmw';
 const CONFIG_TAB      = 'CONFIG_TAB';   // Main config tab — tab renamed by user
 const ADMIN_DATA_TAB  = 'ADMIN_MODE';   // Admin overrides tab — tab renamed by user
-const JOB_SEEKERS_TAB = 'JOB_SEEKERS';  // Students looking for jobs post-degree
+const JOB_SEEKERS_TAB  = 'JOB_SEEKERS';  // Students looking for jobs post-degree
+const STUDENT_DB_TAB   = 'STUDENT DB';    // Central phone/email directory
 const ADMIN_PIN       = '1234';
 const JOIN_PIN        = '2007';   // Placement Cell Mode
 const CACHE_TTL       = 60000;          // 60s per company
@@ -845,7 +846,8 @@ const _WEBAPP         = 'https://script.google.com/macros/s/AKfycbzeh9Op-cDApwuN
 ════════════════════════════════════════════════════ */
 let COMPANIES   = [];   // Built from config sheet
 let ADMIN_DATA  = {};   // Keyed by company name, from Admin Data tab
-let JOB_SEEKERS = [];   // Students looking for jobs — from JOB_SEEKERS tab
+let JOB_SEEKERS  = [];   // Students looking for jobs — from JOB_SEEKERS tab
+let STUDENT_DB   = {};   // Phone lookup map: normEmail→phone, normName→phone
 let view        = 'home';
 let cId         = null;
 let adminMode   = false;
@@ -1228,6 +1230,13 @@ async function loadStudents(company, force=false){
 
   company._loading = false;
   company._lastFetched = Date.now();
+
+  // Enrich phone from STUDENT DB for this company's students
+  if(Object.keys(STUDENT_DB).length){
+    ['studentsRegistered','studentsInterviewed','studentsSelected'].forEach(key=>{
+      (company[key]||[]).forEach(s=>{ if(!s.phone) s.phone = dbPhone(s); });
+    });
+  }
 }
 
 /* ════════════════════════════════════════════════════
@@ -1296,6 +1305,16 @@ async function init(){
       console.warn('[JobSeekers] tab not found or empty:', e.message);
     }
 
+    // 3c. Load Student DB for phone enrichment (non-fatal)
+    try {
+      const dbCSV = await fetchSheetCSV(CONFIG_SHEET_ID, STUDENT_DB_TAB);
+      STUDENT_DB  = parseStudentDB(dbCSV);
+      console.log('[StudentDB] loaded', Object.keys(STUDENT_DB).length, 'lookup entries');
+    } catch(e) {
+      STUDENT_DB  = {};
+      console.warn('[StudentDB] tab not found or empty:', e.message);
+    }
+
     // 4. Show app
     _clearCountdown();
     document.getElementById('loading-screen').classList.add('hide');
@@ -1345,6 +1364,8 @@ async function loadAllStudents(){
   document.getElementById('refresh-bar').classList.add('show');
   await Promise.all(COMPANIES.map(c => loadStudents(c)));
   document.getElementById('refresh-bar').classList.remove('show');
+  // Enrich phone numbers from STUDENT DB for every student in every list
+  if(Object.keys(STUDENT_DB).length) enrichAllStudentPhones();
   // After all student data loaded, resolve job seeker statuses and persist to sheet
   if(JOB_SEEKERS.length) resolveJobSeekerStatuses();
   if(view==='home') buildHome();
@@ -3602,6 +3623,94 @@ async function executeBulkUpload(companyId){
 
   // Refresh detail view after a short delay
   setTimeout(()=>{ closeModal(); go(view,cId); }, 1200);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   STUDENT DB — parse, lookup, enrich
+══════════════════════════════════════════════════════════════════ */
+
+/** Parse "STUDENT DB" tab into a fast lookup map.
+ *  Keys: normalised email AND normalised name → phone string.
+ *  The tab is expected to have Name, Phone, Email columns (flexible detection). */
+function parseStudentDB(csv){
+  const rows = parseCSV(csv);
+  if(rows.length < 2) return {};
+  const hdr = rows[0].map(h=>(h||'').toLowerCase());
+  const col = (...ks) => { for(const k of ks){ const i=hdr.findIndex(h=>h.includes(k)); if(i!==-1)return i; } return -1; };
+  const iName  = col('name');
+  const iPhone = col('phone','mobile','contact','ph');
+  const iEmail = col('email','mail');
+  const map = {};
+  rows.slice(1).forEach(r => {
+    const phone = (r[iPhone]||'').toString().trim();
+    if(!phone) return;
+    const name  = (r[iName] ||'').trim();
+    const email = (r[iEmail]||'').trim();
+    if(email) map[_normKey(email)] = phone;
+    if(name)  map[_normKey(name)]  = phone;
+  });
+  return map;
+}
+
+/** Normalise a string to a lookup key */
+function _normKey(s){
+  return (s||'').toLowerCase().replace(/[^a-z0-9@.]/g,' ').replace(/\s+/g,' ').trim();
+}
+
+/** Look up a student's phone from STUDENT_DB */
+function dbPhone(s){
+  if(!s) return '';
+  // Try email first (most reliable)
+  if(s.email){ const p = STUDENT_DB[_normKey(s.email)]; if(p) return p; }
+  // Try exact name
+  if(s.name){  const p = STUDENT_DB[_normKey(s.name)];  if(p) return p; }
+  // Try fuzzy name — iterate map keys
+  if(s.name){
+    const normN = _normKey(s.name);
+    for(const key of Object.keys(STUDENT_DB)){
+      if(_tokenOverlapSimple(normN, key) >= 0.70) return STUDENT_DB[key];
+    }
+  }
+  return '';
+}
+
+function _tokenOverlapSimple(a, b){
+  const ta = a.split(' ').filter(Boolean);
+  const tb = new Set(b.split(' ').filter(Boolean));
+  if(!ta.length || !tb.size) return 0;
+  return ta.filter(t=>tb.has(t)).length / Math.max(ta.length, tb.size);
+}
+
+/** Enrich phone field for all students in all companies from STUDENT_DB,
+ *  then write back to each company sheet (only empty cells, only if phone found). */
+function enrichAllStudentPhones(){
+  COMPANIES.forEach(co => {
+    // Collect unique students across all three lists
+    const all = new Map();
+    ['studentsRegistered','studentsInterviewed','studentsSelected'].forEach(key => {
+      (co[key]||[]).forEach(s => {
+        if(!s.phone) s.phone = dbPhone(s);
+        const k = (s.email||s.name||'').toLowerCase();
+        if(k && !all.has(k)) all.set(k, s);
+      });
+    });
+
+    // Write enriched phones back to each company sheet tab that exists
+    const tabs = [...new Set([co.tabReg, co.tabInt, co.tabSel].filter(Boolean))];
+    tabs.forEach(tabName => {
+      const enriched = [...all.values()].filter(s => s.phone);
+      if(!enriched.length) return;
+      fetch(_WEBAPP, {
+        method: 'POST',
+        body: JSON.stringify({
+          action:   'enrichCompanySheetPhones',
+          sheetId:  co.sheetId,
+          tabName,
+          students: enriched.map(s => ({ name: s.name, email: s.email, phone: s.phone }))
+        })
+      }).catch(e => console.warn('[PhoneEnrich]', co.name, tabName, e.message));
+    });
+  });
 }
 
 /* ══════════════════════════════════════════════════════════════════
