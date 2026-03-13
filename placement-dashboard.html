@@ -3652,33 +3652,139 @@ function parseStudentDB(csv){
   return map;
 }
 
-/** Normalise a string to a lookup key */
+/** Normalise a string to a lookup key (email-safe) */
 function _normKey(s){
   return (s||'').toLowerCase().replace(/[^a-z0-9@.]/g,' ').replace(/\s+/g,' ').trim();
 }
 
-/** Look up a student's phone from STUDENT_DB */
-function dbPhone(s){
-  if(!s) return '';
-  // Try email first (most reliable)
-  if(s.email){ const p = STUDENT_DB[_normKey(s.email)]; if(p) return p; }
-  // Try exact name
-  if(s.name){  const p = STUDENT_DB[_normKey(s.name)];  if(p) return p; }
-  // Try fuzzy name — iterate map keys
-  if(s.name){
-    const normN = _normKey(s.name);
-    for(const key of Object.keys(STUDENT_DB)){
-      if(_tokenOverlapSimple(normN, key) >= 0.70) return STUDENT_DB[key];
-    }
-  }
-  return '';
+/* ── Name normalisation for robust matching ────────────────────────
+   Handles: "SharanyaBS", "Sharanya B S", "SharanyaB S", "S h a r a n y a"
+   Strategy:
+     1. Strip non-alpha characters (keep spaces)
+     2. Insert space before single uppercase letters glued to words (camelCase split)
+     3. Collapse any run of single characters separated by spaces into one token
+        e.g. "S h a r a n y a" → "sharanya"  and  "B S" → "bs"
+     4. Lowercase and collapse whitespace
+──────────────────────────────────────────────────────────────────── */
+function _normNameRobust(raw){
+  if(!raw) return '';
+  let s = raw;
+  // Strip titles / punctuation but keep spaces
+  s = s.replace(/(mr|ms|mrs|dr|prof|sri|shri|smt|kumari|km)\.?/gi, ' ');
+  s = s.replace(/[^a-zA-Z\s]/g, ' ');
+  // CamelCase split: "SharanyaBS" → "Sharanya B S"
+  //   Insert space before an uppercase letter that follows a lowercase letter
+  s = s.replace(/([a-z])([A-Z])/g, '$1 $2');
+  //   Insert space before an uppercase letter that follows another uppercase + lowercase ahead
+  //   e.g. "BSharanya" → "B Sharanya"
+  s = s.replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2');
+  s = s.toLowerCase();
+  // Collapse runs of spaced-out single chars: "B  S" / "b s" → "bs"
+  // Detect runs: sequences where every space-separated token is 1 char
+  s = s.replace(/(?:(?:^|\s)([a-z])\s(?=[a-z](?:\s|$)))+/g, m => {
+    return ' ' + m.replace(/\s+/g,'') + ' ';
+  });
+  s = s.replace(/\s+/g, ' ').trim();
+  return s;
 }
 
-function _tokenOverlapSimple(a, b){
+/** All normalised variants of a name, for maximum hit rate */
+function _nameVariants(raw){
+  const robust = _normNameRobust(raw);
+  const tokens = robust.split(' ').filter(Boolean);
+  const variants = new Set();
+  variants.add(robust);
+  // Variant: initials collapsed — "sharanya b s" → "sharanya bs"
+  const initials = tokens.filter(t=>t.length===1).join('');
+  const words    = tokens.filter(t=>t.length> 1);
+  if(initials) variants.add([...words, initials].join(' '));
+  if(initials) variants.add([initials, ...words].join(' '));
+  // Variant: all tokens joined no space — handles "SharanyaBS" stored as-is
+  variants.add(tokens.join(''));
+  // Variant: first word only (for partial-name lookups — used as fallback only)
+  if(words.length) variants.add(words[0]);
+  return [...variants].filter(Boolean);
+}
+
+/** Score similarity of two already-normalised name strings.
+ *  Returns 0–1. Uses token overlap + levenshtein + containment. */
+function _nameSimilarity(a, b){
+  if(!a || !b) return 0;
+  if(a === b)  return 1.0;
+
   const ta = a.split(' ').filter(Boolean);
-  const tb = new Set(b.split(' ').filter(Boolean));
-  if(!ta.length || !tb.size) return 0;
-  return ta.filter(t=>tb.has(t)).length / Math.max(ta.length, tb.size);
+  const tb = b.split(' ').filter(Boolean);
+  const setB = new Set(tb);
+
+  // Token overlap
+  const shared = ta.filter(t=>setB.has(t)).length;
+  const tokScore = shared / Math.max(ta.length, tb.length);
+
+  // Levenshtein similarity on full strings
+  const maxLen = Math.max(a.length, b.length);
+  const levScore = maxLen > 0 ? 1 - _levenshtein(a, b) / maxLen : 0;
+
+  // Containment: does one contain all tokens of the other?
+  // Handles "Sharanya" matching "Sharanya B S"
+  const shortToks = ta.length <= tb.length ? ta : tb;
+  const longSet   = ta.length <= tb.length ? setB : new Set(ta);
+  const containScore = shortToks.every(t=>longSet.has(t)) ? 0.85 : 0;
+
+  // Initials match: "b s" matches "b" and "s" tokens in other name
+  const initialsA = ta.filter(t=>t.length===1);
+  const initialsB = tb.filter(t=>t.length===1);
+  const longWords = ta.length > tb.length ? ta : tb;
+  let initialsScore = 0;
+  const inits = ta.length <= tb.length ? initialsA : initialsB;
+  if(inits.length){
+    const matched = inits.filter(i=>longWords.some(w=>w.startsWith(i))).length;
+    initialsScore = matched / Math.max(inits.length, 1) * 0.75;
+  }
+
+  return Math.max(tokScore, levScore * 0.8, containScore, initialsScore);
+}
+
+/** Look up a student's phone from STUDENT_DB — tolerant of all name variants */
+function dbPhone(s){
+  if(!s) return '';
+
+  // 1. Email exact match (most reliable — never fuzzy)
+  if(s.email){
+    const p = STUDENT_DB[_normKey(s.email)];
+    if(p) return p;
+  }
+
+  if(!s.name) return '';
+
+  // 2. Try all name variants as direct map keys
+  const variants = _nameVariants(s.name);
+  for(const v of variants){
+    const p = STUDENT_DB[v];
+    if(p) return p;
+  }
+
+  // 3. Fuzzy scan: score every DB entry against every variant
+  //    Only consider DB keys that look like names (no @ sign)
+  const nameKeys = Object.keys(STUDENT_DB).filter(k=>!k.includes('@'));
+  let bestScore = 0, bestPhone = '';
+  for(const dbKey of nameKeys){
+    for(const variant of variants){
+      const score = _nameSimilarity(variant, dbKey);
+      if(score > bestScore){ bestScore = score; bestPhone = STUDENT_DB[dbKey]; }
+    }
+  }
+  // Threshold: 0.65 avoids false positives on short names
+  if(bestScore >= 0.65) return bestPhone;
+
+  // 4. Last resort: first-name-only containment (very short names like "Sharanya")
+  //    Only if the DB has a unique match
+  const firstName = _normNameRobust(s.name).split(' ')[0];
+  if(firstName && firstName.length >= 4){
+    const matches = nameKeys.filter(k=>k.split(' ')[0]===firstName);
+    if(matches.length===1) return STUDENT_DB[matches[0]];
+  }
+
+  return '';
 }
 
 /** Enrich phone field for all students in all companies from STUDENT_DB,
