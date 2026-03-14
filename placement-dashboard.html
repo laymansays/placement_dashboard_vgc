@@ -1668,7 +1668,10 @@ function buildHome(){
     <div class="section" style="padding-left:0;padding-right:0;padding-top:0">
       <div class="section-head">
         <span class="section-title">All Companies</span>
-        <button class="btn btn-outline btn-sm" onclick="go('dashboard')">See Dashboard &rarr;</button>
+        <div style="display:flex;gap:8px;">
+          ${adminMode ? `<button class="btn btn-outline btn-sm" style="background:linear-gradient(135deg,#0e4a6a,#0369a1);color:#fff;border:none;" onclick="openCompanyReport()">📋 Company Report</button>` : ''}
+          <button class="btn btn-outline btn-sm" onclick="go('dashboard')">See Dashboard &rarr;</button>
+        </div>
       </div>
       <div class="section-divider"></div>
       <div class="co-cards-grid">${COMPANIES.map(c=>coCardHtml(c)).join('')}</div>
@@ -4166,6 +4169,230 @@ function applyJobSeekerFilters(){
     hint.textContent = parts.length ? `${filtered.length} student${filtered.length!==1?'s':''} · ${parts.join(', ')}` : '';
   }
   tableBody.innerHTML = buildJobSeekersTable(filtered, statusVal);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   COMPANY REPORT — filter, view, download CSV / PDF
+══════════════════════════════════════════════════════════════════ */
+
+const STATUS_LABELS = {
+  completed:        '✅ Completed',
+  results_awaited:  '⏳ Results Awaited',
+  registered_sent:  '📋 Registered / Sent',
+  upcoming:         '🗓 Upcoming',
+};
+
+function openCompanyReport(){
+  // Build filter options
+  const modes    = [...new Set(COMPANIES.map(c=>c.interviewMode).filter(Boolean))].sort();
+  const dates    = [...new Set(COMPANIES.map(c=>c.driveDate).filter(Boolean))].sort();
+
+  const modeOpts = `<option value="">All Modes</option>`
+    + modes.map(m=>`<option value="${xe(m)}">${xe(m)}</option>`).join('');
+  const dateOpts = `<option value="">All Dates</option>`
+    + dates.map(d=>`<option value="${xe(d)}">${xe(fmtDate(d))}</option>`.replace(
+        `value="${xe(fmtDate(d))}"`, `value="${xe(d))}"` // keep raw for matching
+      )).join('');
+
+  // Build date options properly
+  const dateOptsClean = `<option value="">All Dates</option>`
+    + dates.map(d=>`<option value="${xe(d)}">${xe(fmtDate(d))}</option>`).join('');
+
+  const html = `
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center;">
+    <input id="cr-search" type="text" placeholder="Search company…"
+      style="padding:7px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg2);color:var(--text);font-size:12.5px;font-family:inherit;outline:none;min-width:180px;"
+      oninput="renderCompanyReport()">
+    <select id="cr-mode" class="js-degree-select" onchange="renderCompanyReport()">
+      ${modeOpts}
+    </select>
+    <select id="cr-date" class="js-degree-select" onchange="renderCompanyReport()">
+      ${dateOptsClean}
+    </select>
+    <span id="cr-hint" style="font-size:11px;color:var(--text4);margin-left:4px;"></span>
+    <div style="margin-left:auto;display:flex;gap:8px;">
+      <button class="btn btn-outline btn-sm" onclick="downloadCompanyReportCSV()">⬇ CSV</button>
+      <button class="btn btn-outline btn-sm" style="background:linear-gradient(135deg,#570B54,#3A0838);color:#fff;border:none;" onclick="downloadCompanyReportPDF()">⬇ PDF</button>
+    </div>
+  </div>
+  <div id="cr-table-wrap"></div>`;
+
+  openModalWide('📋 Company Report', html, 900);
+  renderCompanyReport();
+}
+
+function _getFilteredCompanies(){
+  const search = (document.getElementById('cr-search')||{}).value||'';
+  const mode   = (document.getElementById('cr-mode')  ||{}).value||'';
+  const date   = (document.getElementById('cr-date')  ||{}).value||'';
+  let list = COMPANIES;
+  if(search) list = list.filter(c=>(c.name||'').toLowerCase().includes(search.toLowerCase()));
+  if(mode)   list = list.filter(c=>c.interviewMode===mode);
+  if(date)   list = list.filter(c=>c.driveDate===date);
+  return list;
+}
+
+function renderCompanyReport(){
+  const list  = _getFilteredCompanies();
+  const hint  = document.getElementById('cr-hint');
+  const wrap  = document.getElementById('cr-table-wrap');
+  if(hint) hint.textContent = `${list.length} of ${COMPANIES.length} companies`;
+  if(!wrap) return;
+
+  if(!list.length){
+    wrap.innerHTML = `<div class="no-data" style="padding:24px;">📭 No companies match this filter</div>`;
+    return;
+  }
+
+  const rows = list.map((co,i)=>{
+    const st  = statusOf(co);
+    const stl = STATUS_LABELS[st]||st;
+    const stc = st==='completed'?'#166534':st==='results_awaited'?'#92400e':st==='registered_sent'?'#1e40af':'#374151';
+    const stbg= st==='completed'?'#DCFCE7':st==='results_awaited'?'#FEF3C7':st==='registered_sent'?'#DBEAFE':'#F3F4F6';
+    const poc = co.poc||{};
+    return `<tr>
+      <td style="font-weight:600;color:var(--text);white-space:nowrap;">${i+1}. ${xe(co.name||'—')}</td>
+      <td>${co.interviewMode?`<span style="font-size:11px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:2px 8px;">${xe(co.interviewMode)}</span>`:'<span style="color:var(--text4);">—</span>'}</td>
+      <td style="white-space:nowrap;color:var(--text3);">${co.driveDate?xe(fmtDate(co.driveDate)):'—'}</td>
+      <td style="color:var(--text2);">${xe(poc.name||'—')}</td>
+      <td style="color:var(--text3);font-size:11.5px;">${poc.email?`<a href="mailto:${xe(poc.email)}" style="color:var(--purple);text-decoration:none;">${xe(poc.email)}</a>`:'—'}</td>
+      <td style="color:var(--text3);white-space:nowrap;">${xe(poc.phone||'—')}</td>
+      <td><span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;background:${stbg};color:${stc};white-space:nowrap;">${stl}</span></td>
+    </tr>`;
+  }).join('');
+
+  wrap.innerHTML = `
+    <div style="overflow-x:auto;border-radius:10px;border:1px solid var(--border);">
+    <table class="js-table">
+      <thead><tr>
+        <th>Company</th>
+        <th>Interview Mode</th>
+        <th>Drive Date</th>
+        <th>POC Name</th>
+        <th>POC Email</th>
+        <th>POC Contact</th>
+        <th>Status</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    </div>`;
+}
+
+function downloadCompanyReportCSV(){
+  const list = _getFilteredCompanies();
+  const esc  = v => `"${String(v||'').replace(/"/g,'""')}"`;
+  const hdr  = ['Company Name','Interview Mode','Drive Date','POC Name','POC Email','POC Contact','Status'];
+  const rows = list.map(co=>{
+    const poc=co.poc||{};
+    return [co.name,co.interviewMode,co.driveDate?fmtDate(co.driveDate):'',
+      poc.name,poc.email,poc.phone,STATUS_LABELS[statusOf(co)]||statusOf(co)].map(esc).join(',');
+  });
+  const csv = [hdr.map(esc).join(','), ...rows].join('\r\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const a    = document.createElement('a');
+  a.href     = URL.createObjectURL(blob);
+  a.download = `VVFGC_Company_Report_${new Date().toLocaleDateString('en-IN').replace(/\//g,'-')}.csv`;
+  a.click();
+}
+
+async function downloadCompanyReportPDF(){
+  if(!window.jspdf){ toast('PDF library not loaded yet','error'); return; }
+  const { jsPDF } = window.jspdf;
+  const list = _getFilteredCompanies();
+  const DATE = new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+
+  const doc = new jsPDF({ orientation:'landscape', unit:'mm', format:'a4' });
+  const PW=297, PH=210;
+
+  // Header bar
+  doc.setFillColor(30,27,46); doc.rect(0,0,PW,22,'F');
+  doc.setTextColor(255,255,255); doc.setFontSize(13); doc.setFont('helvetica','bold');
+  doc.text('Company Report — Vidyavahini First Grade Degree College', 14, 14);
+  doc.setFontSize(8); doc.setFont('helvetica','normal');
+  doc.text(DATE+'   ·   '+list.length+' companies', PW-14, 14, {align:'right'});
+
+  // Active filters line
+  const mode = (document.getElementById('cr-mode')||{}).value||'';
+  const date = (document.getElementById('cr-date')||{}).value||'';
+  const search = (document.getElementById('cr-search')||{}).value||'';
+  const filterParts = [];
+  if(search) filterParts.push('Search: '+search);
+  if(mode)   filterParts.push('Mode: '+mode);
+  if(date)   filterParts.push('Date: '+fmtDate(date));
+  if(filterParts.length){
+    doc.setTextColor(150,150,180); doc.setFontSize(7);
+    doc.text('Filters: '+filterParts.join('  |  '), 14, 26);
+  }
+
+  // Table
+  const cols   = ['#','Company','Mode','Drive Date','POC Name','POC Email','POC Contact','Status'];
+  const cW     = [8, 52, 28, 24, 34, 54, 28, 34];
+  const startX = 10, rowH = 8;
+  let y = filterParts.length ? 32 : 26;
+
+  // Header row
+  doc.setFillColor(248,250,252); doc.rect(startX, y, PW-startX*2, rowH, 'F');
+  doc.setDrawColor(226,232,240); doc.rect(startX, y, PW-startX*2, rowH, 'S');
+  doc.setTextColor(100,116,139); doc.setFontSize(7); doc.setFont('helvetica','bold');
+  let x=startX+2;
+  cols.forEach((h,i)=>{ doc.text(h,x,y+5); x+=cW[i]; });
+  y+=rowH;
+
+  doc.setFont('helvetica','normal');
+  list.forEach((co,idx)=>{
+    // Page break
+    if(y+rowH > PH-12){
+      doc.addPage();
+      doc.setFillColor(30,27,46); doc.rect(0,0,PW,14,'F');
+      doc.setTextColor(255,255,255); doc.setFontSize(9); doc.setFont('helvetica','bold');
+      doc.text('Company Report (continued)',14,10);
+      doc.setFont('helvetica','normal');
+      y=20;
+    }
+
+    const poc=co.poc||{};
+    const st=statusOf(co);
+    // Alternating row bg
+    if(idx%2===0){ doc.setFillColor(250,250,252); doc.rect(startX,y,PW-startX*2,rowH,'F'); }
+    doc.setDrawColor(240,240,245); doc.rect(startX,y,PW-startX*2,rowH,'S');
+
+    const stText = st==='completed'?'Completed':st==='results_awaited'?'Results Awaited':
+                   st==='registered_sent'?'Registered':st==='upcoming'?'Upcoming':'—';
+    const stRGB  = st==='completed'?[22,163,74]:st==='results_awaited'?[217,119,6]:
+                   st==='registered_sent'?[37,99,235]:[107,114,128];
+
+    const vals=[
+      String(idx+1),
+      (co.name||'—').slice(0,28),
+      (co.interviewMode||'—').slice(0,16),
+      co.driveDate?fmtDate(co.driveDate):'—',
+      (poc.name||'—').slice(0,20),
+      (poc.email||'—').slice(0,30),
+      (poc.phone||'—').slice(0,16),
+      stText
+    ];
+
+    x=startX+2;
+    vals.forEach((v,i)=>{
+      if(i===7){
+        doc.setTextColor(...stRGB); doc.setFont('helvetica','bold');
+        doc.text(v,x,y+5);
+        doc.setFont('helvetica','normal');
+      } else {
+        doc.setTextColor(30,30,50);
+        doc.text(v,x,y+5);
+      }
+      x+=cW[i];
+    });
+    y+=rowH;
+  });
+
+  // Footer
+  doc.setTextColor(150,150,150); doc.setFontSize(7);
+  doc.text('VVFGC Campus Placement Management System',14,PH-5);
+  doc.text('Page 1',PW-14,PH-5,{align:'right'});
+
+  doc.save(`VVFGC_Company_Report_${DATE.replace(/ /g,'-')}.pdf`);
 }
 
 </script>
