@@ -1627,7 +1627,7 @@ function buildHome(){
   <div class="home-wrap">
     <div class="home-banner">
       <div class="home-banner-left">
-        <div class="home-eyebrow">PLACEMENT SEASON</div>
+        <div class="home-eyebrow">PLACEMENT SEASON 2024–25</div>
         <h1 class="home-title"><span id="cell-link" onclick="openCellPrompt()" title="Placement Cell Analytics" style="cursor:pointer;border-bottom:2px solid transparent;transition:border-color .2s;padding-bottom:1px;" onmouseover="this.style.borderBottomColor='#D3B6D2'" onmouseout="this.style.borderBottomColor='transparent'">Campus <em>Placement</em><br>Dashboard</span></h1>
         <p class="home-sub">Live data from all company sheets — registrations, attendeds and placements in one place.</p>
         <button class="btn-primary-inv" onclick="go('dashboard')">View All Companies →</button>
@@ -4189,12 +4189,7 @@ function openCompanyReport(){
 
   const modeOpts = `<option value="">All Modes</option>`
     + modes.map(m=>`<option value="${xe(m)}">${xe(m)}</option>`).join('');
-  const dateOpts = `<option value="">All Dates</option>`
-    + dates.map(d=>`<option value="${xe(d)}">${xe(fmtDate(d))}</option>`.replace(
-        `value="${xe(fmtDate(d))}"`, `value="${xe(d))}"` // keep raw for matching
-      )).join('');
-
-  // Build date options properly
+  // Build date options — value=raw date for filtering, label=formatted
   const dateOptsClean = `<option value="">All Dates</option>`
     + dates.map(d=>`<option value="${xe(d)}">${xe(fmtDate(d))}</option>`).join('');
 
