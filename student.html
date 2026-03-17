@@ -507,7 +507,7 @@ function handleLogin(){
   if(!email.includes('@')){ errEl.textContent='Please enter a valid email.'; return; }
   const btn = document.getElementById('login-btn');
   btn.disabled = true; btn.textContent = 'Verifying\u2026';
-  doLogin(email).finally(()=>{ btn.disabled=false; btn.textContent='Login to Portal &rarr;'; });
+  doLogin(email).catch(()=>{}).finally(()=>{ btn.disabled=false; btn.textContent='Login to Portal &rarr;'; });
 }
 
 async function doLogin(email){
@@ -539,6 +539,9 @@ async function doLogin(email){
     await loadCompanyData();
     showLoad('Checking your applications\u2026',`Checking ${COMPS.length} companies`);
     await loadStatus();
+    showLoad('Loading your profile\u2026', 'Almost done');
+    // Yield to browser to paint the loading message before heavy render
+    await new Promise(r => setTimeout(r, 0));
     hideLoad();
     renderPortal();
   }catch(e){
