@@ -1189,6 +1189,7 @@ async function loadStudents(company, force=false){
   if(!force && company._lastFetched && Date.now()-company._lastFetched < CACHE_TTL) return;
   if(company._loading) return;
   company._loading = true;
+  try {
 
   const fetchTab = async (tabName) => {
     if(!tabName) return [];
@@ -1228,14 +1229,18 @@ async function loadStudents(company, force=false){
     company[key] = data;
   }));
 
-  company._loading = false;
-  company._lastFetched = Date.now();
+    company._loading = false;
+    company._lastFetched = Date.now();
 
-  // Enrich phone from STUDENT DB for this company's students
-  if(Object.keys(STUDENT_DB).length){
-    ['studentsRegistered','studentsInterviewed','studentsSelected'].forEach(key=>{
-      (company[key]||[]).forEach(s=>{ if(!s.phone) s.phone = dbPhone(s); });
-    });
+    // Enrich phone from STUDENT DB for this company's students
+    if(Object.keys(STUDENT_DB).length){
+      ['studentsRegistered','studentsInterviewed','studentsSelected'].forEach(key=>{
+        (company[key]||[]).forEach(s=>{ if(!s.phone) s.phone = dbPhone(s); });
+      });
+    }
+  } catch(err) {
+    company._loading = false; // always release lock so retries work
+    console.warn('[loadStudents] error for', company.name, err.message);
   }
 }
 
@@ -1315,18 +1320,18 @@ async function init(){
       console.warn('[StudentDB] tab not found or empty:', e.message);
     }
 
-    // 4. Show app
+    // 4. Pre-load all student data while loading screen is still visible
+    setLoadSub('Loading student data<span class="loader-dots"><span>.</span><span>.</span><span>.</span></span>');
+    await loadAllStudents(true); // true = initial load, skip re-render (caller handles it)
+
+    // 5. Show app with complete data — single render, no flicker
     _clearCountdown();
     document.getElementById('loading-screen').classList.add('hide');
     document.getElementById('app').classList.add('ready');
-    // Auto-activate admin if arriving from placement cell login
     if(sessionStorage.getItem('placementAdmin')==='1'){
       adminMode=true; document.body.classList.add('admin-mode');
     }
     go('home');
-
-    // 5. Fetch all student data in background
-    loadAllStudents();
 
   } catch(e){
     _clearCountdown();
@@ -1360,17 +1365,21 @@ function mergeAdminData(){
   });
 }
 
-async function loadAllStudents(){
-  document.getElementById('refresh-bar').classList.add('show');
+async function loadAllStudents(isInitial=false){
+  // On initial load the loading screen is still visible — skip refresh bar
+  if(!isInitial) document.getElementById('refresh-bar').classList.add('show');
   await Promise.all(COMPANIES.map(c => loadStudents(c)));
-  document.getElementById('refresh-bar').classList.remove('show');
+  if(!isInitial) document.getElementById('refresh-bar').classList.remove('show');
   // Enrich phone numbers from STUDENT DB for every student in every list
   if(Object.keys(STUDENT_DB).length) enrichAllStudentPhones();
-  // After all student data loaded, resolve job seeker statuses and persist to sheet
-  if(JOB_SEEKERS.length) resolveJobSeekerStatuses();
-  if(view==='home') buildHome();
-  else if(view==='dashboard') buildDashboard();
-  else if(view==='detail') buildDetail(cId);
+  // Resolve job seeker statuses; skip re-render on initial (go('home') will handle it)
+  if(JOB_SEEKERS.length) resolveJobSeekerStatuses(!isInitial);
+  // Re-render current view (only on non-initial calls — initial caller invokes go())
+  if(!isInitial){
+    if(view==='home') buildHome();
+    else if(view==='dashboard') buildDashboard();
+    else if(view==='detail') buildDetail(cId);
+  }
 }
 
 /* ════════════════════════════════════════════════════
@@ -1627,7 +1636,7 @@ function buildHome(){
   <div class="home-wrap">
     <div class="home-banner">
       <div class="home-banner-left">
-        <div class="home-eyebrow">PLACEMENT SEASON 2024–25</div>
+        <div class="home-eyebrow">PLACEMENT SEASON</div>
         <h1 class="home-title"><span id="cell-link" onclick="openCellPrompt()" title="Placement Cell Analytics" style="cursor:pointer;border-bottom:2px solid transparent;transition:border-color .2s;padding-bottom:1px;" onmouseover="this.style.borderBottomColor='#D3B6D2'" onmouseout="this.style.borderBottomColor='transparent'">Campus <em>Placement</em><br>Dashboard</span></h1>
         <p class="home-sub">Live data from all company sheets — registrations, attendeds and placements in one place.</p>
         <button class="btn-primary-inv" onclick="go('dashboard')">View All Companies →</button>
@@ -3529,7 +3538,7 @@ function bulkOfferLetterModal(companyId, fileInput){
     </button>
   </div>`;
 
-  openModalWide(`📤 Bulk Offer Letter Upload — ${xe(co.name)}`, html, 780);
+  openModalWide(`📤 Bulk Offer Letter Upload — ${xe(co.name)}`, html, '');
 
   // Store matches on window for upload phase
   window._bulkMatches = matches;
@@ -3927,7 +3936,7 @@ function parseJobSeekers(csv){
 /* ── Resolve placement status for each job seeker ── */
 const STATUS_RANK = { 'Selected':3, 'Attended':2, 'Registered':1 };
 
-function resolveJobSeekerStatuses(){
+function resolveJobSeekerStatuses(rebuild=true){
   const matchesStudent = (js, s) => {
     if(js.email && s.email && js.email.toLowerCase()===s.email.toLowerCase()) return true;
     return _fuzzyScore(js.name, s.name||'') >= 0.60;
@@ -3959,7 +3968,7 @@ function resolveJobSeekerStatuses(){
   });
 
   console.log(`[JobSeekers] resolved — ${changed} status updates queued`);
-  if(view === 'home') buildHome();
+  if(rebuild && view === 'home') buildHome();
 }
 
 /* ── Persist a single job seeker's status to the sheet ── */
@@ -4005,12 +4014,6 @@ function buildJobSeekersSection(){
   const degreeOpts = `<option value="">All Degrees</option>`
     + allDegrees.map(d=>`<option value="${xe(d)}">${xe(d)}</option>`).join('');
 
-  const statusOpts = `<option value="">All Statuses</option>
-    <option value="Registered">📋 Registered</option>
-    <option value="Attended">🎯 Attended</option>
-    <option value="Selected">✅ Selected</option>
-    <option value="">— Not in any drive</option>`;
-  // "not in drive" is special — handle via value "none"
   const statusOptsFixed = `<option value="">All Statuses</option>
     <option value="Registered">📋 Registered</option>
     <option value="Attended">🎯 Attended</option>
@@ -4212,7 +4215,7 @@ function openCompanyReport(){
   </div>
   <div id="cr-table-wrap"></div>`;
 
-  openModalWide('📋 Company Report', html, 900);
+  openModalWide('📋 Company Report', html, '');
   renderCompanyReport();
 }
 
