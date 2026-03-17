@@ -3,66 +3,80 @@
    Caches app shell for fast load; data always fetched live
    ═══════════════════════════════════════════════════════ */
 
-const CACHE = 'vgi-placement-v1';
+// Bump this version string whenever you deploy new files.
+// Changing it forces all users to get fresh files immediately.
+const CACHE = 'vgi-placement-v3';
 
-const SHELL = [
-  '/placement_dashboard_vgc/',
-  '/placement_dashboard_vgc/index.html',
-  '/placement_dashboard_vgc/student.html',
-  '/placement_dashboard_vgc/placement-dashboard.html',
+const STATIC = [
   '/placement_dashboard_vgc/logo.jpg',
   '/placement_dashboard_vgc/manifest.json',
+  '/placement_dashboard_vgc/shared.js',
 ];
 
-/* Install — cache the app shell */
+/* Install — only pre-cache true static assets (not HTML) */
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE)
-      .then(c => c.addAll(SHELL))
+      .then(c => c.addAll(STATIC))
       .then(() => self.skipWaiting())
   );
 });
 
-/* Activate — delete old caches */
+/* Activate — delete ALL old caches, claim clients immediately */
 self.addEventListener('activate', e => {
   e.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
-    ).then(() => self.clients.claim())
+    caches.keys()
+      .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+      .then(() => self.clients.claim())
   );
 });
 
-/* Fetch — app shell from cache, everything else from network */
+/* Fetch strategy:
+   - Google APIs / Sheets / Drive / Fonts → always network (never cache)
+   - HTML documents                        → network-first, cache as offline fallback
+   - Everything else (JS, CSS, images)     → cache-first, revalidate in background
+*/
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
 
-  /* Always fetch live: Google APIs, Sheets, Drive, Apps Script */
+  // Always bypass for Google services
   if (
     url.hostname.includes('google') ||
     url.hostname.includes('googleapis') ||
     url.hostname.includes('gstatic') ||
+    url.hostname.includes('fonts.g') ||
+    url.hostname.includes('clearbit') ||
     url.hostname.includes('script.google')
-  ) {
-    return; /* Let browser handle normally */
+  ) { return; }
+
+  // HTML pages — network-first so users always get the latest version
+  if (e.request.destination === 'document' || e.request.mode === 'navigate') {
+    e.respondWith(
+      fetch(e.request)
+        .then(res => {
+          if (res && res.status === 200) {
+            const clone = res.clone();
+            caches.open(CACHE).then(c => c.put(e.request, clone));
+          }
+          return res;
+        })
+        .catch(() => caches.match(e.request))  // offline fallback
+    );
+    return;
   }
 
-  /* App shell: cache-first */
+  // Static assets — cache-first, update in background (stale-while-revalidate)
   e.respondWith(
-    caches.match(e.request).then(cached => {
-      if (cached) return cached;
-      return fetch(e.request).then(res => {
-        /* Cache valid same-origin responses */
-        if (res && res.status === 200 && url.origin === self.location.origin) {
-          const clone = res.clone();
-          caches.open(CACHE).then(c => c.put(e.request, clone));
-        }
-        return res;
-      }).catch(() => {
-        /* Offline fallback for HTML pages */
-        if (e.request.destination === 'document') {
-          return caches.match('/placement_dashboard_vgc/student.html');
-        }
-      });
-    })
+    caches.open(CACHE).then(cache =>
+      cache.match(e.request).then(cached => {
+        const fetchPromise = fetch(e.request).then(res => {
+          if (res && res.status === 200 && url.origin === self.location.origin) {
+            cache.put(e.request, res.clone());
+          }
+          return res;
+        }).catch(() => null);
+        return cached || fetchPromise;
+      })
+    )
   );
 });
