@@ -325,7 +325,7 @@ body{
     <img src="logo.jpg" alt="Vidyavahini"
       onerror="this.style.display='none';var p=this.parentElement;p.style.background='linear-gradient(135deg,#570B54,#6D0E6A)';p.style.display='flex';p.style.alignItems='center';p.style.justifyContent='center';p.style.color='#fff';p.style.fontWeight='900';p.style.fontSize='22px';p.textContent='V';"/>
   </div>
-  <span class="fixed-logo-text">VGI</span>
+  <span class="fixed-logo-text">VVFGC</span>
 </div>
 
 <!-- ── HERO — full viewport canvas including nav ── -->
@@ -345,6 +345,7 @@ body{
     <div class="hero-top">
       <div class="hero-eyebrow">
         <span class="eyebrow-dot"></span>
+        PLACEMENT SEASON 2025–26
       </div>
       <h1 class="hero-title">
         Campus<br><span class="accent">Placement</span> Dashboard
@@ -379,8 +380,6 @@ body{
       </div>
     </div>
 
-PLACEMENT SEASON 2025–26
-    
     <!-- Group 3: portal buttons -->
     <div class="portal-buttons">
       <a class="portal-btn btn-student" href="student.html">
@@ -707,54 +706,60 @@ async function loadIndexStats(){
     return;
   }
 
-  await Promise.allSettled(companies.map(async c => {
-    try{
-      const fetchTab = async (tab) => {
-        if(!tab) return 0;
-        const url = `https://docs.google.com/spreadsheets/d/${c.sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(tab)}`;
-        const res = await fetchWithTimeout(url, 6000);
+  // Fetch all companies concurrently, collect results, then set numbers once
+  const results = await Promise.allSettled(companies.map(async c => {
+    const fetchTab = async (tab) => {
+      if(!tab) return 0;
+      const url = `https://docs.google.com/spreadsheets/d/${c.sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(tab)}`;
+      try {
+        const res = await fetchWithTimeout(url, 8000);
         const text = await res.text();
         if(text.trimStart().startsWith('<')) return 0;
-        const json = JSON.parse(text.replace(/^[^(]*\(/,'').replace(/\);?\s*$/,''));
+        const json = JSON.parse(text.replace(/^[^(]*(\(/,'').replace(/\);?\s*$/,''));
         if(json.status === 'error') return 0;
         return countValidRows(json);
-      };
-      const [reg, int_, sel] = await Promise.all([
-        fetchTab(c.tabReg),
-        fetchTab(c.tabInt),
-        fetchTab(c.tabSel),
-      ]);
-      totalReg += reg;
-      totalSel += sel;
-      if(sel > 0 || int_ > 0) drivesDone++;
-      const statusKey = sel > 0 ? 'placed' : int_ > 0 ? 'ongoing' : reg > 0 ? 'active' : 'upcoming';
-      updateChipStatus(c.id, statusKey);
-    }catch(e){
-      console.warn('[stats] company', c.name, e.message);
-    }
-    setNum('st-reg',    totalReg);
-    setNum('st-drives', drivesDone);
-    setNum('st-placed', totalSel);
+      } catch(e) { return 0; }
+    };
+    const [reg, int_, sel] = await Promise.all([
+      fetchTab(c.tabReg),
+      fetchTab(c.tabInt),
+      fetchTab(c.tabSel),
+    ]);
+    return { c, reg, int_, sel };
   }));
 
-  setNum('st-reg',    totalReg);
-  setNum('st-drives', drivesDone);
-  setNum('st-placed', totalSel);
+  // Process all results and update stats + carousel in one pass
+  results.forEach(r => {
+    if(r.status !== 'fulfilled' || !r.value) return;
+    const { c, reg, int_, sel } = r.value;
+    totalReg += reg;
+    totalSel += sel;
+    if(sel > 0 || int_ > 0) drivesDone++;
+    const statusKey = sel > 0 ? 'placed' : int_ > 0 ? 'ongoing' : reg > 0 ? 'active' : 'upcoming';
+    updateChipStatus(c.id, statusKey);
+  });
+
+  // Animate numbers in once all data is ready
+  animateCount('st-reg',    totalReg);
+  animateCount('st-drives', drivesDone);
+  animateCount('st-placed', totalSel);
 }
 
 function animateCount(id, target){
   const el = document.getElementById(id);
   if(!el || isNaN(target)) return;
-  const start = parseInt(el.textContent)||0;
+  // Clear any loading dots first
+  el.innerHTML = '0';
+  const start = 0;
   const diff = target - start;
-  if(diff === 0) return;
+  if(diff === 0){ el.textContent = '0'; return; }
   let frame = 0;
-  const frames = 30;
+  const frames = 40;
   const step = () => {
     frame++;
-    const progress = frame/frames;
-    const ease = 1-Math.pow(1-progress,3);
-    el.textContent = Math.round(start + diff*ease);
+    const progress = frame / frames;
+    const ease = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+    el.textContent = Math.round(start + diff * ease);
     if(frame < frames) requestAnimationFrame(step);
     else el.textContent = target;
   };
