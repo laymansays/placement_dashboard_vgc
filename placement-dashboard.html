@@ -4434,19 +4434,39 @@ function openCircularModal(){
    <button class="btn btn-admin btn-sm" onclick="generateCircularPDF()">⬇ Generate & Download PDF</button>`);
 }
 
-function generateCircularPDF(){
+async function generateCircularPDF(){
   const g=id=>(document.getElementById(id)||{}).value||'';
   const dateVal=g('ci-date'),company=g('ci-company').trim(),roles=g('ci-roles').trim(),
     about=g('ci-about').trim(),position=g('ci-position').trim(),education=g('ci-education').trim(),
     location=g('ci-location').trim(),ctc=g('ci-ctc').trim(),selection=g('ci-selection').trim(),
     benefits=g('ci-benefits').trim(),docs=g('ci-docs').trim(),culture=g('ci-culture').trim(),
     regLink=g('ci-link').trim(),lastDate=g('ci-lastdate').trim();
+
   if(!company||!roles||!about||!position||!education||!location||!ctc||!selection){
     toast('Please fill all required fields (marked *)','error'); return;
   }
   if(!window.jspdf){ toast('PDF library not ready yet','error'); return; }
+
+  /* ── Load images from repo files (same pattern as Analytics PDF) ── */
+  const loadDataUrl = async (src) => {
+    try {
+      const r = await fetch(src);
+      if(!r.ok) return null;
+      const bl = await r.blob();
+      return new Promise(res => { const fr=new FileReader(); fr.onload=()=>res(fr.result); fr.readAsDataURL(bl); });
+    } catch(e){ return null; }
+  };
+
+  toast('Generating circular…','info','⏳');
+
+  /* logo.jpg is the VGI logo already used in the navbar */
+  const logoData = await loadDataUrl('logo.jpg');
+  /* cdc-signature.jpg — add this file to your repo (same folder as placement-dashboard.html) */
+  const sigData  = await loadDataUrl('cdc-signature.jpg');
+
   let fmtD='';
   try{ fmtD=new Date(dateVal+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'}); }catch(e){ fmtD=dateVal; }
+
   const {jsPDF}=window.jspdf;
   const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
   const W=210,H=297,mL=13,mR=13,innerW=W-mL-mR;
@@ -4454,28 +4474,31 @@ function generateCircularPDF(){
   const cPad=3,col1=46,col2=innerW-8-col1,tX=mL+4,pBot=H-mL-5;
 
   function drawFrame(d){
-    /* ── Outer page border ── */
+    /* Outer page border */
     d.setDrawColor(nR,nG,nB); d.setLineWidth(0.8);
     d.rect(mL, mL, innerW, H-2*mL);
-    /* ── Header box — complete rectangle matching First Source template ── */
+    /* Header box — full rectangle like First Source template */
     d.setLineWidth(0.6);
     d.rect(mL, mL, innerW, 24);
-    /* ── Small border box around VGI logo ── */
+    /* Small box around logo */
     d.setLineWidth(0.4);
     d.rect(mL+1.5, mL+1.5, 21, 21);
-    /* ── Logo image ── */
-    try{ d.addImage('data:image/png;base64,'+_CIRC_LOGO,'PNG',mL+2,mL+2,20,20); }catch(e){}
-    /* ── Institution name ── */
+    /* Logo — fetched from logo.jpg in the repo */
+    if(logoData){
+      try{ d.addImage(logoData, 'JPEG', mL+2, mL+2, 20, 20); }catch(e){}
+    }
+    /* Institution name */
     d.setFont('times','bold'); d.setFontSize(13); d.setTextColor(nR,nG,nB);
     d.text('Vidyavahini Group of Institutions, Tumakuru', mL+26, mL+9);
-    /* ── CDC sub-title ── */
     d.setFontSize(12);
     d.text('Career Development Center', mL+26, mL+17);
   }
-  function cellH(txt,w,fs){
-    doc.setFontSize(fs||10);
+
+  function cellH(txt,w){
+    doc.setFontSize(10);
     return Math.max(doc.splitTextToSize(txt||'',w-cPad*2).length*5+cPad*2,10);
   }
+
   function drawRow(d,x,y,w1,w2,lbl,val){
     const rh=Math.max(cellH(lbl,w1),cellH(val,w2));
     d.setDrawColor(nR,nG,nB); d.setLineWidth(0.3);
@@ -4487,7 +4510,7 @@ function generateCircularPDF(){
     return rh;
   }
 
-  /* PAGE 1 */
+  /* ── PAGE 1 ── */
   drawFrame(doc); let y=mL+24+7;
   doc.setFont('times','normal'); doc.setFontSize(10); doc.setTextColor(0,0,0);
   doc.text('Ref: CDC / VGI / 2025',mL+4,y);
@@ -4512,7 +4535,7 @@ function generateCircularPDF(){
     y+=drawRow(doc,tX,y,col1,col2,lb,vl);
   }
 
-  /* PAGE 2 */
+  /* ── PAGE 2 ── */
   doc.addPage(); drawFrame(doc); y=mL+24+7;
   for(const [lb,vl] of [['Documents Required',docs],['Work Culture',culture]]){
     if(!vl) continue;
@@ -4532,8 +4555,12 @@ function generateCircularPDF(){
     doc.text('Last date to register: ',tX,y);
     doc.setFont('times','normal'); doc.text(lastDate,tX+lw2,y); y+=10;
   }
-  const sX=W-mR-56,sY=y+4;
-  try{ doc.addImage('data:image/jpeg;base64,'+_CIRC_SIG,'JPEG',sX,sY,40,16); }catch(e){}
+
+  /* Signature — fetched from cdc-signature.jpg in the repo */
+  const sX=W-mR-56, sY=y+4;
+  if(sigData){
+    try{ doc.addImage(sigData,'JPEG',sX,sY,40,16); }catch(e){}
+  }
   doc.setFont('times','bold'); doc.setFontSize(10.5); doc.setTextColor(0,0,0);
   doc.text('Dr. Prasanna Kumar T M',sX,sY+19);
   doc.setFont('times','normal'); doc.setFontSize(10);
