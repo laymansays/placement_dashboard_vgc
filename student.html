@@ -531,8 +531,8 @@ async function doLogin(email){
       backlogs:  row[8]||'',
       tenth:     parseFloat((row[9]||'').replace('%',''))||0,
       twelfth:   parseFloat((row[10]||'').replace('%',''))||0,
-      resume:        (row[11]||'').trim(),
-      formattedResume: (row[12]||'').trim(),
+      resume:        (row[12]||'').trim(),  // col M — single resume column
+      isFormatted:   false,                  // set true in-session after portal formatting
     };
 
     showLoad('Loading company data\u2026','Fetching placement configuration');
@@ -540,7 +540,6 @@ async function doLogin(email){
     showLoad('Checking your applications\u2026',`Checking ${COMPS.length} companies`);
     await loadStatus();
     showLoad('Loading your profile\u2026', 'Almost done');
-    // Yield to browser to paint the loading message before heavy render
     await new Promise(r => setTimeout(r, 0));
     hideLoad();
     renderPortal();
@@ -761,27 +760,19 @@ function renderProfile(elig){
         ${pfRow('\u26a0\ufe0f Backlogs',s.backlogs)}
       </div>
       ${ (()=>{
-  if(s.formattedResume){
-    // Formatted resume exists — show it, offer re-format and reset
+    // isFormatted is true only in the current session, after portal formatting completes.
+    // The resume URL (col M) is the same field before and after — formatting overwrites it.
     return `<div class="resume-btn-group">
       <button class="btn-edit-profile" onclick="openEditProfile()">&#9998; Edit Profile</button>
-      <a href="${xe(s.formattedResume)}"
+      ${s.resume ? `<a href="${xe(s.resume)}"
          onclick="if(this.getAttribute('href').startsWith('blob:')){event.preventDefault();window.open(this.href,'_blank');}"
          target="_blank" rel="noopener"
-         class="btn-resume btn-resume-formatted">&#128196; Formatted Resume</a>
-      <button class="btn-rewrite" onclick="openRewriteModal()">&#128203; Re-format</button>
-      <button class="btn-reset-resume" onclick="resetFormattedResume()"
-         title="Remove formatted resume and restore original">&#8635; Reset to Original</button>
+         class="btn-resume ${s.isFormatted ? 'btn-resume-formatted' : ''}">
+         &#128196; ${s.isFormatted ? 'Formatted Resume' : 'View Resume'}</a>` : ''}
+      <button class="btn-rewrite" onclick="openRewriteModal()">
+        ${s.isFormatted ? '&#128203; Re-format' : '&#128203; Format Resume'}
+      </button>
     </div>`;
-  } else {
-    // No formatted resume — show original link (if exists) + always show Format button
-    return `<div class="resume-btn-group">
-      <button class="btn-edit-profile" onclick="openEditProfile()">&#9998; Edit Profile</button>
-      ${s.resume ? `<a href="${xe(s.resume)}" target="_blank" rel="noopener"
-         class="btn-resume">&#128196; View Resume</a>` : ''}
-      <button class="btn-rewrite" onclick="openRewriteModal()">&#128203; Format Resume</button>
-    </div>`;
-  }
 })() }
     </div>`;
 }
@@ -1532,10 +1523,11 @@ try{
   const pdfBlob=doc.output('blob');
   /* ── Immediately show formatted resume in sidebar via blob URL ── */
   const _tempUrl=URL.createObjectURL(pdfBlob);
-  ST.formattedResume=_tempUrl;
+  ST.resume=_tempUrl;        // show formatted version immediately via blob URL
+  ST.isFormatted=true;       // marks button as "Formatted Resume" for this session
   renderProfile(isEligible(ST));
   closeRwModal();
-  /* ── Attempt permanent Drive upload + Sheets write in background ── */
+  /* ── Upload to Drive + overwrite col M in sheet (background) ── */
   uploadFormattedResume(pdfBlob, fname+"_Resume_VGI'26.pdf").catch(uErr=>{
     console.warn('[Portal] Upload failed:',uErr.message);
     alert('Resume downloaded, but could not save to profile: '+uErr.message);
@@ -1544,7 +1536,6 @@ try{
 }catch(err){alert('PDF error: '+err.message);}}
 /* ═══════════════════════════════════════════════════════
    uploadFormattedResume — via Apps Script proxy (no OAuth needed)
-   resetFormattedResume  — via Apps Script proxy (no OAuth needed)
    ═══════════════════════════════════════════════════════ */
 
 const _WEBAPP='https://script.google.com/macros/s/AKfycbzeh9Op-cDApwuN1XenvtMJGKZUyPbwCX1tj6M3Bel4DkEDLFWhzrme0bD9ktsaEgxe/exec';
@@ -1557,22 +1548,6 @@ function _blobToBase64(blob){
     r.onerror=()=>reject(new Error('Failed to read PDF'));
     r.readAsDataURL(blob);
   });
-}
-
-/* Reset formatted resume — clears col M via Apps Script */
-async function resetFormattedResume(){
-  if(!confirm('Remove formatted resume and restore your original resume link?'))return;
-  try{
-    const res=await fetch(_WEBAPP,{
-      method:'POST',
-      body:JSON.stringify({action:'reset',email:ST.email})
-    });
-    const data=await res.json();
-    if(!data.ok)throw new Error(data.error||'Apps Script error');
-    ST.formattedResume='';
-    renderProfile(isEligible(ST));
-    console.log('[Portal] Formatted resume cleared.');
-  }catch(e){alert('Could not reset: '+e.message);}
 }
 
 async function uploadFormattedResume(pdfBlob, filename){
@@ -1588,10 +1563,11 @@ async function uploadFormattedResume(pdfBlob, filename){
   const data=await res.json();
   if(!data.ok)throw new Error(data.error||'Apps Script error');
 
-  /* 3. Update in-memory ST with permanent Drive URL and re-render */
-  ST.formattedResume=data.url;
+  /* 3. Replace ST.resume with permanent Drive URL (overwrites col M in sheet) */
+  ST.resume=data.url;
+  ST.isFormatted=true;
   renderProfile(isEligible(ST));
-  console.log('[Portal] Formatted resume saved:',data.url);
+  console.log('[Portal] Formatted resume saved to col M:',data.url);
 }
 
 
