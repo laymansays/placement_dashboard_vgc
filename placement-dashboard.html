@@ -4454,12 +4454,23 @@ function generateCircularPDF(){
   const cPad=3,col1=46,col2=innerW-8-col1,tX=mL+4,pBot=H-mL-5;
 
   function drawFrame(d){
-    d.setDrawColor(nR,nG,nB); d.setLineWidth(0.8); d.rect(mL,mL,innerW,H-2*mL);
-    d.setLineWidth(0.5); d.line(mL,mL+24,mL+innerW,mL+24);
+    /* ── Outer page border ── */
+    d.setDrawColor(nR,nG,nB); d.setLineWidth(0.8);
+    d.rect(mL, mL, innerW, H-2*mL);
+    /* ── Header box — complete rectangle matching First Source template ── */
+    d.setLineWidth(0.6);
+    d.rect(mL, mL, innerW, 24);
+    /* ── Small border box around VGI logo ── */
+    d.setLineWidth(0.4);
+    d.rect(mL+1.5, mL+1.5, 21, 21);
+    /* ── Logo image ── */
     try{ d.addImage('data:image/png;base64,'+_CIRC_LOGO,'PNG',mL+2,mL+2,20,20); }catch(e){}
+    /* ── Institution name ── */
     d.setFont('times','bold'); d.setFontSize(13); d.setTextColor(nR,nG,nB);
-    d.text('Vidyavahini Group of Institutions, Tumakuru',mL+26,mL+9);
-    d.setFontSize(12); d.text('Career Development Center',mL+26,mL+17);
+    d.text('Vidyavahini Group of Institutions, Tumakuru', mL+26, mL+9);
+    /* ── CDC sub-title ── */
+    d.setFontSize(12);
+    d.text('Career Development Center', mL+26, mL+17);
   }
   function cellH(txt,w,fs){
     doc.setFontSize(fs||10);
