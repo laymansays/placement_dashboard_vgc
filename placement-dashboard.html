@@ -10,7 +10,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <link rel="icon" type="image/jpeg" href="logo.jpg"/>
-<title>Placement Dashboard · Vidyavahini First Grade Degree College</title>
+<title>Placement Dashboard · Vidyavahini Group of Institutions</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
@@ -1425,7 +1425,8 @@ function renderAdminBar(){
   const r=document.getElementById('admin-bar');
   if(!adminMode){ r.innerHTML=''; }
   else {
-    r.innerHTML=`<div class="admin-bar"><span>🛡️ Admin Mode active</span><div class="admin-bar-actions"><button class="btn btn-admin-outline btn-sm" id="ab-diag">🔍 Diagnostics</button><button class="btn btn-admin-outline btn-sm" id="ab-refresh">↺ Reload Config</button><button class="btn btn-admin-outline btn-sm" id="ab-exit">Exit Admin</button></div></div>`;
+    r.innerHTML=`<div class="admin-bar"><span>🛡️ Admin Mode active</span><div class="admin-bar-actions"><button class="btn btn-admin-outline btn-sm" id="ab-circular">📄 Circular</button><button class="btn btn-admin-outline btn-sm" id="ab-diag">🔍 Diagnostics</button><button class="btn btn-admin-outline btn-sm" id="ab-refresh">↺ Reload Config</button><button class="btn btn-admin-outline btn-sm" id="ab-exit">Exit Admin</button></div></div>`;
+    document.getElementById('ab-circular').onclick=openCircularModal;
     document.getElementById('ab-diag').onclick=showDiagnostics;
     document.getElementById('ab-refresh').onclick=()=>{ init(); toast('Reloading config…','info','↺'); };
     document.getElementById('ab-exit').onclick=()=>{ adminMode=false; document.body.classList.remove('admin-mode'); sessionStorage.removeItem('placementAdmin'); go(view,cId); toast('Admin Mode off','info','🔒'); };
@@ -4274,6 +4275,247 @@ function renderCompanyReport(){
       <tbody>${rows}</tbody>
     </table>
     </div>`;
+}
+
+/* ════════════════════════════════════════════════════
+   CIRCULAR GENERATOR
+════════════════════════════════════════════════════ */
+
+/* VGI logo (PNG) and Dr. Prasanna Kumar signature (JPEG) embedded as base64 */
+const _CIRC_LOGO = "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";
+const _CIRC_SIG  = "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";
+
+function openCircularModal(){
+  /* Pre-fill company name from the current detail view if available */
+  const prefillCompany = (view==='detail' && cId)
+    ? (COMPANIES.find(c=>c.id===cId)||{}).name||'' : '';
+
+  /* Format today's date as YYYY-MM-DD for the date input */
+  const todayVal = new Date().toISOString().split('T')[0];
+
+  openModalWide('📄 Campus Selection Circular',
+  `<style>
+  .circ-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .circ-full{grid-column:1/-1;}
+  .circ-divider{grid-column:1/-1;display:flex;align-items:center;gap:12px;margin:4px 0;}
+  .circ-divider span{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--admin);white-space:nowrap;}
+  .circ-divider::before,.circ-divider::after{content:'';flex:1;height:1px;background:var(--border);}
+  </style>
+  <div class="circ-grid">
+    <div class="form-row">
+      <label class="form-label">DATE <span style="color:var(--red)">*</span></label>
+      <input id="circ-date" type="date" class="form-input" value="${todayVal}"/>
+    </div>
+    <div class="form-row">
+      <label class="form-label">COMPANY NAME <span style="color:var(--red)">*</span></label>
+      <input id="circ-company" type="text" class="form-input" placeholder="e.g. First Source Solutions" value="${xe(prefillCompany)}"/>
+    </div>
+    <div class="form-row circ-full">
+      <label class="form-label">ROLE(S) <span style="color:var(--red)">*</span></label>
+      <input id="circ-roles" type="text" class="form-input" placeholder="e.g. Customer Support Associate – Team Operations"/>
+    </div>
+    <div class="circ-divider circ-full"><span>Company Details</span></div>
+    <div class="form-row circ-full">
+      <label class="form-label">ABOUT THE COMPANY <span style="color:var(--red)">*</span></label>
+      <textarea id="circ-about" class="form-textarea" style="min-height:90px;font-family:inherit;font-size:13px;" placeholder="Brief description — services, presence, clients…"></textarea>
+    </div>
+    <div class="form-row">
+      <label class="form-label">POSITION <span style="color:var(--red)">*</span></label>
+      <input id="circ-position" type="text" class="form-input" placeholder="e.g. Customer Support (Operations)"/>
+    </div>
+    <div class="form-row">
+      <label class="form-label">EDUCATION <span style="color:var(--red)">*</span></label>
+      <textarea id="circ-education" class="form-textarea" style="min-height:60px;font-family:inherit;font-size:13px;" placeholder="e.g. Any graduate – B.A, B.Com, BBA (3 years)"></textarea>
+    </div>
+    <div class="form-row">
+      <label class="form-label">WORKING LOCATION <span style="color:var(--red)">*</span></label>
+      <input id="circ-location" type="text" class="form-input" placeholder="e.g. Bengaluru"/>
+    </div>
+    <div class="form-row">
+      <label class="form-label">CTC DETAILS <span style="color:var(--red)">*</span></label>
+      <input id="circ-ctc" type="text" class="form-input" placeholder="e.g. As Per Company Norms"/>
+    </div>
+    <div class="form-row">
+      <label class="form-label">SELECTION PROCESS <span style="color:var(--red)">*</span></label>
+      <textarea id="circ-selection" class="form-textarea" style="min-height:70px;font-family:inherit;font-size:13px;" placeholder="e.g. Online Test → HR Interview → Offer"></textarea>
+    </div>
+    <div class="form-row">
+      <label class="form-label">BENEFITS</label>
+      <textarea id="circ-benefits" class="form-textarea" style="min-height:70px;font-family:inherit;font-size:13px;" placeholder="e.g. PF, ESI, Medical Insurance…"></textarea>
+    </div>
+    <div class="circ-divider circ-full"><span>Additional Info</span></div>
+    <div class="form-row">
+      <label class="form-label">DOCUMENTS REQUIRED</label>
+      <textarea id="circ-docs" class="form-textarea" style="min-height:70px;font-family:inherit;font-size:13px;" placeholder="e.g. Resume, Aadhaar, Mark sheets…"></textarea>
+    </div>
+    <div class="form-row">
+      <label class="form-label">WORK CULTURE</label>
+      <textarea id="circ-culture" class="form-textarea" style="min-height:70px;font-family:inherit;font-size:13px;" placeholder="e.g. 5-day week, rotational shifts…"></textarea>
+    </div>
+    <div class="form-row">
+      <label class="form-label">REGISTRATION LINK</label>
+      <input id="circ-link" type="text" class="form-input" placeholder="https://forms.gle/…"/>
+    </div>
+    <div class="form-row">
+      <label class="form-label">LAST DATE TO REGISTER</label>
+      <input id="circ-lastdate" type="text" class="form-input" placeholder="e.g. 25th March 2026 (before 5 PM)"/>
+    </div>
+  </div>`,
+  `<button class="btn btn-outline btn-sm" onclick="closeModal()">Cancel</button>
+   <button class="btn btn-admin btn-sm" onclick="generateCircularPDF()">⬇ Generate & Download PDF</button>`
+  );
+}
+
+function generateCircularPDF(){
+  const g = id => (document.getElementById(id)||{}).value||'';
+  const dateVal    = g('circ-date');
+  const company    = g('circ-company').trim();
+  const roles      = g('circ-roles').trim();
+  const about      = g('circ-about').trim();
+  const position   = g('circ-position').trim();
+  const education  = g('circ-education').trim();
+  const location   = g('circ-location').trim();
+  const ctc        = g('circ-ctc').trim();
+  const selection  = g('circ-selection').trim();
+  const benefits   = g('circ-benefits').trim();
+  const docs       = g('circ-docs').trim();
+  const culture    = g('circ-culture').trim();
+  const regLink    = g('circ-link').trim();
+  const lastDate   = g('circ-lastdate').trim();
+
+  if(!company||!roles||!about||!position||!education||!location||!ctc||!selection){
+    toast('Please fill all required fields (marked *)','error'); return;
+  }
+  if(!window.jspdf){ toast('PDF library not ready yet','error'); return; }
+
+  /* Format date nicely */
+  let fmtD = '';
+  try { fmtD = new Date(dateVal+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'}); } catch(e){ fmtD=dateVal; }
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
+  const W=210, H=297, mL=13, mR=13, innerW=W-mL-mR;
+  const navyR=0,navyG=31,navyB=95, redR=192,redG=0,redB=0;
+  const cellPad=3, col1=46, col2=innerW-8-col1, tableX=mL+4;
+  const pageBottom=H-mL-5;
+
+  /* ── Draw page frame ── */
+  function drawFrame(d){
+    d.setDrawColor(navyR,navyG,navyB); d.setLineWidth(0.8);
+    d.rect(mL,mL,innerW,H-2*mL);
+    const hdrH=24;
+    d.setFillColor(255,255,255); d.setLineWidth(0.5);
+    d.line(mL,mL+hdrH,mL+innerW,mL+hdrH);
+    try{ d.addImage('data:image/png;base64,'+_CIRC_LOGO,'PNG',mL+2,mL+2,20,20); }catch(e){}
+    d.setFont('times','bold'); d.setFontSize(13); d.setTextColor(navyR,navyG,navyB);
+    d.text('Vidyavahini Group of Institutions, Tumakuru',mL+26,mL+9);
+    d.setFontSize(12); d.text('Career Development Center',mL+26,mL+17);
+  }
+
+  /* ── Measure cell height ── */
+  function cellH(text,colW,fs){
+    doc.setFontSize(fs||10);
+    const lines=doc.splitTextToSize(text||'',colW-cellPad*2);
+    return Math.max(lines.length*5+cellPad*2,10);
+  }
+
+  /* ── Draw one table row ── */
+  function drawRow(d,x,y,w1,w2,label,value){
+    const lh=cellH(label,w1,10), vh=cellH(value,w2,10);
+    const rh=Math.max(lh,vh);
+    d.setDrawColor(navyR,navyG,navyB); d.setLineWidth(0.3);
+    d.rect(x,y,w1,rh); d.rect(x+w1,y,w2,rh);
+    d.setFont('times','bold'); d.setFontSize(10); d.setTextColor(redR,redG,redB);
+    d.text(d.splitTextToSize(label,w1-cellPad*2),x+cellPad,y+cellPad+3.5);
+    d.setFont('times','normal'); d.setTextColor(0,0,0);
+    d.text(d.splitTextToSize(value||'',w2-cellPad*2),x+w1+cellPad,y+cellPad+3.5);
+    return rh;
+  }
+
+  /* ── Page 1 ── */
+  drawFrame(doc);
+  let y=mL+24+7;
+
+  doc.setFont('times','normal'); doc.setFontSize(10); doc.setTextColor(0,0,0);
+  doc.text('Ref: CDC / VGI / 2025',mL+4,y);
+  doc.text(fmtD,W-mR-4,y,{align:'right'});
+  y+=8;
+
+  doc.setFont('times','bold'); doc.setFontSize(14); doc.setTextColor(navyR,navyG,navyB);
+  doc.text('CIRCULAR',W/2,y,{align:'center'}); y+=7;
+
+  doc.setFont('times','bold'); doc.setFontSize(20); doc.setTextColor(redR,redG,redB);
+  const cLines=doc.splitTextToSize(company,innerW-8);
+  doc.text(cLines,W/2,y,{align:'center'}); y+=cLines.length*8;
+
+  doc.setFont('times','bold'); doc.setFontSize(11); doc.setTextColor(navyR,navyG,navyB);
+  const rLines=doc.splitTextToSize(roles,innerW-8);
+  doc.text(rLines,W/2,y,{align:'center'}); y+=rLines.length*5+2;
+
+  doc.setDrawColor(navyR,navyG,navyB); doc.setLineWidth(0.6);
+  doc.line(mL+4,y,mL+innerW-4,y); y+=4;
+
+  /* Page-1 table rows */
+  const p1rows=[
+    ['About the company', about],
+    ['Position',          position],
+    ['Education',         education],
+    ['Working Location',  location],
+    ['CTC Details',       ctc],
+    ['Selection Process', selection],
+    ['Benefits',          benefits],
+  ];
+
+  for(const [lbl,val] of p1rows){
+    const rh=Math.max(cellH(lbl,col1,10),cellH(val,col2,10));
+    if(y+rh>pageBottom){ doc.addPage(); drawFrame(doc); y=mL+24+7; }
+    y+=drawRow(doc,tableX,y,col1,col2,lbl,val);
+  }
+
+  /* ── Page 2 ── */
+  doc.addPage(); drawFrame(doc); y=mL+24+7;
+
+  const p2rows=[
+    ['Documents Required', docs],
+    ['Work Culture',       culture],
+  ].filter(([,v])=>v);
+
+  for(const [lbl,val] of p2rows){
+    y+=drawRow(doc,tableX,y,col1,col2,lbl,val);
+  }
+
+  y+=6;
+  if(regLink){
+    doc.setFont('times','bold'); doc.setFontSize(10.5); doc.setTextColor(0,0,0);
+    const lw=doc.getTextWidth('Registration Link: ');
+    doc.text('Registration Link: ',tableX,y);
+    doc.setFont('times','normal'); doc.setTextColor(30,73,125);
+    doc.text(regLink,tableX+lw,y);
+    doc.setTextColor(0,0,0); y+=7;
+  }
+  if(lastDate){
+    doc.setFont('times','bold'); doc.setFontSize(10.5); doc.setTextColor(0,0,0);
+    const lw2=doc.getTextWidth('Last date to register: ');
+    doc.text('Last date to register: ',tableX,y);
+    doc.setFont('times','normal');
+    doc.text(lastDate,tableX+lw2,y);
+    y+=10;
+  }
+
+  /* Signature */
+  const sigX=W-mR-56, sigY=y+4;
+  try{ doc.addImage('data:image/jpeg;base64,'+_CIRC_SIG,'JPEG',sigX,sigY,40,16); }catch(e){}
+  doc.setFont('times','bold'); doc.setFontSize(10.5); doc.setTextColor(0,0,0);
+  doc.text('Dr. Prasanna Kumar T M',sigX,sigY+19);
+  doc.setFont('times','normal'); doc.setFontSize(10);
+  doc.text('Head – CDC',sigX,sigY+24);
+  doc.text('Vidyavahini Samsthe, Tumakuru',sigX,sigY+29);
+
+  /* Save */
+  const safeName=company.replace(/[^a-zA-Z0-9 ]/g,'').replace(/\s+/g,'_');
+  doc.save(safeName+'_Campus_Selection_2025-26.pdf');
+  closeModal();
+  toast('Circular for "'+company+'" downloaded!','success','📄');
 }
 
 function downloadCompanyReportCSV(){
