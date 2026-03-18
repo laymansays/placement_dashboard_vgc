@@ -4404,6 +4404,10 @@ const _CIRC_SIG="/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAMCAgMCAgMDAwMEAwMEBQgFBQQEBQo
 function openCircularModal(){
   const prefill=(view==='detail'&&cId)?(COMPANIES.find(c=>c.id===cId)||{}).name||'':'';
   const today=new Date().toISOString().split('T')[0];
+
+  /* Build company options from live COMPANIES list */
+  const coOpts = COMPANIES.map(c=>`<option value="${xe(c.name)}" ${c.name===prefill?'selected':''}>${xe(c.name)}</option>`).join('');
+
   openModalWide('📄 Campus Selection Circular',
   `<style>
   .cg{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
@@ -4411,10 +4415,51 @@ function openCircularModal(){
   .cg-div{grid-column:1/-1;display:flex;align-items:center;gap:12px;margin:4px 0;}
   .cg-div span{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--admin);white-space:nowrap;}
   .cg-div::before,.cg-div::after{content:'';flex:1;height:1px;background:var(--border);}
+  #ci-new-co-wrap{display:none;margin-top:8px;}
   </style>
   <div class="cg">
     <div class="form-row"><label class="form-label">DATE <span style="color:var(--red)">*</span></label><input id="ci-date" type="date" class="form-input" value="${today}"/></div>
-    <div class="form-row"><label class="form-label">COMPANY NAME <span style="color:var(--red)">*</span></label><input id="ci-company" type="text" class="form-input" placeholder="e.g. First Source Solutions" value="${xe(prefill)}"/></div>
+    <div class="form-row">
+      <label class="form-label">COMPANY NAME <span style="color:var(--red)">*</span></label>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <select id="ci-company-sel" class="form-select" style="flex:1;"
+          onchange="(function(){
+            const v=document.getElementById('ci-company-sel').value;
+            const wrap=document.getElementById('ci-new-co-wrap');
+            wrap.style.display=v==='__new__'?'block':'none';
+            if(v!=='__new__') document.getElementById('ci-company').value=v;
+          })()">
+          <option value="">— Select company —</option>
+          ${coOpts}
+          <option value="__new__">➕ Add new company…</option>
+        </select>
+      </div>
+      <div id="ci-new-co-wrap">
+        <div style="display:flex;gap:8px;margin-top:6px;">
+          <input id="ci-new-co-input" type="text" class="form-input" placeholder="Type new company name…" style="flex:1;"
+            oninput="document.getElementById('ci-company').value=this.value.trim()"/>
+          <button class="btn btn-admin-outline btn-sm" onclick="(function(){
+            const val=document.getElementById('ci-new-co-input').value.trim();
+            if(!val) return;
+            const sel=document.getElementById('ci-company-sel');
+            /* add to dropdown if not already there */
+            const exists=[...sel.options].some(o=>o.value===val);
+            if(!exists){
+              const opt=document.createElement('option');
+              opt.value=val; opt.text=val;
+              sel.insertBefore(opt, sel.options[sel.options.length-1]);
+            }
+            /* select it */
+            sel.value=val;
+            document.getElementById('ci-company').value=val;
+            document.getElementById('ci-new-co-wrap').style.display='none';
+          })()">✓ Add</button>
+        </div>
+        <div style="font-size:11px;color:var(--text4);margin-top:4px;">This company will be available in the dropdown for this session.</div>
+      </div>
+      <!-- hidden field that generateCircularPDF reads -->
+      <input type="hidden" id="ci-company" value="${xe(prefill)}"/>
+    </div>
     <div class="form-row cg-full"><label class="form-label">ROLE(S) <span style="color:var(--red)">*</span></label><input id="ci-roles" type="text" class="form-input" placeholder="e.g. Customer Support Associate – Team Operations"/></div>
     <div class="cg-div cg-full"><span>Company Details</span></div>
     <div class="form-row cg-full"><label class="form-label">ABOUT THE COMPANY <span style="color:var(--red)">*</span></label><textarea id="ci-about" class="form-textarea" style="min-height:90px;font-family:inherit;font-size:13px;" placeholder="Brief description — services, presence, clients…"></textarea></div>
@@ -4432,6 +4477,12 @@ function openCircularModal(){
   </div>`,
   `<button class="btn btn-outline btn-sm" onclick="closeModal()">Cancel</button>
    <button class="btn btn-admin btn-sm" onclick="generateCircularPDF()">⬇ Generate & Download PDF</button>`);
+
+  /* Pre-select if coming from a detail page */
+  if(prefill){
+    const sel=document.getElementById('ci-company-sel');
+    if(sel) sel.value=prefill;
+  }
 }
 
 async function generateCircularPDF(){
@@ -4487,11 +4538,14 @@ async function generateCircularPDF(){
     if(logoData){
       try{ d.addImage(logoData, 'JPEG', mL+2, mL+2, 20, 20); }catch(e){}
     }
-    /* Institution name */
+    /* Institution name — center aligned in the text area right of the logo box */
+    const textAreaLeft = mL + 24;                   // right edge of logo box
+    const textAreaRight = mL + innerW;
+    const textCenterX = (textAreaLeft + textAreaRight) / 2;
     d.setFont('times','bold'); d.setFontSize(13); d.setTextColor(nR,nG,nB);
-    d.text('Vidyavahini Group of Institutions, Tumakuru', mL+26, mL+9);
+    d.text('Vidyavahini Group of Institutions, Tumakuru', textCenterX, mL+9, {align:'center'});
     d.setFontSize(12);
-    d.text('Career Development Center', mL+26, mL+17);
+    d.text('Career Development Center', textCenterX, mL+17, {align:'center'});
   }
 
   function cellH(txt,w){
