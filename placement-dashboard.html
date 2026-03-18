@@ -4554,8 +4554,10 @@ async function generateCircularPDF(){
     return Math.max(doc.splitTextToSize(txt||'',w-cPad*2).length*5+cPad*2,10);
   }
 
-  /* Strip multiple spaces/newlines → single space */
-  function clean(v){ return (v||'').replace(/[\r\n]+/g,' ').replace(/\s{2,}/g,' ').trim(); }
+  /* Clean value — collapse multiple spaces per line but KEEP intentional newlines */
+  function clean(v){
+    return (v||'').split('\n').map(l=>l.replace(/\s{2,}/g,' ').trim()).filter(l=>l).join('\n');
+  }
 
   /* Justify a single line of text by stretching inter-word spaces */
   function drawJustifiedLine(d, line, x, y, maxW){
@@ -4581,18 +4583,38 @@ async function generateCircularPDF(){
     });
   }
 
-  function drawRow(d,x,y,w1,w2,lbl,val,justify){
+  /* Count total rendered lines, respecting explicit \n breaks */
+  function countLines(txt, maxW){
+    doc.setFontSize(10);
+    return clean(txt).split('\n').reduce((sum, seg)=>{
+      return sum + doc.splitTextToSize(seg||' ', maxW).length;
+    }, 0);
+  }
+
+  function cellH(txt, w){
+    return Math.max(countLines(txt, w - cPad*2) * 5 + cPad*2, 10);
+  }
+
+  function drawRow(d, x, y, w1, w2, lbl, val, justify){
     const cleanedVal = clean(val);
-    const rh=Math.max(cellH(lbl,w1),cellH(cleanedVal,w2));
+    const rh = Math.max(cellH(lbl, w1), cellH(cleanedVal, w2));
     d.setDrawColor(nR,nG,nB); d.setLineWidth(0.3);
-    d.rect(x,y,w1,rh); d.rect(x+w1,y,w2,rh);
+    d.rect(x, y, w1, rh); d.rect(x+w1, y, w2, rh);
     d.setFont('times','bold'); d.setFontSize(10); d.setTextColor(rR,rG,rB);
-    d.text(d.splitTextToSize(lbl,w1-cPad*2),x+cPad,y+cPad+3.5);
+    d.text(d.splitTextToSize(lbl, w1-cPad*2), x+cPad, y+cPad+3.5);
     d.setFont('times','normal'); d.setTextColor(0,0,0);
+
     if(justify && cleanedVal){
       drawJustifiedBlock(d, cleanedVal, x+w1+cPad, y+cPad+3.5, w2-cPad*2, 5);
     } else {
-      d.text(d.splitTextToSize(cleanedVal,w2-cPad*2),x+w1+cPad,y+cPad+3.5);
+      /* Render each \n-delimited segment separately so line breaks are preserved */
+      const segs = cleanedVal.split('\n');
+      let ly = y + cPad + 3.5;
+      segs.forEach(seg => {
+        const wrapped = d.splitTextToSize(seg||' ', w2-cPad*2);
+        d.text(wrapped, x+w1+cPad, ly);
+        ly += wrapped.length * 5;
+      });
     }
     return rh;
   }
@@ -4603,7 +4625,7 @@ async function generateCircularPDF(){
   doc.text('Ref: CDC / VGI / 2025',mL+4,y);
   doc.text(fmtD,W-mR-4,y,{align:'right'}); y+=8;
   doc.setFont('times','bold'); doc.setFontSize(14); doc.setTextColor(nR,nG,nB);
-  doc.text('CIRCULAR',W/2,y,{align:'center'}); y+=7;
+  doc.text('CIRCULAR',W/2,y,{align:'center'}); y+=12;
   doc.setFont('times','bold'); doc.setFontSize(20); doc.setTextColor(rR,rG,rB);
   const cL=doc.splitTextToSize(company,innerW-8);
   doc.text(cL,W/2,y,{align:'center'}); y+=cL.length*8;
@@ -4667,8 +4689,8 @@ async function generateCircularPDF(){
   doc.text('Head – CDC',sX,sY+24);
   doc.text('Vidyavahini Samsthe, Tumakuru',sX,sY+29);
 
-  const safe=company.replace(/[^a-zA-Z0-9 ]/g,'').replace(/\s+/g,'_');
-  const fileName=safe+'_Campus_Selection_2025-26.pdf';
+  const safe=company.replace(/[^a-zA-Z0-9 ]/g,'').trim().replace(/\s+/g,'_');
+  const fileName=safe+'_Campus_Selection 2025-26.pdf';
 
   /* Generate blob URL for preview */
   const pdfBlob = doc.output('blob');
