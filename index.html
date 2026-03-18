@@ -577,9 +577,7 @@ function _makeChip(c){
     <div class="co-chip-logo" data-chip-logo="${c.id}" style="background:${g};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px;">${letters}</div>
     <div class="co-chip-info">
       <span class="co-chip-name">${c.name}</span>
-      <span class="co-chip-status s-upcoming" data-chip-id="${c.id}">
-        <span class="sdot"></span>Upcoming
-      </span>
+
     </div>
   </div>`;
 }
@@ -715,7 +713,7 @@ async function loadIndexStats(){
         const res = await fetchWithTimeout(url, 8000);
         const text = await res.text();
         if(text.trimStart().startsWith('<')) return 0;
-        const json = JSON.parse(text.replace(/^[^(]*(\(/,'').replace(/\);?\s*$/,''));
+        const json = JSON.parse(text.replace(/^[^(]*\(/,'').replace(/\);?\s*$/,''));
         if(json.status === 'error') return 0;
         return countValidRows(json);
       } catch(e) { return 0; }
@@ -735,8 +733,7 @@ async function loadIndexStats(){
     totalReg += reg;
     totalSel += sel;
     if(sel > 0 || int_ > 0) drivesDone++;
-    const statusKey = sel > 0 ? 'placed' : int_ > 0 ? 'ongoing' : reg > 0 ? 'active' : 'upcoming';
-    updateChipStatus(c.id, statusKey);
+
   });
 
   // Animate numbers in once all data is ready
