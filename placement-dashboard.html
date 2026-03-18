@@ -4554,14 +4554,46 @@ async function generateCircularPDF(){
     return Math.max(doc.splitTextToSize(txt||'',w-cPad*2).length*5+cPad*2,10);
   }
 
-  function drawRow(d,x,y,w1,w2,lbl,val){
-    const rh=Math.max(cellH(lbl,w1),cellH(val,w2));
+  /* Strip multiple spaces/newlines → single space */
+  function clean(v){ return (v||'').replace(/[\r\n]+/g,' ').replace(/\s{2,}/g,' ').trim(); }
+
+  /* Justify a single line of text by stretching inter-word spaces */
+  function drawJustifiedLine(d, line, x, y, maxW){
+    const words = line.split(' ').filter(Boolean);
+    if(words.length <= 1){ d.text(line, x, y); return; }
+    const totalWordW = words.reduce((s,w)=>s+d.getTextWidth(w), 0);
+    const gap = (maxW - totalWordW) / (words.length - 1);
+    let cx = x;
+    words.forEach((w,i)=>{
+      d.text(w, cx, y);
+      cx += d.getTextWidth(w) + gap;
+    });
+  }
+
+  /* Draw a block of text with full justification (last line left-aligned) */
+  function drawJustifiedBlock(d, txt, x, y, maxW, lineH){
+    d.setFontSize(10);
+    const lines = d.splitTextToSize(clean(txt), maxW);
+    lines.forEach((line, i)=>{
+      const isLast = i === lines.length - 1;
+      if(isLast){ d.text(line, x, y + i*lineH); }
+      else { drawJustifiedLine(d, line, x, y + i*lineH, maxW); }
+    });
+  }
+
+  function drawRow(d,x,y,w1,w2,lbl,val,justify){
+    const cleanedVal = clean(val);
+    const rh=Math.max(cellH(lbl,w1),cellH(cleanedVal,w2));
     d.setDrawColor(nR,nG,nB); d.setLineWidth(0.3);
     d.rect(x,y,w1,rh); d.rect(x+w1,y,w2,rh);
     d.setFont('times','bold'); d.setFontSize(10); d.setTextColor(rR,rG,rB);
     d.text(d.splitTextToSize(lbl,w1-cPad*2),x+cPad,y+cPad+3.5);
     d.setFont('times','normal'); d.setTextColor(0,0,0);
-    d.text(d.splitTextToSize(val||'',w2-cPad*2),x+w1+cPad,y+cPad+3.5);
+    if(justify && cleanedVal){
+      drawJustifiedBlock(d, cleanedVal, x+w1+cPad, y+cPad+3.5, w2-cPad*2, 5);
+    } else {
+      d.text(d.splitTextToSize(cleanedVal,w2-cPad*2),x+w1+cPad,y+cPad+3.5);
+    }
     return rh;
   }
 
@@ -4586,21 +4618,21 @@ async function generateCircularPDF(){
 
   /* All rows — one continuous flow, page breaks inserted automatically */
   const allRows = [
-    ['About the company', about],
-    ['Position',          position],
-    ['Education',         education],
-    ['Working Location',  location],
-    ['CTC Details',       ctc],
-    ['Selection Process', selection],
-    ['Benefits',          benefits],
-    ['Documents Required',docs],
-    ['Work Culture',      culture],
+    ['About the company', about,    true ],
+    ['Position',          position, false],
+    ['Education',         education,false],
+    ['Working Location',  location, false],
+    ['CTC Details',       ctc,      false],
+    ['Selection Process', selection,false],
+    ['Benefits',          benefits, false],
+    ['Documents Required',docs,     false],
+    ['Work Culture',      culture,  false],
   ].filter(([,vl]) => !isEmpty(vl));
 
-  for(const [lb,vl] of allRows){
-    const rh=Math.max(cellH(lb,col1),cellH(vl,col2));
+  for(const [lb,vl,justify] of allRows){
+    const rh=Math.max(cellH(lb,col1),cellH(clean(vl),col2));
     if(y+rh>pBot){ doc.addPage(); drawFrame(doc); y=mL+24+7; }
-    y+=drawRow(doc,tX,y,col1,col2,lb,vl);
+    y+=drawRow(doc,tX,y,col1,col2,lb,vl,justify);
   }
 
   /* Registration link + last date — only if not empty */
