@@ -1135,7 +1135,28 @@ function setLoading(msg,sub){setRwBody(`<div class="rw-loading"><div class="rw-s
 function showUploadFallback(err){setRwBody(`${err?`<div class="rw-error">&#9888; ${err}<br><small style="font-weight:400;color:#9F1239">Upload your PDF directly below instead.</small></div>`:''}
 <label class="rw-drop-zone" id="rw-drop"><div class="rw-drop-icon">&#128196;</div><div class="rw-drop-title">Upload Resume PDF</div><div class="rw-drop-hint">Click here or drag &amp; drop your PDF</div><div class="rw-drop-note">Processed locally — not uploaded to any server</div></label><input type="file" id="rw-file-inp" accept=".pdf" style="display:none"/>`);document.getElementById('rw-file-inp').onchange=e=>{if(e.target.files[0])handleResumeFile(e.target.files[0]);};const drop=document.getElementById('rw-drop');drop.addEventListener('click',()=>document.getElementById('rw-file-inp').click());drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('rw-drag-over');});drop.addEventListener('dragleave',()=>drop.classList.remove('rw-drag-over'));drop.addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('rw-drag-over');const f=e.dataTransfer.files[0];if(f&&f.type==='application/pdf')handleResumeFile(f);});}
 async function handleResumeFile(file){if(!file||file.type!=='application/pdf'){setRwBody('<div class="rw-error">&#10060; Please select a PDF file.</div>');return;}try{setLoading('Reading PDF…','Extracting text from your resume');const text=await extractTextFromPDF(file);setLoading('Formatting…','Applying placement cell template');const parsed=parseResumeText(text);if(typeof cleanParsedSections==='function')cleanParsedSections(parsed.sections,_gradeMode==='cgpa');const html=buildResumeHTML(parsed);_rwHtml=html;setRwBody(`<div class="rw-preview">${html}</div>`);document.getElementById('rw-dl-btn').style.display='block';}catch(err){setRwBody(`<div class="rw-error">&#10060; ${err.message||'Failed to read PDF.'}</div><div style="text-align:center;margin-top:16px;"><button style="padding:9px 20px;border:1.5px solid #6D0E6A;border-radius:8px;background:#fff;color:#6D0E6A;font-size:12.5px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;" onclick="showUploadFallback('')">&#8617; Upload Instead</button></div>`);}}
-async function startExtractAndFormat(){if(!ST||!ST.resume){showUploadFallback('No resume URL linked to your profile.');return;}if(typeof fetchResumeFile!=='function'){showUploadFallback('Drive connector not loaded — upload below.');return;}setLoading('Connecting to Google Drive…','Authenticating with your Google account');try{const file=await fetchResumeFile(ST.resume,(msg)=>setLoading('Fetching resume…',msg));await handleResumeFile(file);}catch(err){showUploadFallback(err.message||'Could not fetch from Google Drive.');}}
+async function startExtractAndFormat(){
+  if(!ST||!ST.resume){ showUploadFallback('No resume URL linked to your profile.'); return; }
+  setLoading('Fetching resume…','Downloading from Google Drive');
+  try{
+    // Extract file ID from any Drive URL format
+    const m = ST.resume.match(/\/d\/([a-zA-Z0-9_-]{20,})/)||ST.resume.match(/[?&]id=([a-zA-Z0-9_-]{20,})/);
+    if(!m){ showUploadFallback('Could not read your resume URL. Please contact the placement cell.'); return; }
+    const fileId = m[1];
+    // Use export=download to get the raw file bytes
+    const downloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
+    const res = await fetch(downloadUrl);
+    if(!res.ok) throw new Error(`Drive returned ${res.status}`);
+    const blob = await res.blob();
+    // Verify it looks like a PDF (Drive may redirect to a login page for private files)
+    const text200 = await blob.slice(0,8).text();
+    if(!text200.startsWith('%PDF')){ showUploadFallback('Resume is private or inaccessible. Please share it as "Anyone with the link → Viewer" and try again.'); return; }
+    const file = new File([blob], 'resume.pdf', {type:'application/pdf'});
+    await handleResumeFile(file);
+  }catch(err){
+    showUploadFallback(err.message||'Could not fetch resume. Please upload your PDF directly.');
+  }
+}
 function fixCharSpacing(s){
   if(typeof s!=='string')return String(s||'');
   // Collapse "A c c o u n t i n g" style char-spaced words (no lookbehind — broad browser support)
@@ -1592,10 +1613,8 @@ async function uploadFormattedResume(pdfBlob, filename){
 
 /* ── Edit Profile ── */
 function openEditProfile(){
-  document.getElementById('ep-photo').value   = ST.photoUrl || '';
-  document.getElementById('ep-phone').value   = ST.phone    || '';
-  document.getElementById('ep-tenth').value   = ST.tenth>0 ? ST.tenth    : '';
-  document.getElementById('ep-twelfth').value = ST.twelfth>0 ? ST.twelfth : '';
+  document.getElementById('ep-photo').value = ST.photoUrl || '';
+  document.getElementById('ep-phone').value = ST.phone    || '';
   document.getElementById('ep-modal').classList.add('show');
 }
 function closeEditProfile(){
@@ -1606,18 +1625,13 @@ document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeEditProfile()
 async function saveEditProfile(){
   const photoUrl = document.getElementById('ep-photo').value.trim();
   const phone    = document.getElementById('ep-phone').value.trim();
-  const tenth    = document.getElementById('ep-tenth').value.trim();
-  const twelfth  = document.getElementById('ep-twelfth').value.trim();
-
-  if(tenth   && (isNaN(tenth)   || +tenth   < 0 || +tenth   > 100)){ alert('Please enter a valid 10th percentage (0–100).'); return; }
-  if(twelfth && (isNaN(twelfth) || +twelfth < 0 || +twelfth > 100)){ alert('Please enter a valid 12th percentage (0–100).'); return; }
 
   const btn=document.getElementById('ep-save-btn');
   btn.disabled=true; btn.textContent='Saving…';
   try{
     const res=await fetch(_WEBAPP,{
       method:'POST',
-      body:JSON.stringify({action:'updateProfile',email:ST.email,phone,photoUrl,tenth,twelfth})
+      body:JSON.stringify({action:'updateProfile',email:ST.email,phone,photoUrl,tenth:'',twelfth:''})
     });
     if(!res.ok)throw new Error('Server error '+res.status);
     const data=await res.json();
@@ -1625,8 +1639,6 @@ async function saveEditProfile(){
 
     if(photoUrl) ST.photoUrl = drivePhoto(photoUrl);
     if(phone)    ST.phone    = phone;
-    if(tenth)    ST.tenth    = parseFloat(tenth);
-    if(twelfth)  ST.twelfth  = parseFloat(twelfth);
 
     closeEditProfile();
     const elig=isEligible(ST);
@@ -1657,14 +1669,7 @@ async function saveEditProfile(){
         <label class="ep-label">&#128241; PHONE NUMBER</label>
         <input class="ep-input" id="ep-phone" type="tel" placeholder="e.g. 9876543210">
       </div>
-      <div class="ep-field">
-        <label class="ep-label">&#128202; 10th PERCENTAGE</label>
-        <input class="ep-input" id="ep-tenth" type="number" min="0" max="100" step="0.01" placeholder="e.g. 82.5">
-      </div>
-      <div class="ep-field">
-        <label class="ep-label">&#128202; 12th PERCENTAGE</label>
-        <input class="ep-input" id="ep-twelfth" type="number" min="0" max="100" step="0.01" placeholder="e.g. 78.0">
-      </div>
+
     </div>
     <div class="ep-foot">
       <button class="ep-cancel" onclick="closeEditProfile()">Cancel</button>
