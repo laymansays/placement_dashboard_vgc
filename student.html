@@ -1129,34 +1129,18 @@ let _rwHtml='',_gradeMode='percentage';
 function openRewriteModal(){document.getElementById('rw-modal').classList.add('show');document.getElementById('rw-dl-btn').style.display='none';_rwHtml='';showGradePrompt();}
 function closeRwModal(){document.getElementById('rw-modal').classList.remove('show');}
 function setRwBody(html){document.getElementById('rw-body').innerHTML=html;}
-function showGradePrompt(){setRwBody(`<div style="padding:8px 0 4px;"><p style="font-size:13.5px;font-weight:700;color:#1A0519;margin:0 0 6px;">How should academic performance be shown?</p><p style="font-size:12px;color:#64748B;margin:0 0 20px;">Applied consistently across all education entries.</p><div style="display:flex;gap:12px;"><button onclick="pickGrade('percentage')" style="flex:1;padding:14px;border-radius:12px;border:2px solid #D3B6D2;background:#fff;cursor:pointer;font-size:13px;font-weight:700;color:#6D0E6A;" onmouseover="this.style.background='#F7F0F7'" onmouseout="this.style.background='#fff'">&#128202; Percentage<br><span style="font-size:11px;color:#94A3B8;font-weight:500;">e.g. 79.5%</span></button><button onclick="pickGrade('cgpa')" style="flex:1;padding:14px;border-radius:12px;border:2px solid #D3B6D2;background:#fff;cursor:pointer;font-size:13px;font-weight:700;color:#6D0E6A;" onmouseover="this.style.background='#F7F0F7'" onmouseout="this.style.background='#fff'">&#127891; CGPA<br><span style="font-size:11px;color:#94A3B8;font-weight:500;">e.g. 8.37 CGPA</span></button></div></div>`);}
-function pickGrade(mode){_gradeMode=mode;startExtractAndFormat();}
+function showGradePrompt(){setRwBody(`<div style="padding:8px 0 4px;"><p style="font-size:13.5px;font-weight:700;color:#1A0519;margin:0 0 4px;">How should academic performance be shown?</p><p style="font-size:12px;color:#64748B;margin:0 0 20px;">Choose how grades appear in your formatted resume, then upload your resume PDF.</p><div style="display:flex;gap:12px;"><button onclick="pickGrade('percentage')" style="flex:1;padding:14px;border-radius:12px;border:2px solid #D3B6D2;background:#fff;cursor:pointer;font-size:13px;font-weight:700;color:#6D0E6A;" onmouseover="this.style.background='#F7F0F7'" onmouseout="this.style.background='#fff'">&#128202; Percentage<br><span style="font-size:11px;color:#94A3B8;font-weight:500;">e.g. 79.5%</span></button><button onclick="pickGrade('cgpa')" style="flex:1;padding:14px;border-radius:12px;border:2px solid #D3B6D2;background:#fff;cursor:pointer;font-size:13px;font-weight:700;color:#6D0E6A;" onmouseover="this.style.background='#F7F0F7'" onmouseout="this.style.background='#fff'">&#127891; CGPA<br><span style="font-size:11px;color:#94A3B8;font-weight:500;">e.g. 8.37 CGPA</span></button></div></div>`);}
+function pickGrade(mode){
+  _gradeMode=mode;
+  // Show upload zone immediately — browser cannot fetch Drive PDFs due to CORS.
+  // Student picks their resume PDF from their device; processing is done locally.
+  showUploadFallback('');
+}
 function setLoading(msg,sub){setRwBody(`<div class="rw-loading"><div class="rw-spinner"></div><div class="rw-loading-txt">${msg}</div><div class="rw-loading-sub">${sub||''}</div></div>`);}
 function showUploadFallback(err){setRwBody(`${err?`<div class="rw-error">&#9888; ${err}<br><small style="font-weight:400;color:#9F1239">Upload your PDF directly below instead.</small></div>`:''}
 <label class="rw-drop-zone" id="rw-drop"><div class="rw-drop-icon">&#128196;</div><div class="rw-drop-title">Upload Resume PDF</div><div class="rw-drop-hint">Click here or drag &amp; drop your PDF</div><div class="rw-drop-note">Processed locally — not uploaded to any server</div></label><input type="file" id="rw-file-inp" accept=".pdf" style="display:none"/>`);document.getElementById('rw-file-inp').onchange=e=>{if(e.target.files[0])handleResumeFile(e.target.files[0]);};const drop=document.getElementById('rw-drop');drop.addEventListener('click',()=>document.getElementById('rw-file-inp').click());drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('rw-drag-over');});drop.addEventListener('dragleave',()=>drop.classList.remove('rw-drag-over'));drop.addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('rw-drag-over');const f=e.dataTransfer.files[0];if(f&&f.type==='application/pdf')handleResumeFile(f);});}
 async function handleResumeFile(file){if(!file||file.type!=='application/pdf'){setRwBody('<div class="rw-error">&#10060; Please select a PDF file.</div>');return;}try{setLoading('Reading PDF…','Extracting text from your resume');const text=await extractTextFromPDF(file);setLoading('Formatting…','Applying placement cell template');const parsed=parseResumeText(text);if(typeof cleanParsedSections==='function')cleanParsedSections(parsed.sections,_gradeMode==='cgpa');const html=buildResumeHTML(parsed);_rwHtml=html;setRwBody(`<div class="rw-preview">${html}</div>`);document.getElementById('rw-dl-btn').style.display='block';}catch(err){setRwBody(`<div class="rw-error">&#10060; ${err.message||'Failed to read PDF.'}</div><div style="text-align:center;margin-top:16px;"><button style="padding:9px 20px;border:1.5px solid #6D0E6A;border-radius:8px;background:#fff;color:#6D0E6A;font-size:12.5px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;" onclick="showUploadFallback('')">&#8617; Upload Instead</button></div>`);}}
-async function startExtractAndFormat(){
-  if(!ST||!ST.resume){ showUploadFallback('No resume URL linked to your profile.'); return; }
-  setLoading('Fetching resume…','Downloading from Google Drive');
-  try{
-    // Extract file ID from any Drive URL format
-    const m = ST.resume.match(/\/d\/([a-zA-Z0-9_-]{20,})/)||ST.resume.match(/[?&]id=([a-zA-Z0-9_-]{20,})/);
-    if(!m){ showUploadFallback('Could not read your resume URL. Please contact the placement cell.'); return; }
-    const fileId = m[1];
-    // Use export=download to get the raw file bytes
-    const downloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
-    const res = await fetch(downloadUrl);
-    if(!res.ok) throw new Error(`Drive returned ${res.status}`);
-    const blob = await res.blob();
-    // Verify it looks like a PDF (Drive may redirect to a login page for private files)
-    const text200 = await blob.slice(0,8).text();
-    if(!text200.startsWith('%PDF')){ showUploadFallback('Resume is private or inaccessible. Please share it as "Anyone with the link → Viewer" and try again.'); return; }
-    const file = new File([blob], 'resume.pdf', {type:'application/pdf'});
-    await handleResumeFile(file);
-  }catch(err){
-    showUploadFallback(err.message||'Could not fetch resume. Please upload your PDF directly.');
-  }
-}
+// startExtractAndFormat removed — browser CORS blocks Drive fetch; upload zone used instead
 function fixCharSpacing(s){
   if(typeof s!=='string')return String(s||'');
   // Collapse "A c c o u n t i n g" style char-spaced words (no lookbehind — broad browser support)
