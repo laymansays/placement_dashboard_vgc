@@ -1120,18 +1120,37 @@ let _rwHtml='',_gradeMode='percentage';
 function openRewriteModal(){document.getElementById('rw-modal').classList.add('show');document.getElementById('rw-dl-btn').style.display='none';_rwHtml='';showGradePrompt();}
 function closeRwModal(){document.getElementById('rw-modal').classList.remove('show');}
 function setRwBody(html){document.getElementById('rw-body').innerHTML=html;}
-function showGradePrompt(){setRwBody(`<div style="padding:8px 0 4px;"><p style="font-size:13.5px;font-weight:700;color:#1A0519;margin:0 0 4px;">How should academic performance be shown?</p><p style="font-size:12px;color:#64748B;margin:0 0 20px;">Choose how grades appear in your formatted resume, then upload your resume PDF.</p><div style="display:flex;gap:12px;"><button onclick="pickGrade('percentage')" style="flex:1;padding:14px;border-radius:12px;border:2px solid #D3B6D2;background:#fff;cursor:pointer;font-size:13px;font-weight:700;color:#6D0E6A;" onmouseover="this.style.background='#F7F0F7'" onmouseout="this.style.background='#fff'">&#128202; Percentage<br><span style="font-size:11px;color:#94A3B8;font-weight:500;">e.g. 79.5%</span></button><button onclick="pickGrade('cgpa')" style="flex:1;padding:14px;border-radius:12px;border:2px solid #D3B6D2;background:#fff;cursor:pointer;font-size:13px;font-weight:700;color:#6D0E6A;" onmouseover="this.style.background='#F7F0F7'" onmouseout="this.style.background='#fff'">&#127891; CGPA<br><span style="font-size:11px;color:#94A3B8;font-weight:500;">e.g. 8.37 CGPA</span></button></div></div>`);}
-function pickGrade(mode){
+function showGradePrompt(){setRwBody(`<div style="padding:8px 0 4px;"><p style="font-size:13.5px;font-weight:700;color:#1A0519;margin:0 0 4px;">How should academic performance be shown?</p><p style="font-size:12px;color:#64748B;margin:0 0 20px;">Applied consistently across all education entries in your resume.</p><div style="display:flex;gap:12px;"><button onclick="pickGrade('percentage')" style="flex:1;padding:14px;border-radius:12px;border:2px solid #D3B6D2;background:#fff;cursor:pointer;font-size:13px;font-weight:700;color:#6D0E6A;" onmouseover="this.style.background='#F7F0F7'" onmouseout="this.style.background='#fff'">&#128202; Percentage<br><span style="font-size:11px;color:#94A3B8;font-weight:500;">e.g. 79.5%</span></button><button onclick="pickGrade('cgpa')" style="flex:1;padding:14px;border-radius:12px;border:2px solid #D3B6D2;background:#fff;cursor:pointer;font-size:13px;font-weight:700;color:#6D0E6A;" onmouseover="this.style.background='#F7F0F7'" onmouseout="this.style.background='#fff'">&#127891; CGPA<br><span style="font-size:11px;color:#94A3B8;font-weight:500;">e.g. 8.37 CGPA</span></button></div></div>`);}
+async function pickGrade(mode){
   _gradeMode=mode;
-  // Show upload zone immediately — browser cannot fetch Drive PDFs due to CORS.
-  // Student picks their resume PDF from their device; processing is done locally.
-  showUploadFallback('');
+  if(!ST||!ST.resume){
+    showUploadFallback('No resume linked to your profile. Please contact the placement cell.');
+    return;
+  }
+  setLoading('Fetching your resume…','Retrieving from Drive via placement cell server');
+  try{
+    const res=await fetch(_WEBAPP,{
+      method:'POST',
+      body:JSON.stringify({action:'fetchResume',email:ST.email,resumeUrl:ST.resume})
+    });
+    if(!res.ok) throw new Error('Server error '+res.status);
+    const data=await res.json();
+    if(!data.ok) throw new Error(data.error||'Could not fetch resume');
+    // data.base64 is the PDF bytes; convert to a File and process
+    const binary=atob(data.base64);
+    const bytes=new Uint8Array(binary.length);
+    for(let i=0;i<binary.length;i++) bytes[i]=binary.charCodeAt(i);
+    const file=new File([bytes],'resume.pdf',{type:'application/pdf'});
+    await handleResumeFile(file);
+  }catch(err){
+    // Fall back to manual upload if proxy fails
+    showUploadFallback(err.message||'Could not fetch resume automatically.');
+  }
 }
 function setLoading(msg,sub){setRwBody(`<div class="rw-loading"><div class="rw-spinner"></div><div class="rw-loading-txt">${msg}</div><div class="rw-loading-sub">${sub||''}</div></div>`);}
 function showUploadFallback(err){setRwBody(`${err?`<div class="rw-error">&#9888; ${err}<br><small style="font-weight:400;color:#9F1239">Upload your PDF directly below instead.</small></div>`:''}
 <label class="rw-drop-zone" id="rw-drop"><div class="rw-drop-icon">&#128196;</div><div class="rw-drop-title">Upload Resume PDF</div><div class="rw-drop-hint">Click here or drag &amp; drop your PDF</div><div class="rw-drop-note">Processed locally — not uploaded to any server</div></label><input type="file" id="rw-file-inp" accept=".pdf" style="display:none"/>`);document.getElementById('rw-file-inp').onchange=e=>{if(e.target.files[0])handleResumeFile(e.target.files[0]);};const drop=document.getElementById('rw-drop');drop.addEventListener('click',()=>document.getElementById('rw-file-inp').click());drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('rw-drag-over');});drop.addEventListener('dragleave',()=>drop.classList.remove('rw-drag-over'));drop.addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('rw-drag-over');const f=e.dataTransfer.files[0];if(f&&f.type==='application/pdf')handleResumeFile(f);});}
 async function handleResumeFile(file){if(!file||file.type!=='application/pdf'){setRwBody('<div class="rw-error">&#10060; Please select a PDF file.</div>');return;}try{setLoading('Reading PDF…','Extracting text from your resume');const text=await extractTextFromPDF(file);setLoading('Formatting…','Applying placement cell template');const parsed=parseResumeText(text);if(typeof cleanParsedSections==='function')cleanParsedSections(parsed.sections,_gradeMode==='cgpa');const html=buildResumeHTML(parsed);_rwHtml=html;setRwBody(`<div class="rw-preview">${html}</div>`);document.getElementById('rw-dl-btn').style.display='block';}catch(err){setRwBody(`<div class="rw-error">&#10060; ${err.message||'Failed to read PDF.'}</div><div style="text-align:center;margin-top:16px;"><button style="padding:9px 20px;border:1.5px solid #6D0E6A;border-radius:8px;background:#fff;color:#6D0E6A;font-size:12.5px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;" onclick="showUploadFallback('')">&#8617; Upload Instead</button></div>`);}}
-// startExtractAndFormat removed — browser CORS blocks Drive fetch; upload zone used instead
 function fixCharSpacing(s){
   if(typeof s!=='string')return String(s||'');
   // Collapse "A c c o u n t i n g" style char-spaced words (no lookbehind — broad browser support)
